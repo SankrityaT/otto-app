@@ -22,7 +22,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="app">
       <header className="status" aria-label="Status">
-        <span className="status__day">Ayin</span>
+        <span className="status__day flex items-center gap-2.5 text-[20px]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Havi's otter logo, a small fixed icon */}
+          <img src="/icons/icon-192.png" alt="" className="h-11 w-11 rounded-xl" />
+          Ayin
+        </span>
         <span className="status__right">
           <span className="pill">
             <span className="pill__dot pill__dot--off" aria-hidden />
