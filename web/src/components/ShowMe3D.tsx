@@ -199,7 +199,8 @@ function LabelLayout({
   return null;
 }
 
-export function ShowMe3D({ scene }: { scene: Scene }) {
+/** `fill` stretches the model to its container instead of a square; `onGrab` fires when the student turns it. */
+export function ShowMe3D({ scene, fill = false, onGrab }: { scene: Scene; fill?: boolean; onGrab?: () => void }) {
   const still = usePrefersReducedMotion();
   const [grabbed, setGrabbed] = useState(false);
   const partsById = useMemo(() => new Map(scene.parts.map((part) => [part.id, part])), [scene]);
@@ -211,9 +212,9 @@ export function ShowMe3D({ scene }: { scene: Scene }) {
   const arrowWords = useRef<(HTMLElement | null)[]>([]);
 
   return (
-    <figure className="graph-paper flex w-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line">
+    <figure className={`graph-paper flex w-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line ${fill ? "h-full" : ""}`}>
       <figcaption className="px-5 pt-4 font-hand text-[26px] leading-tight text-ink">{scene.title}</figcaption>
-      <div className="relative aspect-square w-full touch-none overflow-hidden" aria-label={`3D model: ${scene.title}`} role="img">
+      <div className={`relative w-full touch-none overflow-hidden ${fill ? "min-h-0 flex-1" : "aspect-square"}`} aria-label={`3D model: ${scene.title}`} role="img">
         <Canvas camera={{ position: [4, 2.6, 4.8], fov: 45 }}>
           <ambientLight intensity={0.8} />
           <directionalLight position={[5, 8, 5]} intensity={1.4} />
@@ -254,17 +255,20 @@ export function ShowMe3D({ scene }: { scene: Scene }) {
             enablePan={false}
             autoRotate={!still && !grabbed}
             autoRotateSpeed={0.8}
-            onStart={() => setGrabbed(true)}
+            onStart={() => {
+              setGrabbed(true);
+              onGrab?.();
+            }}
           />
           <LabelLayout labels={labels} anchors={anchors} notes={notes} lines={lines} arrowPins={arrowPins} arrowWords={arrowWords} />
         </Canvas>
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <svg className="absolute inset-0 h-full w-full">
+          <svg className="absolute inset-0 h-full w-full text-ink">
             {labels.map((label, i) => (
               <line
                 key={label.text}
                 ref={(line) => void (lines.current[i] = line)}
-                stroke="#23201c"
+                stroke="currentColor"
                 strokeWidth="1.5"
                 opacity="0"
               />

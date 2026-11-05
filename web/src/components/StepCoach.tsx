@@ -23,6 +23,7 @@ import { RaftIcon } from "./raft/Stickers";
 import type { Scene } from "@/lib/ai/scene";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
+import { OtterView } from "./OtterView";
 import {
   Check,
   Eye,
@@ -37,7 +38,7 @@ import {
 
 /** How often the screen checks for presses on the otter's physical buttons. */
 const BUTTON_POLL_MS = 1000;
-/** How often Ayin looks when the student asks it to watch hands-free. */
+/** How often Ayin looks through the otter's camera while watching hands-free. */
 const WATCH_EVERY_MS = 6000;
 
 // three.js only runs in the browser, and only loads when a student asks to be shown.
@@ -69,18 +70,16 @@ export function StepCoach({
   const [listening, setListening] = useState(false);
   // Posting to the raft from inside a task: asking for help on a step, or sharing a finished task.
   const [composing, setComposing] = useState<"ask" | "win" | null>(null);
-  // Hands-free: Ayin checks the step every few seconds until it's done. The student turns it on.
-  const [watching, setWatching] = useState(false);
+  // Hands-free: Ayin notices when a step is done, so the student doesn't have to tap. On by default.
+  const [watching, setWatching] = useState(true);
   // The step Ayin couldn't see being done, so the student can say "I did it".
   const [notSeen, setNotSeen] = useState<string | null>(null);
   // null: the pause before starting. "steps": one step at a time. "alone": checked only at the end.
   const [mode, setMode] = useState<"steps" | "alone" | null>(
     run.doneStepIds.length > 0 ? "steps" : null,
   );
-  const [scene, setScene] = useState<{
-    stepId: string;
-    scene: Scene | null;
-  } | null>(null);
+  // Each step's 3D model, built once and then reused. The flat picture is the fallback.
+  const [scenes, setScenes] = useState<Record<string, Scene>>({});
   const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
   const useBrowserEyes = cameraChoice !== "otter";
@@ -93,6 +92,8 @@ export function StepCoach({
   } = useCamera(
     useBrowserEyes && !summary,
     cameraChoice === "screen" ? "screen" : "camera",
+    // Ayin looks when the student moves and then holds still: usually a step just done.
+    watching && mode === "steps" ? () => done({ auto: true }) : undefined,
   );
 
   const index = run.steps.findIndex((s) => !doneIds.includes(s.id));
@@ -110,14 +111,20 @@ export function StepCoach({
           pictureShown: step.showPictureFirst,
         };
 
-  // The 3D model belongs to one step; moving on hides it.
-  const stepScene = step && scene?.stepId === step.id ? scene : null;
+  const stepScene = step ? scenes[step.id] : undefined;
 
-  // A new step: read it aloud, and start drawing the next picture early.
+  // A new step: read it aloud, and get this step's 3D model and the next one's ready.
   useEffect(() => {
     if (!step || mode !== "steps") return;
     speak(step.text);
-    if (nextStep) new Image().src = `/api/steps/${nextStep.id}/picture`;
+    [step, nextStep].forEach((s) => {
+      if (!s) return;
+      new Image().src = `/api/steps/${s.id}/picture`;
+      api
+        .scene(s.id, null)
+        .then((r) => setScenes((all) => ({ ...all, [s.id]: r.scene })))
+        .catch(() => {}); // the flat picture stays up instead
+    });
   }, [step, nextStep, mode]);
 
   /** One photo, only at the moment the student asks. Null means "let the server use the otter". */
@@ -133,7 +140,7 @@ export function StepCoach({
     if (!step) return;
     setHeard(question);
     try {
-      const showing = stepScene?.scene && !flat ? stepScene.scene.title : null;
+      const showing = stepScene && !flat ? stepScene.title : null;
       const result = await api.ask(
         run.id,
         step.id,
@@ -194,12 +201,11 @@ export function StepCoach({
     });
     try {
       if (level === HELP_LEVELS.showMe) {
-        // "Show me" builds a 3D model of the step; the flat picture stays one tap away.
+        // "Show me" brings up the 3D model of the step and talks the student through it.
         setFlat(false);
-        setScene({ stepId: step.id, scene: null });
-        const result = await api.scene(step.id, await takePhoto());
-        setScene({ stepId: step.id, scene: result.scene });
-        tell(result.scene.say);
+        const shown = stepScene ?? (await api.scene(step.id, await takePhoto())).scene;
+        setScenes((all) => ({ ...all, [step.id]: shown }));
+        tell(shown.say);
       } else {
         const result = await api.help(
           run.id,
@@ -269,11 +275,12 @@ export function StepCoach({
     done({ auto: true });
   });
 
+  // The otter's camera can't be compared frame by frame here, so it simply looks every few seconds.
   useEffect(() => {
-    if (!watching || mode !== "steps") return;
+    if (!watching || mode !== "steps" || useBrowserEyes) return;
     const timer = setInterval(onWatchTick, WATCH_EVERY_MS);
     return () => clearInterval(timer);
-  }, [watching, mode]);
+  }, [watching, mode, useBrowserEyes]);
 
   useEffect(() => {
     if (!listening) return;
@@ -296,36 +303,39 @@ export function StepCoach({
     return () => clearInterval(timer);
   }, []);
 
-  // What Ayin looks through: the camera or shared screen preview, or a note about the otter.
-  const eyes = useBrowserEyes ? (
-    <div className="flex items-center gap-3 rounded-full bg-card py-1.5 pl-1.5 pr-4 text-[15px] text-ink-3">
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        className="h-9 w-12 rounded-full bg-clay object-cover"
-      />
-      <span
-        className={`h-2 w-2 rounded-full ${looking ? "bg-cel-deep" : "bg-clay-2"}`}
-      />
-      {cameraChoice === "screen" && !sharing ? (
-        <button
-          onClick={shareScreen}
-          className="font-medium text-cel-deep underline-offset-4 hover:underline"
-        >
-          Share a screen with Ayin
-        </button>
-      ) : looking ? (
-        "Looking now"
-      ) : (
-        (cameraError ?? "Looks only when you tap")
-      )}
+  // What Ayin sees, always on screen, so the student never has to trust a camera they can't see.
+  const eyes = (
+    <div className="flex items-center gap-3 rounded-2xl bg-card p-2 pr-3 text-[15px] text-ink-2">
+      <div
+        className={`h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-clay ring-4 transition-shadow ${looking ? "ring-cel" : "ring-transparent"}`}
+      >
+        {useBrowserEyes ? (
+          <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+        ) : (
+          <OtterView />
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+        <span className="font-semibold text-ink">{looking ? "Ayin is looking" : "What Ayin sees"}</span>
+        {cameraChoice === "screen" && !sharing ? (
+          <button onClick={shareScreen} className="font-medium text-cel-deep underline-offset-4 hover:underline">
+            Share a screen with Ayin
+          </button>
+        ) : cameraError ? (
+          <span>{cameraError}</span>
+        ) : mode === "steps" ? (
+          <button onClick={() => setWatching((on) => !on)} aria-pressed={watching} className="text-left leading-snug">
+            {watching
+              ? useBrowserEyes
+                ? "Looks when your hands stop. Tap to stop."
+                : "Looks every few seconds. Tap to stop."
+              : "Only looks when you tap. Tap to watch for me."}
+          </button>
+        ) : (
+          <span>Only looks when you tap Done</span>
+        )}
+      </div>
     </div>
-  ) : (
-    <p className="text-center text-[15px] text-ink-3">
-      Using the otter&apos;s camera
-    </p>
   );
 
   if (mode === null) return <TaskStart run={run} onStart={start} />;
@@ -434,33 +444,24 @@ export function StepCoach({
         )}
       </header>
 
-      {stepScene && !flat ? (
-        <div className="flex flex-col gap-2">
-          {stepScene.scene ? (
-            <ShowMe3D scene={stepScene.scene} />
-          ) : (
-            <div className="graph-paper flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-line">
-              <UprightOtter className="h-40 w-40" furHue={run.furHue} />
-              <p className="font-hand text-[22px] text-ink-2">
-                Ayin is building it for you
-              </p>
-            </div>
-          )}
-          <Button
-            look="quiet"
-            className="self-center"
-            onClick={() => setFlat(true)}
-          >
+      {current.pictureShown && stepScene && !flat ? (
+        <div className="flex h-[42dvh] flex-col gap-1">
+          <div className="min-h-0 flex-1">
+            <ShowMe3D key={step.id} scene={stepScene} fill />
+          </div>
+          <Button look="quiet" className="self-center py-1" onClick={() => setFlat(true)}>
             See the flat picture
           </Button>
         </div>
       ) : (
-        <StepPicture
-          stepId={step.id}
-          alt={step.detail}
-          shown={current.pictureShown}
-          furHue={run.furHue}
-        />
+        <div className="flex flex-col gap-1">
+          <StepPicture stepId={step.id} alt={step.detail} shown={current.pictureShown} furHue={run.furHue} />
+          {current.pictureShown && stepScene && (
+            <Button look="quiet" className="self-center py-1" onClick={() => setFlat(false)}>
+              See it in 3D
+            </Button>
+          )}
+        </div>
       )}
 
       <h1 className="font-display text-[38px] leading-[1.05]">{step.text}</h1>
@@ -535,17 +536,6 @@ export function StepCoach({
             <Eye size={22} />
           </RoundAction>
         </div>
-
-        <button
-          onClick={() => setWatching((on) => !on)}
-          aria-pressed={watching}
-          className={`flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[15px] font-medium ${
-            watching ? "bg-cel-wash text-cel-deep" : "border border-line text-ink-2"
-          }`}
-        >
-          <span className={`h-2.5 w-2.5 rounded-full ${watching ? "bg-cel-deep" : "bg-clay-2"}`} />
-          {watching ? "Watching until each step is done · tap to stop" : "Hands busy? Ayin can watch for you"}
-        </button>
 
         {eyes}
       </div>
