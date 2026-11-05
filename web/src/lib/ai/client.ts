@@ -28,17 +28,17 @@ type Ask<T extends z.ZodType> = {
   schema: T;
   instructions: string;
   photo?: Photo | null;
+  /** Several pictures, in order (like a screen over a few seconds). */
+  photos?: Photo[];
   effort: "low" | "medium" | "high";
   maxTokens?: number;
 };
 
 function request<T extends z.ZodType>(options: Ask<T>) {
   const content: Anthropic.ContentBlockParam[] = [];
-  if (options.photo) {
-    content.push({
-      type: "image",
-      source: { type: "base64", media_type: options.photo.mediaType, data: options.photo.data },
-    });
+  for (const photo of [options.photo, ...(options.photos ?? [])]) {
+    if (!photo) continue;
+    content.push({ type: "image", source: { type: "base64", media_type: photo.mediaType, data: photo.data } });
   }
   content.push({ type: "text", text: options.instructions });
   return {

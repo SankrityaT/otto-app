@@ -115,6 +115,12 @@ export const api = {
   cheerPartner: (runId: string, phrase: string) => call(`/api/runs/${runId}/together`, post({ phrase })),
   helperFor: (studentId: string, stepId: string) =>
     call<{ helperName: string | null }>(`/api/crew/helper?studentId=${encodeURIComponent(studentId)}&stepId=${encodeURIComponent(stepId)}`),
+  explain: (
+    studentId: string,
+    question: string,
+    moments: { frames: string[]; sounds: string[] },
+    history: { who: "student" | "ayin"; text: string }[],
+  ) => call<{ say: string; choices: string[] }>("/api/explain", post({ studentId, question, ...moments, history })),
   talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[], busyWith: string | null = null) =>
     call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history, busyWith })),
   feed: (studentId: string, kind: PostKind | null) =>
