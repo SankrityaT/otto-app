@@ -1,5 +1,11 @@
 import type { Photo } from "./ai/client";
 import { config } from "./config";
+import { getSetting } from "./data/settings";
+
+/** Where the otter is: the address saved during "Connect your otter", or else AYIN_CAMERA_URL. */
+export function otterAddress(): string | null {
+  return getSetting("otter_url") ?? config.cameraUrl;
+}
 
 // Ayin doesn't care which camera a photo comes from: the phone sends one with the
 // request, or the server takes one from the otter. Either way the answer is the same.
@@ -15,9 +21,9 @@ export function photoFromDataUrl(dataUrl: string): Photo | null {
 }
 
 /** Take a photo from the otter's camera (XIAO or Raspberry Pi), which serves GET /capture. */
-export async function photoFromOtter(): Promise<Photo | null> {
-  if (!config.cameraUrl) return null;
-  const response = await fetch(`${config.cameraUrl}/capture`, {
+export async function photoFromOtter(address = otterAddress()): Promise<Photo | null> {
+  if (!address) return null;
+  const response = await fetch(`${address.replace(/\/$/, "")}/capture`, {
     cache: "no-store",
     signal: AbortSignal.timeout(5000),
   });

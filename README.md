@@ -32,7 +32,13 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Talk to Ayin:** students can just ask out loud ("is this the right way up?"). Ayin looks through the camera and answers in a sentence or two, like a coach beside them.
 - **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Ayin can look at a shared screen or tab instead.
 
-**Crew.** A small group from the same work site, set up by staff.
+**Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
+
+- **Wins:** share what you made, with a photo of the work (never faces). Raftmates react with hand-drawn otter stickers that show who reacted, never a count.
+- **Help board:** ask about any step. Raftmates who've done that step on their own see "You know this one" and can answer; the asker marks "This helped". Stuck mid-task? "Ask my raft" posts the question with the step attached.
+- **Ayin checks every post and reply** before anyone sees it: kind, no personal info, no faces. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff.
+- **Profiles:** each student's own goal, "how I work best", and "I can help with", which fills itself from tasks they've mastered.
+- **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
 
 - A shared weekly goal shown as one pond that every crewmate's otter sits in. Each step anyone does on their own raises the water. Never a ranking.
 - Weekly rings that quietly restart each week. There is no streak to break.
@@ -42,7 +48,9 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 **Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket.
 
-**The otter on the counter.** A 3D-printed otter holds the camera in its pebble, with a privacy shutter. The Raspberry Pi version adds Done, Help and Show me buttons for students who don't speak.
+**The otter on the counter.** A 3D-printed otter holds the camera in its pebble, with a privacy shutter. The Raspberry Pi version adds Done, Help and Show me buttons for students who don't speak. "Connect your otter" in the Me tab finds it on the Wi-Fi, shows a live photo through it and tests its buttons, with no files to edit.
+
+**Paper too.** Any task prints as a step card with its pictures, to keep at the station.
 
 ## How it works
 

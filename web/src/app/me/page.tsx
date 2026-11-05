@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import AyinOtter from "@/components/otter/AyinOtter";
@@ -69,6 +70,22 @@ export default function MePage() {
           </div>
           <p className="choice__help">Ayin looks only when you tap Done, Help or Show me, and never saves what it sees. Share a screen when the task is on a computer, or when there is no camera.</p>
         </fieldset>
+
+        <Link href="/me/otter" className="card flex items-center gap-4">
+          <span className="text-[17px]">
+            <strong className="block">Connect your otter</strong>
+            <span className="text-ink-3">Use the desk otter as Ayin&apos;s eyes, with its own buttons</span>
+          </span>
+        </Link>
+
+        {student && (
+          <Link href={`/raft/people/${student.id}`} className="card flex items-center gap-4">
+            <span className="text-[17px]">
+              <strong className="block">My goal, how I work best, and my work card</strong>
+              <span className="text-ink-3">What your raft sees, and a card you can share with a supervisor</span>
+            </span>
+          </Link>
+        )}
 
         <button className="btn btn--quiet self-start" onClick={() => setStudentId(null)}>
           Switch student

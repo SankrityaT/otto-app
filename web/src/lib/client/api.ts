@@ -75,5 +75,8 @@ export const api = {
   profile: (studentId: string) => call<{ profile: Profile; workStyles: string[] }>(`/api/raft/people/${studentId}`),
   updateProfile: (studentId: string, change: { goal?: string | null; goalRoutineId?: string | null; workStyle?: string[] }) =>
     call(`/api/raft/people/${studentId}`, { method: "PATCH", body: JSON.stringify(change) }),
+  otter: () => call<{ address: string | null }>("/api/otter"),
+  testOtter: (address: string) => call<{ photo: string }>("/api/otter/test", post({ address })),
+  saveOtter: (address: string | null) => call("/api/otter", post({ address })),
   buttonPresses: (after: number) => call<{ presses: { id: number; button: string }[] }>(`/api/buttons?after=${after}`),
 };

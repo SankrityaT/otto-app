@@ -124,6 +124,12 @@ const SCHEMA = `
     created_at TEXT NOT NULL
   );
 
+  -- Small settings saved from the app, like the otter's address
+  CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+
   -- Button presses from the otter, picked up by the screen at the same station
   CREATE TABLE IF NOT EXISTS button_presses (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
