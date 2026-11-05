@@ -38,12 +38,12 @@ const students = Object.fromEntries(
 const latte = createRoutine({
   title: "Make an iced latte",
   steps: [
-    { text: "Wash your hands", detail: "Wash your hands with soap for 20 seconds, then dry them." },
-    { text: "Fill a cup with ice", detail: "Scoop ice into a tall cup until it is full." },
-    { text: "Pour milk to the line", detail: "Pour cold milk into the cup up to the line." },
-    { text: "Pull one espresso shot", detail: "Press the one-shot button on the espresso machine." },
-    { text: "Pour the shot over the milk", detail: "Pour the espresso slowly over the milk and ice." },
-    { text: "Put on a lid", detail: "Press a lid onto the cup until it clicks all the way round." },
+    { text: "Wash your hands", detail: "Wash your hands with soap for 20 seconds, then dry them.", seconds: 20 },
+    { text: "Fill a cup with ice", detail: "Scoop ice into a tall cup until it is full.", seconds: null },
+    { text: "Pour milk to the line", detail: "Pour cold milk into the cup up to the line.", seconds: null },
+    { text: "Pull one espresso shot", detail: "Press the one-shot button on the espresso machine.", seconds: null },
+    { text: "Pour the shot over the milk", detail: "Pour the espresso slowly over the milk and ice.", seconds: null },
+    { text: "Put on a lid", detail: "Press a lid onto the cup until it clicks all the way round.", seconds: null },
   ],
 });
 

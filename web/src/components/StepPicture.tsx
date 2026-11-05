@@ -7,7 +7,7 @@ import UprightOtter from "./otter/UprightOtter";
  * The picture for one step. The first time a step is shown, Claude draws it, which
  * takes a few seconds, so the otter waits with the student until it arrives.
  */
-export function StepPicture({ stepId, alt, shown }: { stepId: string; alt: string; shown: boolean }) {
+export function StepPicture({ stepId, alt, shown, furHue }: { stepId: string; alt: string; shown: boolean; furHue: number }) {
   const [state, setState] = useState<{ stepId: string; status: "loading" | "ready" | "missing" }>({
     stepId,
     status: "loading",
@@ -17,7 +17,7 @@ export function StepPicture({ stepId, alt, shown }: { stepId: string; alt: strin
   if (!shown) {
     return (
       <Frame>
-        <UprightOtter className="h-40 w-40" active={false} />
+        <UprightOtter className="h-40 w-40" furHue={furHue} active={false} />
         <p className="text-ink-3">The picture is resting. Tap Show me to see it.</p>
       </Frame>
     );
@@ -27,7 +27,7 @@ export function StepPicture({ stepId, alt, shown }: { stepId: string; alt: strin
     <Frame>
       {status !== "ready" && (
         <div className="flex flex-col items-center gap-2">
-          <UprightOtter className="h-40 w-40" active={status === "loading"} />
+          <UprightOtter className="h-40 w-40" furHue={furHue} active={status === "loading"} />
           <p className="text-ink-3">{status === "loading" ? "Ayin is drawing this step" : "No picture for this step"}</p>
         </div>
       )}

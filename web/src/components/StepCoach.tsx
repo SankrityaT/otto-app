@@ -11,10 +11,11 @@ import { HELP_LEVELS, nextHelpLevel, type HelpLevel } from "@/lib/help";
 import { Button } from "./Button";
 import { Ring } from "./Ring";
 import { StepPicture } from "./StepPicture";
+import { StepTimer } from "./StepTimer";
 import type { Scene } from "@/lib/ai/scene";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
-import { Check, Eye, Lightbulb, MessageCircle, Mic, MicOff, Users, X } from "lucide-react";
+import { Check, Eye, Lightbulb, ListTree, MessageCircle, Mic, MicOff, Users, X } from "lucide-react";
 
 /** How often the screen checks for presses on the otter's physical buttons. */
 const BUTTON_POLL_MS = 1000;
@@ -29,7 +30,7 @@ interface StepHelp {
   pictureShown: boolean;
 }
 
-export function StepCoach({ run }: { run: Run }) {
+export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: () => void }) {
   const [doneIds, setDoneIds] = useState<string[]>(run.doneStepIds);
   const [help, setHelp] = useState<StepHelp | null>(null);
   const [say, setSay] = useState<string | null>(null);
@@ -115,6 +116,21 @@ export function StepCoach({ run }: { run: Run }) {
     }
   }
 
+  /** The step feels too big: break it into smaller ones, then reload the steps. */
+  async function makeSmaller() {
+    if (!step || busy) return;
+    setBusy(true);
+    tell("Breaking it into smaller steps");
+    try {
+      await api.splitStep(step.id);
+      onStepsChanged();
+    } catch (error) {
+      tell((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function askCrewmate() {
     if (!step) return;
     const { helperName } = await api.askCrewmate(run.studentId, step.id);
@@ -152,7 +168,7 @@ export function StepCoach({ run }: { run: Run }) {
   }, []);
 
   if (summary || !step || !current) {
-    return <Finished title={run.title} summary={summary ?? { total: run.steps.length, onOwn: 0 }} />;
+    return <Finished title={run.title} furHue={run.furHue} summary={summary ?? { total: run.steps.length, onOwn: 0 }} />;
   }
 
   return (
@@ -191,7 +207,7 @@ export function StepCoach({ run }: { run: Run }) {
             <ShowMe3D scene={stepScene.scene} />
           ) : (
             <div className="graph-paper flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-line">
-              <UprightOtter className="h-40 w-40" />
+              <UprightOtter className="h-40 w-40" furHue={run.furHue} />
               <p className="font-hand text-[22px] text-ink-2">Ayin is building it for you</p>
             </div>
           )}
@@ -200,16 +216,24 @@ export function StepCoach({ run }: { run: Run }) {
           </Button>
         </div>
       ) : (
-        <StepPicture stepId={step.id} alt={step.detail} shown={current.pictureShown} />
+        <StepPicture stepId={step.id} alt={step.detail} shown={current.pictureShown} furHue={run.furHue} />
       )}
 
-      <h1 className="font-display text-[34px] leading-[1.08]">{step.text}</h1>
+      <h1 className="font-display text-[38px] leading-[1.05]">{step.text}</h1>
+
+      {step.seconds && <StepTimer key={step.id} seconds={step.seconds} />}
 
       {say && (
         <p className="flex items-start gap-3 rounded-2xl bg-cel-wash px-4 py-3 text-[17px] leading-snug text-cel-deep" aria-live="polite">
           <MessageCircle size={20} className="mt-0.5 shrink-0" />
           {say}
         </p>
+      )}
+
+      {current.level >= HELP_LEVELS.nudge && (
+        <Button look="quiet" className="self-start px-0" disabled={busy} onClick={makeSmaller}>
+          <ListTree size={18} /> Too big? Smaller steps
+        </Button>
       )}
 
       {current.level === HELP_LEVELS.showMe && (
@@ -248,19 +272,19 @@ export function StepCoach({ run }: { run: Run }) {
 /** A secondary action: a round button with its word underneath. */
 function RoundAction({ label, children, ...props }: { label: string; children: React.ReactNode; disabled?: boolean; onClick: () => void }) {
   return (
-    <button className="flex w-16 flex-col items-center gap-1 text-[13px] font-medium text-ink-2 disabled:opacity-40" {...props}>
+    <button className="flex w-20 flex-col items-center gap-1 whitespace-nowrap text-[13px] font-medium text-ink-2 disabled:opacity-40" {...props}>
       <span className="grid h-14 w-14 place-items-center rounded-full bg-card">{children}</span>
       {label}
     </button>
   );
 }
 
-function Finished({ title, summary }: { title: string; summary: Summary }) {
+function Finished({ title, furHue, summary }: { title: string; furHue: number; summary: Summary }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 text-center">
       <div className="relative grid place-items-center">
         <Ring fill={summary.total ? summary.onOwn / summary.total : 0} size={200} stroke={10} label="Steps on your own" />
-        <UprightOtter className="absolute h-32 w-32" />
+        <UprightOtter className="absolute h-32 w-32" furHue={furHue} />
       </div>
       <h1 className="font-display text-[40px] leading-none">
         {summary.onOwn} of {summary.total} on your own

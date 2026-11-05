@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Atkinson_Hyperlegible_Next, Gochi_Hand, Instrument_Serif } from "next/font/google";
 import "./globals.css";
-import "./pond.css";
 
 // Atkinson Hyperlegible is built to be easy to read; Instrument Serif is for the few large lines.
 const sans = Atkinson_Hyperlegible_Next({ variable: "--font-atkinson", subsets: ["latin"] });

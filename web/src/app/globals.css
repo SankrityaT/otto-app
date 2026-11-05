@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Havi's pond styles sit in the components layer, so Tailwind utilities can still override them. */
+@import "./pond.css" layer(components);
 
 /* Tailwind names for the colours and fonts in Havi's pond styles (pond.css), so both agree. */
 @theme inline {

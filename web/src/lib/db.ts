@@ -32,6 +32,7 @@ const SCHEMA = `
     position    INTEGER NOT NULL,
     text        TEXT NOT NULL,        -- 8 words or fewer
     detail      TEXT NOT NULL,        -- one plain sentence for "show me"
+    seconds     INTEGER,              -- only for steps that take a set time
     picture_svg TEXT,                 -- drawn once, then reused
     scene_json  TEXT                  -- the 3D "show me" model, built once, then reused
   );
@@ -93,6 +94,7 @@ function addMissingColumns(db: DatabaseSync): void {
   const has = (table: string, column: string) =>
     (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).some((c) => c.name === column);
   if (!has("steps", "scene_json")) db.exec("ALTER TABLE steps ADD COLUMN scene_json TEXT");
+  if (!has("steps", "seconds")) db.exec("ALTER TABLE steps ADD COLUMN seconds INTEGER");
   if (!has("students", "fur_hue")) db.exec("ALTER TABLE students ADD COLUMN fur_hue INTEGER NOT NULL DEFAULT 0");
 }
 

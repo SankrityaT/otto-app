@@ -38,6 +38,7 @@ export const api = {
     ),
   help: (runId: string, stepId: string, level: number, photo: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/help`, post({ stepId, level, photo })),
+  splitStep: (stepId: string) => call(`/api/steps/${stepId}/split`, post({})),
   scene: (stepId: string, photo: string | null) => call<{ scene: Scene }>(`/api/steps/${stepId}/scene`, post({ photo })),
   crew: (studentId: string) => call<{ crew: CrewView }>(`/api/crew?studentId=${encodeURIComponent(studentId)}`),
   cheer: (fromId: string, runId: string, phrase: string) => call("/api/crew/cheers", post({ fromId, runId, phrase })),
