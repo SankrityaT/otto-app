@@ -142,12 +142,23 @@ export default function Today() {
       <div className="today">
         <div className="today__center">
           <h1 className="sr-only">Today</h1>
-          {chatting ? (
+          {/* While talking, the task leaves drift off and the pond draws in, so the words have room. */}
+          <Pond
+            motion="idle"
+            furHue={student.furHue}
+            agentStatus={status}
+            open={chatting ? [] : leaves}
+            done={finished}
+            onLeafSelect={start}
+            onBin={() => setBinSignal((n) => n + 1)}
+            upright={status !== "idle" || chatting}
+            style={chatting ? { width: "min(56%, 280px)", marginTop: 0 } : undefined}
+          />
+          {chatting && (
             <AyinChat
               turns={chat}
               thinking={status === "thinking"}
               voice={voice}
-              furHue={student.furHue}
               choices={choices}
               task={offer?.title ?? null}
               onChoose={converse}
@@ -160,17 +171,6 @@ export default function Today() {
                 setOffer(null);
                 setChoices([]);
               }}
-            />
-          ) : (
-            <Pond
-              motion="idle"
-              furHue={student.furHue}
-              agentStatus={status}
-              open={leaves}
-              done={finished}
-              onLeafSelect={start}
-              onBin={() => setBinSignal((n) => n + 1)}
-              upright={status !== "idle"}
             />
           )}
           <TalkBar status={status} onListening={(on) => setStatus(on ? "listening" : "idle")} onSend={(text) => converse(text)} />

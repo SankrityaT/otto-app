@@ -1,9 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { Play, Volume2, X } from "lucide-react";
-import { useEffect, useRef } from "react";
-import UprightOtter from "./otter/UprightOtter";
+import { Play, Volume2 } from "lucide-react";
 
 export type ChatTurn = { who: "student" | "ayin"; text: string };
 /** Which of Ayin's lines is being said out loud, and how far through it Ayin is. */
@@ -13,16 +11,15 @@ export type Voice = { turn: number; char: number } | null;
 const CHOICE_TONES = ["study", "errands", "care", "health"];
 
 /**
- * Talking with Ayin. Playful, but calm and predictable: the otter sits in its own little pond
- * and bobs while it talks, each word lights up as Ayin says it (so reading and listening go
- * together), every line can be heard again, and ready answers float like leaves so the
- * student never has to think up what to type. Starting a task is always the student's tap.
+ * Talking with Ayin, right there in the pond: no chat window, no scrolling history. The otter
+ * sits up above, and under it is only what matters now: what the student said, Ayin's answer
+ * with each word lighting up as it's said (reading and listening together), and a few ready
+ * answers floating like leaves. Starting a task is always the student's tap.
  */
 export function AyinChat({
   turns,
   thinking,
   voice,
-  furHue,
   choices,
   task,
   onChoose,
@@ -33,7 +30,6 @@ export function AyinChat({
   turns: ChatTurn[];
   thinking: boolean;
   voice: Voice;
-  furHue: number;
   choices: string[];
   task: string | null;
   onChoose: (text: string) => void;
@@ -41,55 +37,32 @@ export function AyinChat({
   onHear: (turn: number) => void;
   onClose: () => void;
 }) {
-  const end = useRef<HTMLDivElement>(null);
-  const talking = voice !== null;
-
-  useEffect(() => {
-    end.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-  }, [turns, thinking]);
+  const lastAyin = turns.findLastIndex((t) => t.who === "ayin");
+  const lastYou = turns.findLast((t) => t.who === "student");
 
   return (
-    <section className="flex h-[min(60dvh,580px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[28px] border border-line bg-card" aria-label="Talking with Ayin">
-      <header className="flex items-center gap-4 px-4 pb-2 pt-4">
-        <div className={`chat__pond ${talking ? "is-talking" : ""}`}>
-          <UprightOtter className="chat__otter h-16 w-16" furHue={furHue} active={talking || thinking} />
-        </div>
-        <div className="flex-1">
-          <p className="font-display text-[30px] leading-none text-ink">Ayin</p>
-          <p className="mt-1 text-[15px] text-ink-3">{thinking ? "Thinking…" : talking ? "Talking to you" : "Your turn"}</p>
-        </div>
-        <button onClick={onClose} aria-label="Close the chat" className="grid h-11 w-11 place-items-center rounded-full text-ink-3 hover:bg-clay">
-          <X size={22} />
-        </button>
-      </header>
+    <section className="mt-[min(80px,16vw)] flex w-full max-w-[560px] flex-col items-center gap-4 px-2 text-center" aria-label="Talking with Ayin" aria-live="polite">
+      {lastYou && <p className="text-[16px] text-ink-3">You: {lastYou.text}</p>}
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3" aria-live="polite">
-        {turns.map((turn, i) =>
-          turn.who === "student" ? (
-            <p key={i} className="chat__bubble max-w-[80%] self-end rounded-[22px] rounded-br-md bg-cel-wash px-4 py-2.5 text-[18px] text-cel-deep">
-              {turn.text}
+      {thinking ? (
+        <p className="chat__dots text-[34px] leading-none text-ink-3" aria-label="Ayin is thinking">
+          <span>•</span> <span>•</span> <span>•</span>
+        </p>
+      ) : (
+        lastAyin !== -1 && (
+          <div key={lastAyin} className="chat__bubble flex flex-col items-center gap-2">
+            <p className="max-w-[26ch] text-balance text-[clamp(22px,4.6vw,28px)] font-medium leading-snug text-ink">
+              <Words text={turns[lastAyin].text} at={voice?.turn === lastAyin ? voice.char : null} />
             </p>
-          ) : (
-            <div key={i} className="chat__bubble flex max-w-[90%] items-end gap-1.5 self-start">
-              <p className="rounded-[22px] rounded-bl-md bg-clay px-4 py-3 text-[19px] leading-snug text-ink">
-                <Words text={turn.text} at={voice?.turn === i ? voice.char : null} />
-              </p>
-              <button onClick={() => onHear(i)} aria-label="Hear it again" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-3 hover:bg-clay">
-                <Volume2 size={20} />
-              </button>
-            </div>
-          ),
-        )}
-        {thinking && (
-          <p className="chat__bubble chat__dots self-start rounded-[22px] rounded-bl-md bg-clay px-5 py-3 text-[22px] leading-none text-ink-3" aria-label="Ayin is thinking">
-            <span>•</span> <span>•</span> <span>•</span>
-          </p>
-        )}
-        <div ref={end} />
-      </div>
+            <button onClick={() => onHear(lastAyin)} className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[15px] text-ink-3 hover:bg-clay">
+              <Volume2 size={18} /> Hear it again
+            </button>
+          </div>
+        )
+      )}
 
       {!thinking && (task || choices.length > 0) && (
-        <div className="flex flex-wrap items-center gap-2.5 px-4 pb-4 pt-2">
+        <div className="flex flex-wrap justify-center gap-2.5">
           {task && (
             <button onClick={onStartTask} className="chat__leaf flex items-center gap-2" style={{ "--tone": "var(--r-home)", "--i": 0 } as CSSProperties}>
               <Play size={18} fill="currentColor" /> Start: {task}
@@ -107,6 +80,10 @@ export function AyinChat({
           ))}
         </div>
       )}
+
+      <button onClick={onClose} className="btn btn--text py-1 text-[15px]">
+        Back to my pond
+      </button>
     </section>
   );
 }
