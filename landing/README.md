@@ -26,7 +26,15 @@ All optional. Copy `.env.example` to `.env.local` to set them.
 
 - `src/app/page.tsx` lists the sections in order. Each section is one file in `src/components/`.
 - `src/components/otter/` is Havi's otter, copied from `web/` unchanged, with its artwork in `public/otter/`.
-- `public/device/` holds renders of the 3D-printed otter from `hardware/otter/renders/`.
+- `public/device/otter.glb` is the 3D-printed otter you can spin around (about 600 KB). To rebuild it after changing the design:
+
+  ```bash
+  cd hardware/otter
+  GLB_ONLY=1 .venv/bin/python otter.py   # the full model (see hardware/README.md for setup)
+  .venv/bin/python web_model.py          # a lighter copy with the paint colours
+  npx @gltf-transform/cli optimize otter_web.glb ../../landing/public/device/otter.glb \
+      --compress meshopt --simplify false --texture-compress false
+  ```
 
 ## Writing for this page
 

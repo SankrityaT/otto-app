@@ -1,4 +1,5 @@
 import { Accessibility, CameraOff, MousePointerClick } from "lucide-react";
+import { OtterViewer } from "./OtterViewer";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
@@ -22,22 +23,9 @@ export function Device() {
       intro="Ayin works on any phone or tablet. For work stations, we're building a 3D-printed otter that holds a little camera in its pebble, so your hands stay free."
       className="bg-card/60"
     >
-      <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr]">
+      <div className="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
         <Reveal>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-[2fr_1fr]">
-            <div className="render col-span-2 aspect-square sm:col-span-1 sm:row-span-2">
-              {/* eslint-disable-next-line @next/next/no-img-element -- static renders, sized by their frame */}
-              <img src="/device/otter-device.png" alt="The 3D-printed Ayin otter, sitting up and holding a camera pebble." loading="lazy" />
-            </div>
-            <div className="render aspect-square">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/device/otter-shutter.png" alt="The otter from the front, with the privacy shutter closed over the camera." loading="lazy" />
-            </div>
-            <div className="render aspect-square">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/device/otter-inside.png" alt="The otter opened up, showing the small camera board and buttons inside." loading="lazy" />
-            </div>
-          </div>
+          <OtterViewer />
         </Reveal>
         <div>
           <span className="inline-flex items-center gap-2 rounded-full bg-cel-wash px-3.5 py-1.5 text-[15px] font-semibold text-cel-deep">
