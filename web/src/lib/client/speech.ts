@@ -7,6 +7,34 @@ let playing: HTMLAudioElement | null = null;
 /** Each new line gets a number, so a slow reply for an old line never talks over a new one. */
 let latest = 0;
 
+// The microphone can hear Ayin's own voice, and speech recognition often hands over what it
+// heard just after Ayin stops. So Ayin remembers when it last spoke and what it said.
+/** Anything heard this soon after Ayin stops talking is probably still Ayin. */
+const ECHO_MS = 1500;
+/** Ayin's lines are remembered this long, to spot them coming back through the microphone. */
+const REMEMBER_MS = 30_000;
+let quietSince = 0;
+const said: { words: Set<string>; at: number }[] = [];
+
+const wordsOf = (text: string) => text.toLowerCase().match(/[a-z0-9']+/g) ?? [];
+
+function remember(text: string): void {
+  said.push({ words: new Set(wordsOf(text)), at: Date.now() });
+  while (said.length && Date.now() - said[0].at > REMEMBER_MS) said.shift();
+}
+
+function stoppedTalking(): void {
+  quietSince = Date.now();
+}
+
+/** True if what the microphone heard is most likely Ayin's own voice, not the student's. */
+function isEcho(heard: string, short: boolean): boolean {
+  if (isSpeaking() || Date.now() - quietSince < ECHO_MS) return true;
+  const words = wordsOf(heard);
+  if (short || words.length < 3) return false;
+  return said.some((line) => words.filter((w) => line.words.has(w)).length / words.length >= 0.7);
+}
+
 /** Where each word starts in the text, for lighting words up as they're said. */
 function wordStarts(text: string): number[] {
   return [...text.matchAll(/\S+/g)].map((m) => m.index);
@@ -20,7 +48,10 @@ function speakInBrowser(text: string, { onEnd, onWord }: SpeakOptions): void {
   }
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.95;
-  if (onEnd) utterance.onend = onEnd;
+  utterance.onend = () => {
+    stoppedTalking();
+    onEnd?.();
+  };
   if (onWord) utterance.onboundary = (event) => event.name === "word" && onWord(event.charIndex);
   window.speechSynthesis.speak(utterance);
 }
@@ -38,6 +69,7 @@ function playAudio(audio: HTMLAudioElement, text: string, { onEnd, onWord }: Spe
   audio.onplay = () => requestAnimationFrame(follow);
   audio.onended = () => {
     if (audio === playing) playing = null;
+    stoppedTalking();
     onEnd?.();
   };
   playing = audio;
@@ -54,6 +86,7 @@ function playAudio(audio: HTMLAudioElement, text: string, { onEnd, onWord }: Spe
 export function speak(text: string, options: SpeakOptions = {}): void {
   if (typeof window === "undefined") return options.onEnd?.();
   hush();
+  remember(text);
   const line = ++latest;
   fetch("/api/voice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) })
     .then(async (response) => {
@@ -71,6 +104,7 @@ export function speak(text: string, options: SpeakOptions = {}): void {
 /** Stop talking mid-sentence. */
 export function hush(): void {
   if (typeof window === "undefined") return;
+  if (isSpeaking()) stoppedTalking();
   playing?.pause();
   playing = null;
   window.speechSynthesis?.cancel();
@@ -125,11 +159,12 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
   let stopped = false;
 
   recognition.onresult = (event) => {
-    if (isSpeaking()) return; // that was Ayin's own voice
-    const said = event.results[event.resultIndex][0].transcript.trim();
-    const command = toCommand(said);
-    if (command && said.split(/\s+/).length <= 3) onCommand(command);
-    else if (said.length >= 2) onQuestion(said);
+    const heard = event.results[event.resultIndex][0].transcript.trim();
+    const short = heard.split(/\s+/).length <= 3;
+    if (isEcho(heard, short)) return; // that was Ayin's own voice
+    const command = toCommand(heard);
+    if (command && short) onCommand(command);
+    else if (heard.length >= 2) onQuestion(heard);
   };
   recognition.onend = () => {
     if (!stopped) recognition.start(); // browsers stop after a pause; keep going

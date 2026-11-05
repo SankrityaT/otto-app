@@ -25,7 +25,8 @@ import type { Scene, SceneSoFar } from "@/lib/ai/scene";
 import type { ChatTurn } from "./AyinChat";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
-import { OtterView } from "./OtterView";
+import { AyinSees } from "./AyinSees";
+import { HandsFree } from "./HandsFree";
 import { TogetherBar } from "./TogetherBar";
 import {
   Check,
@@ -33,8 +34,6 @@ import {
   Lightbulb,
   ListTree,
   MessageCircle,
-  Mic,
-  MicOff,
   Users,
   X,
 } from "lucide-react";
@@ -362,15 +361,7 @@ export function StepCoach({
   // What Ayin sees, always on screen, so the student never has to trust a camera they can't see.
   const eyes = (
     <div className="flex items-center gap-3 rounded-2xl bg-card p-2 pr-3 text-[15px] text-ink-2">
-      <div
-        className={`h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-clay ring-4 transition-shadow ${looking ? "ring-cel" : "ring-transparent"}`}
-      >
-        {useBrowserEyes ? (
-          <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
-        ) : (
-          <OtterView />
-        )}
-      </div>
+      <AyinSees videoRef={videoRef} otter={!useBrowserEyes} looking={looking} className="h-20 w-28 shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
         <span className="font-semibold text-ink">{looking ? "Ayin is looking" : "What Ayin sees"}</span>
         {cameraChoice === "screen" && !sharing ? (
@@ -379,16 +370,14 @@ export function StepCoach({
           </button>
         ) : cameraError ? (
           <span>{cameraError}</span>
-        ) : mode === "steps" ? (
-          <button onClick={() => setWatching((on) => !on)} aria-pressed={watching} className="text-left leading-snug">
-            {watching
-              ? useBrowserEyes
-                ? "Looks when your hands stop. Tap to stop."
-                : "Looks every few seconds. Tap to stop."
-              : "Only looks when you tap. Tap to watch for me."}
-          </button>
         ) : (
-          <span>Only looks when you tap Done</span>
+          <span className="leading-snug">
+            {mode === "steps" && watching
+              ? useBrowserEyes
+                ? "Looks when your hands stop"
+                : "Looks every few seconds"
+              : "Looks when you say or tap Done"}
+          </span>
         )}
       </div>
     </div>
@@ -486,18 +475,13 @@ export function StepCoach({
             ))}
           </ol>
         </div>
-        {canListen() ? (
-          <button
-            onClick={() => setListening((on) => !on)}
-            aria-pressed={listening}
-            aria-label={listening ? "Stop listening" : "Talk to Ayin"}
-            className={`grid h-11 w-11 place-items-center rounded-full ${listening ? "bg-ink text-card" : "bg-card text-ink-2"}`}
-          >
-            {listening ? <Mic size={20} /> : <MicOff size={20} />}
-          </button>
-        ) : (
-          <span className="h-11 w-11" />
-        )}
+        <HandsFree
+          on={listening || watching}
+          onChange={(on) => {
+            setListening(on && canListen());
+            setWatching(on);
+          }}
+        />
       </header>
 
       <TogetherBar runId={run.id} />

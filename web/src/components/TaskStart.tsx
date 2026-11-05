@@ -1,14 +1,18 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Mic, MicOff, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { Scene, SceneSoFar } from "@/lib/ai/scene";
 import type { Run } from "@/lib/data/runs";
 import { api } from "@/lib/client/api";
+import { useCameraChoice } from "@/lib/client/settings";
 import { canListen, hush, listen, speak, type VoiceCommand } from "@/lib/client/speech";
+import { useCamera } from "@/lib/client/useCamera";
 import { STAGES } from "@/lib/stages";
+import { AyinSees } from "./AyinSees";
 import { Button } from "./Button";
+import { HandsFree } from "./HandsFree";
 import UprightOtter from "./otter/UprightOtter";
 
 /** The pause after Ayin finishes a step before the walkthrough moves on by itself. */
@@ -111,6 +115,10 @@ function StepStory({ run }: { run: Run }) {
   const [building, setBuilding] = useState<Record<string, SceneSoFar>>({});
   const [heard, setHeard] = useState<string | null>(null);
   const [say, setSay] = useState<string | null>(null);
+  // Ayin's eyes while watching too, so a question about what the student is holding gets a real look.
+  const [cameraChoice] = useCameraChoice();
+  const { videoRef, capture } = useCamera(cameraChoice === "this-device");
+  const [looking, setLooking] = useState(false);
   const step = run.steps[index];
   const scene = scenes[step.id];
   const last = run.steps.length - 1;
@@ -187,8 +195,11 @@ function StepStory({ run }: { run: Run }) {
     setPlaying(false);
     setHeard(question);
     setSay("…");
+    setLooking(true);
+    const photo = capture();
+    setTimeout(() => setLooking(false), 600);
     try {
-      tell((await api.ask(run.id, step.id, question, null, scene?.title ?? null)).say);
+      tell((await api.ask(run.id, step.id, question, photo, scene?.title ?? null)).say);
     } catch (error) {
       tell((error as Error).message);
     }
@@ -214,16 +225,7 @@ function StepStory({ run }: { run: Run }) {
         >
           {playing ? <Pause size={18} /> : <Play size={18} />}
         </button>
-        {canListen() && (
-          <button
-            onClick={() => setListening((on) => !on)}
-            aria-pressed={listening}
-            aria-label={listening ? "Stop listening" : "Talk to Ayin"}
-            className={`grid h-10 w-10 place-items-center rounded-full ${listening ? "bg-ink text-card" : "bg-card text-ink-2"}`}
-          >
-            {listening ? <Mic size={18} /> : <MicOff size={18} />}
-          </button>
-        )}
+        {canListen() && <HandsFree on={listening} onChange={setListening} />}
       </div>
 
       <div className="relative min-h-0 flex-1">
@@ -236,6 +238,12 @@ function StepStory({ run }: { run: Run }) {
             {/* eslint-disable-next-line @next/next/no-img-element -- the SVG drawn for this step */}
             <img key={step.id} src={`/api/steps/${step.id}/picture`} alt={step.detail} className="min-h-0 max-w-full flex-1 object-contain" />
           </div>
+        )}
+        {cameraChoice !== "screen" && (
+          <figure className="absolute bottom-2 right-2 flex flex-col items-center gap-0.5">
+            <AyinSees videoRef={videoRef} otter={cameraChoice === "otter"} looking={looking} className="h-16 w-24" />
+            <figcaption className="rounded-full bg-card/90 px-2 text-[12px] text-ink-2">What Ayin sees</figcaption>
+          </figure>
         )}
       </div>
 
@@ -253,12 +261,12 @@ function StepStory({ run }: { run: Run }) {
       </div>
 
       {say ? (
-        <p className="line-clamp-3 rounded-[var(--radius-card)] bg-cel-wash px-4 py-2 text-[16px] text-cel-deep" aria-live="polite">
+        <p className="rounded-[var(--radius-card)] bg-cel-wash px-4 py-2 text-[16px] text-cel-deep" aria-live="polite">
           {heard && <span className="block text-[13px] text-ink-3">You: {heard}</span>}
           {say}
         </p>
       ) : (
-        listening && <p className="text-center text-[14px] text-ink-3">Say &ldquo;next&rdquo;, &ldquo;back&rdquo;, or ask Ayin anything</p>
+        listening && <p className="text-center text-[14px] text-ink-3">Hands-free: say &ldquo;next&rdquo;, &ldquo;back&rdquo;, or ask Ayin anything</p>
       )}
     </section>
   );
