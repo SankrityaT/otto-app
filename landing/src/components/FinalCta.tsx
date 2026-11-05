@@ -2,6 +2,7 @@ import { site } from "@/lib/site";
 import { Leaf } from "./Leaf";
 import { OtterSays } from "./OtterSays";
 import { Reveal } from "./Reveal";
+import UprightOtter from "./otter/UprightOtter";
 
 const TELL_SCHOOL = `mailto:?subject=${encodeURIComponent("Have you seen Ayin?")}&body=${encodeURIComponent(
   "Hi! I found Ayin, a calm step-by-step coach that helps students learn job tasks and do them on their own. Could it work at our school?\n\n",
@@ -15,8 +16,11 @@ export function FinalCta() {
           <Leaf color="var(--mustard)" className="drift absolute left-[8%] top-[18%] w-12" style={{ ["--r" as string]: "-15deg" }} />
           <Leaf color="var(--plum)" className="drift absolute bottom-[14%] left-[16%] w-9" style={{ ["--r" as string]: "60deg", animationDelay: "-3s" }} />
           <Leaf color="var(--sky)" className="drift absolute right-[10%] top-[26%] w-10" style={{ ["--r" as string]: "130deg", animationDelay: "-5s" }} />
-          {/* eslint-disable-next-line @next/next/no-img-element -- decorative */}
-          <img src="/otter/otter-base.png" alt="" className="mx-auto -mb-6 -mt-10 w-48 md:w-56" style={{ filter: "var(--otter-dim, none)" }} />
+          {/* The otter sits up to wait with you. Its drawing has empty space above and to the left,
+              so the margins trim that off and centre the otter itself. */}
+          <div className="mx-auto w-52 md:w-64">
+            <UprightOtter className="-mb-[8%] -mt-[22%] block aspect-square w-full -translate-x-[5.7%]" />
+          </div>
           <OtterSays className="rotate-[-2deg]" tailX="45%">
             No rush. I&apos;ll wait.
           </OtterSays>
