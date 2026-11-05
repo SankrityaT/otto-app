@@ -24,17 +24,20 @@ export const api = {
   setFurHue: (studentId: string, furHue: number) =>
     call(`/api/students/${studentId}`, { method: "PATCH", body: JSON.stringify({ furHue }) }),
   doneThisWeek: (studentId: string) =>
-    call<{ done: { runId: string; title: string; onOwn: number; total: number }[] }>(
+    call<{
+      done: { runId: string; title: string; onOwn: number; total: number }[];
+      inProgress: { runId: string; title: string; done: number; total: number }[];
+    }>(
       `/api/runs?studentId=${encodeURIComponent(studentId)}`,
     ),
   routines: () => call<{ routines: { id: string; title: string; stepCount: number }[] }>("/api/routines"),
   newRoutine: (task: string, photo: string | null) => call<{ routine: Routine }>("/api/routines", post({ task, photo })),
   startRun: (routineId: string, studentId: string) => call<{ runId: string }>("/api/runs", post({ routineId, studentId })),
   run: (runId: string) => call<{ run: Run; summary: Summary }>(`/api/runs/${runId}`),
-  check: (runId: string, stepId: string, helpLevel: number, photo: string | null) =>
+  check: (runId: string, stepId: string, helpLevel: number, photo: string | null, trustStudent = false) =>
     call<{ done: boolean; say: string; finished: boolean; summary: Summary | null }>(
       `/api/runs/${runId}/check`,
-      post({ stepId, helpLevel, photo }),
+      post({ stepId, helpLevel, photo, trustStudent }),
     ),
   ask: (runId: string, stepId: string, question: string, photo: string | null, showing: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/ask`, post({ stepId, question, photo, showing })),

@@ -28,6 +28,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
 - **Time you can see:** a step that takes a set time (wash hands for 20 seconds) gets a calm ring timer. It never turns red.
 - **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.
+- **Hands-free:** voice is on during a task, so "done" works with wet hands. "Watch for me" lets Ayin check every few seconds until each step is done, and "I did it" moves on when the camera can't see the step.
 - **Talk to Ayin:** students can just ask out loud ("is this the right way up?"). Ayin looks through the camera and answers in a sentence or two, like a coach beside them.
 - **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Ayin can look at a shared screen or tab instead.
 

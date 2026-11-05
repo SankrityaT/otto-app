@@ -15,6 +15,7 @@ import { useStudentId } from "@/lib/client/settings";
 
 type Routine = { id: string; title: string; stepCount: number };
 type Done = { runId: string; title: string; onOwn: number; total: number };
+type Started = { runId: string; title: string; done: number; total: number };
 
 /** Each task keeps the same leaf colour every time, picked from its id. */
 function toneFor(id: string): LeafItem["tone"] {
@@ -37,6 +38,7 @@ export default function Today() {
   const [students, setStudents] = useState<Student[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [done, setDone] = useState<Done[]>([]);
+  const [started, setStarted] = useState<Started[]>([]);
   const [status, setStatus] = useState<PondStatus>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [binSignal, setBinSignal] = useState(0);
@@ -47,7 +49,14 @@ export default function Today() {
   }, []);
 
   useEffect(() => {
-    if (studentId) api.doneThisWeek(studentId).then((r) => setDone(r.done)).catch(() => {});
+    if (!studentId) return;
+    api
+      .doneThisWeek(studentId)
+      .then((r) => {
+        setDone(r.done);
+        setStarted(r.inProgress);
+      })
+      .catch(() => {});
   }, [studentId]);
 
   const student = students.find((s) => s.id === studentId);
@@ -110,6 +119,28 @@ export default function Today() {
           </label>
           {message && <p className="mt-2 text-center text-ink-2">{message}</p>}
         </div>
+
+        <aside className="today__left" aria-label="Now">
+          <Fold id="now" title="Now" summary={started.length === 0 ? "Nothing started" : `${started.length} started`}>
+            {started.length === 0 ? (
+              <p className="text-ink-2">Nothing in progress. Tap a leaf in the pond to start a task.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {started.map((s) => (
+                  <li key={s.runId} className="card flex flex-col gap-2">
+                    <p className="card__title">{s.title}</p>
+                    <p className="card__line">
+                      {s.done} of {s.total} steps done
+                    </p>
+                    <button className="btn btn--primary self-start" onClick={() => router.push(`/run/${s.runId}`)}>
+                      Carry on
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Fold>
+        </aside>
 
         <aside className="today__right" aria-label="Your tasks">
           <Fold id="practise" title="Practise again" summary={`${routines.length} ${routines.length === 1 ? "task" : "tasks"}`}>

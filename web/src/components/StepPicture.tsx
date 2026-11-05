@@ -48,7 +48,7 @@ export function StepPicture({ stepId, alt, shown, furHue }: { stepId: string; al
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[var(--radius-card)] border border-line bg-card text-center">
+    <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[var(--radius-card)] border border-line bg-[#fbf8f2] text-center text-[#6b6359]">
       {children}
     </div>
   );

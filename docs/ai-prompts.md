@@ -48,3 +48,4 @@ This file lists the prompts that shaped the project. Small requests like "fix th
 | Nov 5 | Ayin should talk with the student like a coach beside them while they look at the diagram or hold the real part. | Spoken questions answered from the step, the 3D model and what the camera sees, in about 3 seconds |
 | Nov 5 | Read our First Place AZ tour notes and build what they teach: their five-stage skill model, pause points, and personal goals. | The five-stage path on every task, a calm start screen, "Watch" and "On my own" modes |
 | Nov 5 | Look at Ama (withama.ai), a competitor, and say where Ayin is different. | Added to the research notes |
+| Nov 5 | You can't tap Done with soapy hands. Make Ayin hands-free, and bring back Havi's "Now" section. | Voice on during tasks, "watch for me" checks until each step is done, "I did it" when the camera can't see, and "Now" for tasks in progress |

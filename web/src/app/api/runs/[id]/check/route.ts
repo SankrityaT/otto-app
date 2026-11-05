@@ -5,7 +5,11 @@ import { getRun, logStep, runSummary } from "@/lib/data/runs";
 import { HELP_LEVELS, type HelpLevel } from "@/lib/help";
 import { aiFailure, jsonError, readJson } from "@/lib/http";
 
-/** "Done": look at a photo, and log the step if it really is done. */
+/**
+ * "Done": look at a photo, and log the step if it really is done.
+ * If the camera couldn't see the step and the student says they did it, Ayin takes their
+ * word (`trustStudent`). It never blocks a student who has finished.
+ */
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[id]/check">) {
   const { id } = await ctx.params;
   const body = await readJson(request);
@@ -16,11 +20,12 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[i
   const helpLevel = Number(body.helpLevel);
   if (!Object.values(HELP_LEVELS).includes(helpLevel as HelpLevel)) return jsonError("Unknown help level.", 400);
 
-  const photo = await getPhoto(body.photo);
-  if (!photo) return jsonError("Ayin needs a photo to check the step.", 400);
+  const trustStudent = body.trustStudent === true;
+  const photo = trustStudent ? null : await getPhoto(body.photo);
+  if (!trustStudent && !photo) return jsonError("Ayin needs a photo to check the step.", 400);
 
   try {
-    const result = await checkStep(step, photo);
+    const result = photo ? await checkStep(step, photo) : { done: true, say: "Okay. On to the next step." };
     if (result.done) logStep(run, step.id, helpLevel as HelpLevel);
     const stepsLeft = run.steps.length - run.doneStepIds.length - (run.doneStepIds.includes(step.id) ? 0 : 1);
     const finished = result.done && stepsLeft === 0;

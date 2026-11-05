@@ -35,6 +35,8 @@ import {
 
 /** How often the screen checks for presses on the otter's physical buttons. */
 const BUTTON_POLL_MS = 1000;
+/** How often Ayin looks when the student asks it to watch hands-free. */
+const WATCH_EVERY_MS = 6000;
 
 // three.js only runs in the browser, and only loads when a student asks to be shown.
 const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), {
@@ -63,6 +65,10 @@ export function StepCoach({
   const [looking, setLooking] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [listening, setListening] = useState(false);
+  // Hands-free: Ayin checks the step every few seconds until it's done. The student turns it on.
+  const [watching, setWatching] = useState(false);
+  // The step Ayin couldn't see being done, so the student can say "I did it".
+  const [notSeen, setNotSeen] = useState<string | null>(null);
   // null: the pause before starting. "steps": one step at a time. "alone": checked only at the end.
   const [mode, setMode] = useState<"steps" | "alone" | null>(
     run.doneStepIds.length > 0 ? "steps" : null,
@@ -142,24 +148,33 @@ export function StepCoach({
     speak(text);
   }
 
-  async function done() {
+  /**
+   * "Done": Ayin looks and checks the step. When it's watching hands-free (`auto`), it stays
+   * quiet until the step is done. `trust` takes the student's word when the camera can't see.
+   */
+  async function done({ auto = false, trust = false } = {}) {
     if (!step || !current || busy) return;
     setBusy(true);
     try {
-      const result = await api.check(
-        run.id,
-        step.id,
-        current.level,
-        await takePhoto(),
-      );
-      tell(result.say);
+      const result = await api.check(run.id, step.id, current.level, trust ? null : await takePhoto(), trust);
+      if (result.done || !auto) tell(result.say);
+      setNotSeen(result.done || auto ? null : step.id);
       if (result.done) setDoneIds((ids) => [...ids, step.id]);
-      if (result.finished) setSummary(result.summary);
+      if (result.finished) {
+        setSummary(result.summary);
+        setWatching(false);
+      }
     } catch (error) {
-      tell((error as Error).message);
+      if (!auto) tell((error as Error).message);
     } finally {
       setBusy(false);
     }
+  }
+
+  /** Leave the pause screen. Voice turns on by itself, so the student's hands stay free. */
+  function start(nextMode: "steps" | "alone") {
+    setMode(nextMode);
+    if (canListen()) setListening(true);
   }
 
   async function askForHelp(level: HelpLevel) {
@@ -245,6 +260,16 @@ export function StepCoach({
     if (command === "show-me") askForHelp(HELP_LEVELS.showMe);
   });
 
+  const onWatchTick = useEffectEvent(() => {
+    done({ auto: true });
+  });
+
+  useEffect(() => {
+    if (!watching || mode !== "steps") return;
+    const timer = setInterval(onWatchTick, WATCH_EVERY_MS);
+    return () => clearInterval(timer);
+  }, [watching, mode]);
+
   useEffect(() => {
     if (!listening) return;
     return listen(onCommand, onQuestion);
@@ -298,7 +323,7 @@ export function StepCoach({
     </p>
   );
 
-  if (mode === null) return <TaskStart run={run} onStart={setMode} />;
+  if (mode === null) return <TaskStart run={run} onStart={start} />;
 
   if (mode === "alone" && !summary) {
     return (
@@ -439,6 +464,12 @@ export function StepCoach({
         </p>
       )}
 
+      {notSeen === step.id && (
+        <Button className="self-start" disabled={busy} onClick={() => done({ trust: true })}>
+          <Check size={18} /> I did it, next step
+        </Button>
+      )}
+
       {current.level >= HELP_LEVELS.nudge && (
         <Button
           look="quiet"
@@ -469,7 +500,7 @@ export function StepCoach({
             look="main"
             className="h-16 flex-1 text-[19px]"
             disabled={busy}
-            onClick={done}
+            onClick={() => done()}
           >
             <Check size={22} /> {busy ? "Looking" : "Done"}
           </Button>
@@ -481,6 +512,17 @@ export function StepCoach({
             <Eye size={22} />
           </RoundAction>
         </div>
+
+        <button
+          onClick={() => setWatching((on) => !on)}
+          aria-pressed={watching}
+          className={`flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[15px] font-medium ${
+            watching ? "bg-cel-wash text-cel-deep" : "border border-line text-ink-2"
+          }`}
+        >
+          <span className={`h-2.5 w-2.5 rounded-full ${watching ? "bg-cel-deep" : "bg-clay-2"}`} />
+          {watching ? "Watching until each step is done · tap to stop" : "Hands busy? Ayin can watch for you"}
+        </button>
 
         {eyes}
       </div>
