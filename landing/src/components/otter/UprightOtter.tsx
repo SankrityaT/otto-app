@@ -15,7 +15,8 @@
  * (1024×1024, made from Havishea's upright drawing):
  *   upright-body.png  the otter without its tail
  *   upright-tail.png  the tail on its own, swung from its base
- *   upright-eyes.png  closed eyes; revealed from the top down, like an eyelid, for blinks
+ *   upright-eyes.png  the closed eyelids' fur; revealed from the top down for blinks
+ *   upright-lash.png  the closed-eye lines, which ride the eyelid's edge down
  *
  * Motion is kept small: slow breathing, a very slight bob and lean,
  * a gentle tail sway, and a blink every few seconds.
@@ -24,7 +25,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export type UprightSources = { body: string; tail: string; eyes: string };
+export type UprightSources = { body: string; tail: string; eyes: string; lash: string };
 
 /** The drawing's coordinate space. The art files can be larger; they are drawn into this space. */
 const SIZE = 1024;
@@ -34,8 +35,10 @@ const MAX_PIXELS = 2048;
 const SEAT = { x: 512, y: 880 };
 /** The tail swings from its root, where it leaves the hip along the floor (see scripts/fix_upright_tail.py). */
 const TAIL_PIVOT = { x: 739, y: 830 };
-/** The eyelid's travel: from just above the eyes to the bottom of the closed-eyes layer. */
-const LID = { top: 398, bottom: 492 };
+/** The eyelid's travel: from just above the eyes to the bottom of the closed-eyes layer (printed by scripts/redraw_closed_eyes.py). */
+const LID = { top: 401, bottom: 494 };
+/** Where the closed-eye lines rest. They ride the eyelid's edge down until they get here. */
+const LASH_Y = 440;
 
 const smoothstep = (lo: number, hi: number, x: number) => {
   const u = Math.max(0, Math.min(1, (x - lo) / (hi - lo)));
@@ -113,7 +116,7 @@ export default function UprightOtter({
   className?: string;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [imgs, setImgs] = useState<{ body: HTMLImageElement; tail: HTMLImageElement; eyes: HTMLImageElement } | null>(null);
+  const [imgs, setImgs] = useState<{ body: HTMLImageElement; tail: HTMLImageElement; eyes: HTMLImageElement; lash: HTMLImageElement } | null>(null);
   const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
@@ -126,9 +129,14 @@ export default function UprightOtter({
 
   useEffect(() => {
     let live = true;
-    const s = sources ?? { body: `${assetBase}/upright-body.png`, tail: `${assetBase}/upright-tail.png`, eyes: `${assetBase}/upright-eyes.png` };
-    Promise.all([loadImage(s.body), loadImage(s.tail), loadImage(s.eyes)])
-      .then(([body, tail, eyes]) => live && setImgs({ body, tail, eyes }))
+    const s = sources ?? {
+      body: `${assetBase}/upright-body.png`,
+      tail: `${assetBase}/upright-tail.png`,
+      eyes: `${assetBase}/upright-eyes.png`,
+      lash: `${assetBase}/upright-lash.png`,
+    };
+    Promise.all([loadImage(s.body), loadImage(s.tail), loadImage(s.eyes), loadImage(s.lash)])
+      .then(([body, tail, eyes, lash]) => live && setImgs({ body, tail, eyes, lash }))
       .catch(() => {});
     return () => {
       live = false;
@@ -136,7 +144,7 @@ export default function UprightOtter({
   }, [assetBase, sources]);
 
   const layers = useMemo(
-    () => imgs && { body: tint(imgs.body, furHue), tail: tint(imgs.tail, furHue), eyes: tint(imgs.eyes, furHue) },
+    () => imgs && { body: tint(imgs.body, furHue), tail: tint(imgs.tail, furHue), eyes: tint(imgs.eyes, furHue), lash: imgs.lash },
     [imgs, furHue],
   );
 
@@ -148,7 +156,7 @@ export default function UprightOtter({
 
     // Shrinking 2048 px layers on every frame is slow and makes the motion stutter.
     // Shrink them to the canvas size once (and again only if the size changes).
-    let sized: { px: number; body: CanvasImageSource; tail: CanvasImageSource; eyes: CanvasImageSource } | null = null;
+    let sized: { px: number; body: CanvasImageSource; tail: CanvasImageSource; eyes: CanvasImageSource; lash: CanvasImageSource } | null = null;
     const shrink = (img: CanvasImageSource, px: number) => {
       const c = document.createElement('canvas');
       c.width = c.height = px;
@@ -165,7 +173,8 @@ export default function UprightOtter({
         cv.height = px;
       }
       if (cv.width > 0 && sized?.px !== cv.width) {
-        sized = { px: cv.width, body: shrink(layers.body, cv.width), tail: shrink(layers.tail, cv.width), eyes: shrink(layers.eyes, cv.width) };
+        const px = cv.width;
+        sized = { px, body: shrink(layers.body, px), tail: shrink(layers.tail, px), eyes: shrink(layers.eyes, px), lash: shrink(layers.lash, px) };
       }
       return sized ?? layers;
     };
@@ -220,14 +229,17 @@ export default function UprightOtter({
       g.restore();
 
       g.drawImage(art.body, 0, 0, SIZE, SIZE);
-      // The eyelid: the closed-eyes layer, solid, shown from the top down as the eye shuts.
+      // The eyelid: solid fur, shown from the top down as the eye shuts. Its edge carries the
+      // closed-eye lines down, which stop where the closed eye rests while the lid finishes.
       if (shut > 0) {
+        const edge = LID.top + (LID.bottom - LID.top) * shut;
         g.save();
         g.beginPath();
-        g.rect(0, LID.top, SIZE, (LID.bottom - LID.top) * shut);
+        g.rect(0, LID.top, SIZE, edge - LID.top);
         g.clip();
         g.drawImage(art.eyes, 0, 0, SIZE, SIZE);
         g.restore();
+        g.drawImage(art.lash, 0, Math.min(edge, LASH_Y) - LASH_Y, SIZE, SIZE);
       }
     };
 
