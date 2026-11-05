@@ -152,6 +152,9 @@ export default function Today() {
             onLeafSelect={start}
             onBin={() => setBinSignal((n) => n + 1)}
             upright={status !== "idle" || chatting}
+            mood={status !== "idle" ? status : voice ? "talking" : "idle"}
+            beat={voice?.char}
+            onOtter={chatting ? undefined : () => converse("Hi Ayin")}
             style={chatting ? { width: "min(56%, 280px)", marginTop: 0 } : undefined}
           />
           {chatting && (

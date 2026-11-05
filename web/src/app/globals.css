@@ -55,6 +55,10 @@
 
 /* Talking with Ayin: a little pond for the otter, bubbles that pop in, words that light up as
    Ayin says them, and answers that float like the pond's leaves. Reduce Motion stills it all. */
+/* The sitting-up otter can be tapped for a happy bounce. */
+.pond__upright.is-shown .pond__upright-otter,
+.pond__center.is-tappable { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+
 /* The pond draws in smoothly when a conversation starts. */
 .pond { transition: width 450ms ease, margin 450ms ease; }
 

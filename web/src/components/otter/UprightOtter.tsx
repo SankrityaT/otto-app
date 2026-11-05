@@ -3,7 +3,8 @@
 /**
  * Written by Havi (@Havishea) for the Ayin team and copied from
  * https://github.com/Havishea/Ayin. We changed the default asset folder, moved the fur tint into useMemo to satisfy
- * our lint rules, and draw the layers at a fixed size so 2048 px art stays sharp.
+ * our lint rules, and draw the layers at a fixed size so 2048 px art stays sharp. We added reactions (see below)
+ * so it responds to the student instead of playing the same loop.
  *
  * UprightOtter: the otter sitting up, holding its stone. Shown while you ask
  * something or while Ayin is explaining a task.
@@ -16,12 +17,26 @@
  *
  * Motion is kept small: slow breathing, a very slight bob and lean,
  * a gentle tail sway, and a blink every few seconds.
+ *
+ * On top of that it reacts, using springs so every move eases in and settles:
+ *   it leans toward the student's finger or cursor,
+ *   leans in while listening and sways slowly while thinking,
+ *   gives a small hop on each word it says (`beat` changes per word),
+ *   and a tap gets a happy bounce, a wiggle and a squeezed-shut smile.
  * With Reduce Motion it holds still.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export type UprightSources = { body: string; tail: string; eyes: string };
+export type OtterMood = 'idle' | 'listening' | 'thinking' | 'talking';
+
+/** A spring that eases a value toward a target: stiffness, and how quickly it stops wobbling. */
+type Spring = { x: number; v: number };
+function step(sp: Spring, target: number, dt: number, stiffness = 120, damping = 14) {
+  sp.v += (-(sp.x - target) * stiffness - sp.v * damping) * dt;
+  sp.x += sp.v * dt;
+}
 
 /** The drawing's coordinate space. The art files can be larger; they are drawn into this space. */
 const SIZE = 1024;
@@ -86,6 +101,8 @@ export default function UprightOtter({
   assetBase = '/otter',
   furHue = 0,
   active = true,
+  mood = 'idle',
+  beat = 0,
   className,
 }: {
   sources?: UprightSources;
@@ -93,8 +110,19 @@ export default function UprightOtter({
   furHue?: number;
   /** Only animate while shown; it rests (and costs nothing) otherwise. */
   active?: boolean;
+  /** What Ayin is doing right now, so its body can show it. */
+  mood?: OtterMood;
+  /** Changes on every word Ayin says, for a small hop per word. */
+  beat?: number;
   className?: string;
 }) {
+  // Read inside the animation loop without restarting it.
+  const moodRef = useRef(mood);
+  const beatRef = useRef(beat);
+  useEffect(() => {
+    moodRef.current = mood;
+    beatRef.current = beat;
+  }, [mood, beat]);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [imgs, setImgs] = useState<{ body: HTMLImageElement; tail: HTMLImageElement; eyes: HTMLImageElement } | null>(null);
   const [reduced, setReduced] = useState(false);
@@ -142,6 +170,30 @@ export default function UprightOtter({
     let blinkStart = -10;
     let doubleAt = -1;
 
+    // Reactions. `look` is where the finger or cursor is, from -1 (left) to 1 (right).
+    const lean = { x: 0, v: 0 };
+    const shift = { x: 0, v: 0 };
+    const hop = { x: 0, v: 0 };
+    const squash = { x: 0, v: 0 };
+    let look = 0;
+    let lastBeat = beatRef.current;
+    let happyUntil = -1;
+    let last = 0;
+
+    const onPointer = (e: PointerEvent) => {
+      const box = cv.getBoundingClientRect();
+      const dx = (e.clientX - (box.left + box.width / 2)) / Math.max(240, window.innerWidth / 2);
+      look = Math.max(-1, Math.min(1, dx));
+    };
+    const onTap = () => {
+      hop.v -= 520;
+      squash.v += 6;
+      lean.v += 2.4;
+      happyUntil = performance.now() / 1000 + 0.7;
+    };
+    window.addEventListener('pointermove', onPointer);
+    cv.addEventListener('pointerdown', onTap);
+
     const draw = (t: number) => {
       fit();
       const k = cv.width / SIZE;
@@ -151,15 +203,39 @@ export default function UprightOtter({
 
       const still = reduced || !active;
       const TAU = Math.PI * 2;
+      const dt = Math.min(0.05, Math.max(0, t - last));
+      last = t;
+      const mood = moodRef.current;
+
+      if (!still) {
+        // A new word: a small hop with a squash, like a nod.
+        if (beatRef.current !== lastBeat) {
+          lastBeat = beatRef.current;
+          hop.v -= 150;
+          squash.v += 1.6;
+        }
+        const leanTarget =
+          mood === 'thinking' ? 0.06 * Math.sin((t / 2.6) * TAU) : mood === 'listening' ? 0.07 + look * 0.04 : look * 0.07;
+        step(lean, leanTarget, dt, 60, 9);
+        step(shift, look * 18, dt, 40, 10);
+        step(hop, 0, dt, 260, 16);
+        step(squash, mood === 'listening' ? 0.02 : 0, dt, 300, 12);
+      }
       // Slow breath (3.8s): a touch taller and narrower on the in-breath.
       const breath = still ? 0 : Math.sin((t / 3.8) * TAU);
       const sy = 1 + 0.011 * breath;
       const sx = 1 - 0.005 * breath;
       // A very small bob that follows the breath, and a slow lean.
       const bob = still ? 0 : -2.2 * Math.sin((t / 3.8) * TAU + 0.5);
-      const lean = still ? 0 : 0.008 * Math.sin((t / 6.4) * TAU) + 0.004 * Math.sin((t / 2.9) * TAU + 1);
+      const sway = still ? 0 : 0.008 * Math.sin((t / 6.4) * TAU) + 0.004 * Math.sin((t / 2.9) * TAU + 1);
       // Tail: a gentle sway with a slower drift on top.
-      const tail = still ? 0 : 0.05 * Math.sin((t / 2.7) * TAU) + 0.018 * Math.sin((t / 1.25) * TAU + 0.7);
+      // The tail wags faster while Ayin talks or is happy.
+      const lively = !still && (mood === 'talking' || t < happyUntil);
+      const tail = still
+        ? 0
+        : lively
+          ? 0.11 * Math.sin((t / 0.7) * TAU)
+          : 0.05 * Math.sin((t / 2.7) * TAU) + 0.018 * Math.sin((t / 1.25) * TAU + 0.7);
 
       if (!still && t >= nextBlink) {
         blinkStart = t;
@@ -171,12 +247,15 @@ export default function UprightOtter({
         doubleAt = -1;
       }
       const bt = t - blinkStart;
-      const shut = bt < 0 || bt > 0.2 ? 0 : bt < 0.06 ? bt / 0.06 : bt < 0.12 ? 1 : 1 - (bt - 0.12) / 0.08;
+      // Happy: eyes squeezed shut for a moment, like a smile.
+      const shut =
+        !still && t < happyUntil ? 1 : bt < 0 || bt > 0.2 ? 0 : bt < 0.06 ? bt / 0.06 : bt < 0.12 ? 1 : 1 - (bt - 0.12) / 0.08;
 
       g.scale(k, k);
-      g.translate(SEAT.x, SEAT.y + bob);
-      g.rotate(lean);
-      g.scale(sx, sy);
+      g.translate(SEAT.x + (still ? 0 : shift.x), SEAT.y + bob + (still ? 0 : hop.x));
+      g.rotate(sway + (still ? 0 : lean.x));
+      // Squash: wider and shorter on landing, then back.
+      g.scale(sx * (1 + 0.04 * squash.x), sy * (1 - 0.05 * squash.x));
       g.translate(-SEAT.x, -SEAT.y);
 
       g.save();
@@ -194,21 +273,31 @@ export default function UprightOtter({
       }
     };
 
+    const stopListening = () => {
+      window.removeEventListener('pointermove', onPointer);
+      cv.removeEventListener('pointerdown', onTap);
+    };
+
     if (reduced || !active) {
       draw(0);
       const onResize = () => draw(0);
       window.addEventListener('resize', onResize);
-      return () => window.removeEventListener('resize', onResize);
+      return () => {
+        window.removeEventListener('resize', onResize);
+        stopListening();
+      };
     }
 
     let raf = 0;
-    const t0 = performance.now();
     const loop = (now: number) => {
-      draw((now - t0) / 1000);
+      draw(now / 1000);
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      stopListening();
+    };
   }, [layers, reduced, active]);
 
   return <canvas ref={canvas} className={className} aria-hidden />;
