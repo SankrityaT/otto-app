@@ -28,7 +28,7 @@ export function RaftIntro({ onDone }: { onDone: () => void }) {
   const last = page === PAGES.length - 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ground p-5" role="dialog" aria-modal aria-labelledby="raft-intro-title">
+    <section className="page flex min-h-[70svh] items-center justify-center" aria-labelledby="raft-intro-title">
       <div className="flex w-full max-w-md flex-col gap-6 text-center">
         <div className="flex justify-center -space-x-6" aria-hidden>
           {RAFT.slice(0, page + 2).map((hue) => (
@@ -47,7 +47,12 @@ export function RaftIntro({ onDone }: { onDone: () => void }) {
         <Button look="main" className="h-14" onClick={() => (last ? onDone() : setPage(page + 1))}>
           {last ? "See my raft" : "Next"}
         </Button>
+        {!last && (
+          <button onClick={onDone} className="btn btn--text self-center">
+            Skip
+          </button>
+        )}
       </div>
-    </div>
+    </section>
   );
 }

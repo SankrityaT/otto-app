@@ -87,7 +87,7 @@ export default function RaftPage() {
         />
       )}
 
-      <div className="page flex flex-col gap-5">
+      <div className={`page flex flex-col gap-5 ${introOpen ? "hidden" : ""}`}>
         <header className="flex items-center justify-between gap-3">
           <div>
             <h1 className="page__h">{raft.name}</h1>
