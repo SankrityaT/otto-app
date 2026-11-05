@@ -21,8 +21,7 @@ export function Stages() {
 
   return (
     <Section
-      number="02"
-      label="help that steps back"
+      label="Help that steps back"
       title={
         <>
           The best help knows

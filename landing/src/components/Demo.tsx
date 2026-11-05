@@ -20,7 +20,7 @@ export function Demo() {
     <section id="demo" className="px-5 pb-8 sm:px-8">
       <Reveal className="mx-auto max-w-5xl">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <span className="label">[ 00 / see it in action ]</span>
+          <span className="label">See it in action</span>
           <span className="text-[16px] text-ink-3">30 seconds, no sound needed</span>
         </div>
         <div className={`card relative overflow-hidden p-0 ${video ? "aspect-video" : "aspect-[4/5] sm:aspect-video"}`}>

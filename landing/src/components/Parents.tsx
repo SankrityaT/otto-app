@@ -38,8 +38,7 @@ export function Parents() {
   return (
     <Section
       id="parents"
-      number="07"
-      label="for parents and carers"
+      label="For parents and carers"
       title={
         <>
           Built carefully,

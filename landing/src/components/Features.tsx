@@ -44,8 +44,7 @@ const FEATURES = [
 export function Features() {
   return (
     <Section
-      number="03"
-      label="little things"
+      label="Little things"
       title={
         <>
           Little things

@@ -11,8 +11,7 @@ const POINTS = [
 export function Device() {
   return (
     <Section
-      number="06"
-      label="the otter on the counter"
+      label="The otter on the counter"
       title={
         <>
           Your coach can also

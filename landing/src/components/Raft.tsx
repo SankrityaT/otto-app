@@ -39,8 +39,7 @@ export function Raft() {
   return (
     <Section
       id="raft"
-      number="05"
-      label="your raft"
+      label="Your raft"
       title={
         <>
           A raft is a group of otters

@@ -35,7 +35,7 @@ const FAQ = [
 
 export function Faq() {
   return (
-    <Section number="08" label="questions" title="Good questions.">
+    <Section label="Questions" title="Good questions.">
       <div className="mx-auto grid max-w-4xl gap-3">
         {FAQ.map(({ q, a }, i) => (
           <Reveal key={q} delay={Math.min(i, 3) * 50}>

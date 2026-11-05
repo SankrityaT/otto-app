@@ -60,8 +60,7 @@ export function OtterColour() {
   return (
     <Section
       id="otter"
-      number="04"
-      label="your otter"
+      label="Your otter"
       title={
         <>
           Meet your otter.

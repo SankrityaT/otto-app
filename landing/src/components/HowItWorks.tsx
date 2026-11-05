@@ -30,8 +30,7 @@ export function HowItWorks() {
   return (
     <Section
       id="how"
-      number="01"
-      label="one step"
+      label="One step"
       title={
         <>
           A coach that shows you
