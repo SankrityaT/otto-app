@@ -185,6 +185,9 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
         <ellipse cx="200" cy="92" rx="181" ry="76" fill="var(--water)" />
       </svg>
 
+      {/* Leaves float under the otters; an otter that is talking comes to the front, so its
+          speech bubble is never hidden. A leaf you hover comes forward to show its task. The otters
+          let the pointer through, so leaves near them can still be hovered. */}
       <RaftLeaves />
 
       {members.slice(0, SPOTS.length).map((m, i) => {
@@ -194,8 +197,8 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
         return (
           <div
             key={m.name}
-            className="absolute transition-transform duration-500 ease-[cubic-bezier(0.3,0.7,0.3,1)]"
-            style={{ left: `${spot.x}%`, top: `${spot.y}%`, width: `${OTTER_W}%`, transform: `translateX(${lean(i)}%)`, zIndex: spot.y > 5 ? 2 : 1 }}
+            className="pointer-events-none absolute transition-transform duration-500 ease-[cubic-bezier(0.3,0.7,0.3,1)]"
+            style={{ left: `${spot.x}%`, top: `${spot.y}%`, width: `${OTTER_W}%`, transform: `translateX(${lean(i)}%)`, zIndex: bubble?.who === i ? 20 : spot.y > 5 ? 3 : 2 }}
           >
             <div className="raft-float" style={{ animationDelay: `${i * -1.7}s`, animationDuration: `${7 + i * 0.6}s` }}>
               <div style={{ transform: spot.flip ? "scaleX(-1)" : undefined, filter: "var(--otter-dim, none)" }}>

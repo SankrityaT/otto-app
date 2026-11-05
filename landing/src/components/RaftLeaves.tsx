@@ -17,7 +17,7 @@ export function RaftLeaves() {
   return (
     <ul className="contents">
       {TASKS.map((t, i) => (
-        <li key={t.title} className="group absolute z-[3] w-[5%] -translate-x-1/2 -translate-y-1/2" style={{ left: `${t.x}%`, top: `${t.y}%` }}>
+        <li key={t.title} className="group absolute z-[1] hover:z-30 focus-within:z-30 w-[5%] -translate-x-1/2 -translate-y-1/2" style={{ left: `${t.x}%`, top: `${t.y}%` }}>
           <Ripples className="pointer-events-none absolute left-1/2 top-[62%] w-[230%] -translate-x-1/2 -translate-y-1/2 overflow-visible" />
           <button type="button" className="relative block w-full cursor-pointer rounded-full transition-transform duration-300 group-hover:scale-125 group-focus-within:scale-125" aria-label={`${t.title}, ${t.line}`}>
             <Leaf
