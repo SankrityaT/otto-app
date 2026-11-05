@@ -3,12 +3,12 @@ import { Leaf } from "./Leaf";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
-/** A pretend raft for the picture. Rings fill with steps done on your own this week. */
+/** A pretend raft for the picture, with otter nicknames. Rings fill with steps done on your own this week. */
 const CREW = [
-  { name: "Maya", done: 9, target: 12, color: "var(--celadon)" },
-  { name: "Jordan", done: 12, target: 12, color: "var(--sky)" },
-  { name: "Leo", done: 5, target: 10, color: "var(--apricot)" },
-  { name: "Sam", done: 7, target: 10, color: "var(--lavender)" },
+  { name: "You", done: 9, target: 12, color: "var(--celadon)" },
+  { name: "Kelp", done: 12, target: 12, color: "var(--sky)" },
+  { name: "Pebble", done: 5, target: 10, color: "var(--apricot)" },
+  { name: "Ripple", done: 7, target: 10, color: "var(--lavender)" },
 ];
 const CHEERS = ["Nice work!", "You got this", "Way to go!", "High five"];
 
@@ -77,7 +77,7 @@ export function Raft() {
                   <Ring {...m} />
                   <div>
                     <p className="font-semibold">{m.name}</p>
-                    <p className="text-[14px] text-ink-3">{m.done === m.target ? "Ring full!" : `${m.done} on their own`}</p>
+                    <p className="text-[14px] text-ink-3">{m.done === m.target ? "Ring full!" : `${m.done} on ${m.name === "You" ? "your" : "their"} own`}</p>
                   </div>
                 </li>
               ))}

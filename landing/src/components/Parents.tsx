@@ -23,7 +23,7 @@ const WHY = [
   {
     big: "−17%",
     body: "When AI did the work for students, their scores dropped 17% once it was taken away. Hint-only help did no harm. So Ayin gives hints, not answers.",
-    source: "Bastani et al., PNAS 2025",
+    source: "PNAS, 2025",
     href: "https://www.pnas.org/doi/10.1073/pnas.2422633122",
   },
   {

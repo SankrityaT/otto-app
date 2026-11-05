@@ -68,7 +68,7 @@ export function OtterColour() {
           <span className="italic text-cel-deep">Make it yours.</span>
         </>
       }
-      intro="Every student gets their own otter, drawn by Havi on our team. It floats in your pond at home, your tasks drift by as leaves, and finished ones pile up in a little basket."
+      intro="Every student gets their own otter. It floats in your pond at home, your tasks drift by as leaves, and finished ones pile up in a little basket."
       className="bg-cel-wash/60"
     >
       <Reveal>

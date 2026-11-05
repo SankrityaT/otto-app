@@ -45,7 +45,7 @@ export function Footer() {
         </div>
       </div>
       <div className="mx-auto mt-12 flex max-w-6xl flex-wrap justify-between gap-3 border-t border-line pt-6 text-[14px] text-ink-3">
-        <p>Made for the 2026 North American AI Challenge for Neurodiverse Learning. Otter drawn by Havi.</p>
+        <p>Made for the 2026 North American AI Challenge for Neurodiverse Learning.</p>
         <p>© 2026 Ayin · MIT licensed</p>
       </div>
     </footer>
