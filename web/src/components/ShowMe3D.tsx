@@ -40,7 +40,7 @@ function usePrefersReducedMotion(): boolean {
   );
 }
 
-export function Part({ part, still }: { part: Scene["parts"][number]; still: boolean }) {
+function Part({ part, still }: { part: Scene["parts"][number]; still: boolean }) {
   const material = useRef<MeshStandardMaterial>(null);
   const { x: w, y: h, z: d } = part.size;
 

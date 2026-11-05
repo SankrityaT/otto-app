@@ -1,5 +1,4 @@
 import type { StepPlan } from "../ai/steps";
-import { parseScene, type Scene } from "../ai/scene";
 import { db, newId, now } from "../db";
 
 // A routine is a task that has been broken into steps once and can be practised again.
@@ -29,22 +28,6 @@ export function listRoutines(): { id: string; title: string; stepCount: number }
        GROUP BY r.id ORDER BY r.created_at DESC`,
     )
     .all() as { id: string; title: string; stepCount: number }[];
-}
-
-/**
- * Every task as a station in the raft's work-site room, with a small 3D model of it: the
- * first step's "show me" model, if Ayin has built one.
- */
-export function listStations(): { routineId: string; title: string; scene: Scene | null }[] {
-  const rows = db
-    .prepare(
-      `SELECT r.id AS routineId, r.title,
-              (SELECT s.scene_json FROM steps s WHERE s.routine_id = r.id AND s.scene_json IS NOT NULL
-               ORDER BY s.position LIMIT 1) AS sceneJson
-       FROM routines r ORDER BY r.created_at`,
-    )
-    .all() as { routineId: string; title: string; sceneJson: string | null }[];
-  return rows.map((row) => ({ routineId: row.routineId, title: row.title, scene: row.sceneJson ? parseScene(row.sceneJson) : null }));
 }
 
 export function createRoutine(plan: StepPlan): Routine {

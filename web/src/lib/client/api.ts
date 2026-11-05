@@ -62,7 +62,6 @@ export const api = {
     call<{ runId: string }>("/api/crew/invites", post({ fromId, toId, routineId })),
   answerInvite: (inviteId: string, studentId: string, answer: "yes" | "not-today") =>
     call<{ runId: string | null }>(`/api/crew/invites/${inviteId}`, post({ studentId, answer })),
-  stations: () => call<{ stations: { routineId: string; title: string; scene: Scene | null }[] }>("/api/raft/stations"),
   together: (runId: string) => call<{ together: Together | null }>(`/api/runs/${runId}/together`),
   cheerPartner: (runId: string, phrase: string) => call(`/api/runs/${runId}/together`, post({ phrase })),
   askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),
