@@ -16,6 +16,17 @@ function wavyRing(rx: number, ry: number, waves: number, amp: number, phase: num
 }
 const RINGS = [wavyRing(40, 13, 5, 0.045, 0), wavyRing(40, 13, 4, 0.05, 1.7)];
 
+/** Two small rings that spread out and fade, one after the other. */
+export function Ripples({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 100 40" aria-hidden>
+      {RINGS.map((d, k) => (
+        <path key={k} className="ripples__ring" d={d} style={{ ["--k" as string]: k }} />
+      ))}
+    </svg>
+  );
+}
+
 /** Havi's pond with the otter floating in it. */
 export const Pond = forwardRef<AyinOtterHandle, { furHue?: number; className?: string; style?: CSSProperties; alt?: string }>(
   function Pond({ furHue = 0, className = "", style, alt }, ref) {
@@ -26,11 +37,7 @@ export const Pond = forwardRef<AyinOtterHandle, { furHue?: number; className?: s
           <ellipse cx="200" cy="132" rx="184" ry="116" fill="var(--water-edge)" />
           <ellipse cx="200" cy="134" rx="176" ry="109" fill="var(--water)" />
         </svg>
-        <svg className="pond__ripples" viewBox="0 0 100 40" aria-hidden>
-          {RINGS.map((d, k) => (
-            <path key={k} className="ripples__ring" d={d} style={{ ["--k" as string]: k }} />
-          ))}
-        </svg>
+        <Ripples className="pond__ripples" />
         <div className="pond__otter">
           <AyinOtter ref={ref} size="100%" furHue={furHue} alt={alt} />
         </div>
