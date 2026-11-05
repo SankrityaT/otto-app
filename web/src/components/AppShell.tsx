@@ -31,6 +31,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </span>
       </header>
       <main className="main">{children}</main>
+      {/* Room at the bottom so the floating tabs never cover the last button on a page. */}
+      <div className="h-32 shrink-0" aria-hidden />
       <Tabs items={SECTIONS} value={current} onChange={(path) => router.push(path)} />
     </div>
   );

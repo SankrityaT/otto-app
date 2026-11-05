@@ -87,7 +87,7 @@ export default function RaftPage() {
         />
       )}
 
-      <div className="page flex flex-col gap-5 pb-40">
+      <div className="page flex flex-col gap-5">
         <header className="flex items-center justify-between gap-3">
           <div>
             <h1 className="page__h">{raft.name}</h1>
@@ -123,6 +123,17 @@ export default function RaftPage() {
             </button>
           ))}
         </div>
+
+        {tab !== "people" && (
+          <div className="flex gap-3">
+            <Button look="main" className="h-14 flex-1" onClick={() => setComposing("win")}>
+              <RaftIcon name="win" /> Share a win
+            </Button>
+            <Button className="h-14 flex-1" onClick={() => setComposing("ask")}>
+              <RaftIcon name="help" /> Ask for help
+            </Button>
+          </div>
+        )}
 
         {tab === "wins" && (
           <>
@@ -191,16 +202,6 @@ export default function RaftPage() {
         {message && <p className="text-ink-3">{message}</p>}
       </div>
 
-      <div className="fixed inset-x-0 bottom-24 z-10 flex justify-center px-5">
-        <div className="flex w-full max-w-md gap-3">
-          <Button look="main" className="h-14 flex-1 shadow-lg" onClick={() => setComposing("win")}>
-            <RaftIcon name="win" /> Share a win
-          </Button>
-          <Button className="h-14 flex-1 shadow-lg" onClick={() => setComposing("ask")}>
-            <RaftIcon name="help" /> Ask for help
-          </Button>
-        </div>
-      </div>
     </AppShell>
   );
 }
