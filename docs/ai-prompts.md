@@ -35,3 +35,5 @@ This file lists the prompts that shaped the project. Small requests like "fix th
 | Date | Prompt | Result |
 | --- | --- | --- |
 | Nov 4 | Start a clean repo with a clear README and simple folders. | This repository's structure |
+| Nov 4 | Build the step coach from the plan: steps, step check, help ladder, pictures, log and crew. The backend must give the same answer whether the photo comes from the phone or the otter. | The API in `web/src/app/api` and the Claude prompts in `web/src/lib/ai` |
+| Nov 4 | The first screens look plain. Restyle them with Ayin's own design system from our earlier mockups. | Gloock headings, Lexend text, warm ground and dark ink buttons |

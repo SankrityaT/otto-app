@@ -13,7 +13,7 @@ const crewId = newId();
 db.prepare("INSERT INTO crews (id, name, weekly_goal, cheers) VALUES (?, ?, ?, ?)").run(
   crewId,
   "Café crew",
-  20,
+  30,
   JSON.stringify(["Nice work!", "You did it on your own!", "Proud of you", "Keep going"]),
 );
 
