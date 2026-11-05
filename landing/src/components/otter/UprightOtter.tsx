@@ -3,7 +3,8 @@
 /**
  * Written by Havi (@Havishea) for the Ayin team and copied from
  * https://github.com/Havishea/Ayin. We changed the default asset folder, moved the fur tint into useMemo to satisfy
- * our lint rules, and draw the layers at a fixed size so 2048 px art stays sharp.
+ * our lint rules, and draw the layers at a fixed size so 2048 px art stays sharp. On the landing page the whole
+ * tail is one layer that swings from its root, so the pivot moved.
  *
  * UprightOtter: the otter sitting up, holding its stone. Shown while you ask
  * something or while Ayin is explaining a task.
@@ -29,8 +30,8 @@ const SIZE = 1024;
 const MAX_PIXELS = 2048;
 /** The otter breathes and leans from the middle of its seat. */
 const SEAT = { x: 512, y: 880 };
-/** The tail swings from where it meets the hip. */
-const TAIL_PIVOT = { x: 770, y: 790 };
+/** The tail swings from its root, where it leaves the hip along the floor (see scripts/fix_upright_tail.py). */
+const TAIL_PIVOT = { x: 739, y: 830 };
 
 const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
