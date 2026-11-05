@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 
 const STUDENT_KEY = "ayin.studentId";
 const CAMERA_KEY = "ayin.camera";
+export const THEME_KEY = "ayin.theme";
 const CHANGED = "ayin:settings-changed"; // same-tab updates; "storage" only fires in other tabs
 
 export type CameraChoice = "this-device" | "screen" | "otter";
@@ -36,4 +37,20 @@ export function useCameraChoice(): [CameraChoice, (choice: CameraChoice) => void
   const stored = useSyncExternalStore(subscribe, () => localStorage.getItem(CAMERA_KEY), () => null);
   const choice: CameraChoice = stored === "otter" || stored === "screen" ? stored : "this-device";
   return [choice, (next) => save(CAMERA_KEY, next)];
+}
+
+export type ThemeChoice = "auto" | "light" | "dark";
+
+/** Day, night, or follow the device. The page reads this before it draws (see layout.tsx). */
+export function useThemeChoice(): [ThemeChoice, (choice: ThemeChoice) => void] {
+  const stored = useSyncExternalStore(subscribe, () => localStorage.getItem(THEME_KEY), () => null);
+  const choice: ThemeChoice = stored === "light" || stored === "dark" ? stored : "auto";
+  return [
+    choice,
+    (next) => {
+      if (next === "auto") delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = next;
+      save(THEME_KEY, next === "auto" ? null : next);
+    },
+  ];
 }

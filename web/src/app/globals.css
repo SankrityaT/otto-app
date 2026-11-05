@@ -36,6 +36,13 @@
     --paper-grid: rgba(184, 221, 201, 0.08);
   }
 }
+/* "Night" chosen in Me: dark even when the device is light. */
+:root[data-theme="dark"] {
+  --clay: #3a352f;
+  --clay-2: #4a443c;
+  --paper: #26231f;
+  --paper-grid: rgba(184, 221, 201, 0.08);
+}
 
 /* Graph paper behind "show me" explainers. */
 .graph-paper {

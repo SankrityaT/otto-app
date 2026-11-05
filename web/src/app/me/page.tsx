@@ -8,7 +8,7 @@ import AyinOtter from "@/components/otter/AyinOtter";
 import FurSlider from "@/components/pond/FurSlider";
 import type { Student } from "@/lib/data/crew";
 import { api } from "@/lib/client/api";
-import { useCameraChoice, useStudentId } from "@/lib/client/settings";
+import { useCameraChoice, useStudentId, useThemeChoice } from "@/lib/client/settings";
 
 /** Wait this long after the slider stops before saving the colour. */
 const SAVE_DELAY_MS = 400;
@@ -16,6 +16,7 @@ const SAVE_DELAY_MS = 400;
 export default function MePage() {
   const [studentId, setStudentId] = useStudentId();
   const [camera, setCamera] = useCameraChoice();
+  const [theme, setTheme] = useThemeChoice();
   const [student, setStudent] = useState<Student | null>(null);
   const [furHue, setFurHue] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -70,6 +71,25 @@ export default function MePage() {
             ))}
           </div>
           <p className="choice__help">Ayin looks only when you tap Done, Help or Show me, and never saves what it sees. Share a screen when the task is on a computer, or when there is no camera.</p>
+        </fieldset>
+
+        <fieldset className="choice">
+          <legend className="choice__label">Appearance</legend>
+          <div className="choice__opts">
+            {(
+              [
+                ["auto", "Device"],
+                ["light", "Day"],
+                ["dark", "Night"],
+              ] as const
+            ).map(([value, label]) => (
+              <label key={value} className={`choice__opt ${theme === value ? "is-on" : ""}`}>
+                <input type="radio" name="theme" checked={theme === value} onChange={() => setTheme(value)} />
+                {label}
+              </label>
+            ))}
+          </div>
+          <p className="choice__help">Follows your device unless you pick one.</p>
         </fieldset>
 
         {student && <PhoneLink studentId={student.id} />}
