@@ -18,7 +18,7 @@ from PIL import Image
 from scipy import ndimage
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OTTER = os.path.join(HERE, "..", "..", "public", "landing", "otter")
+OTTER = os.path.join(HERE, "..", "..", "public", "otter")
 UP_EYES = ((650, 790, 950, 1000), (1050, 790, 1300, 1000))  # boxes around each upright eye (2048 px art)
 RIM = 20  # the light ring and outline around each upright eye, covered too
 FRAMES = 11  # otter-eyelids.png: 11 blink frames, open to closed, stacked

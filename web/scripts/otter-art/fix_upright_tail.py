@@ -17,7 +17,7 @@ from PIL import Image
 from scipy import ndimage
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OTTER = os.path.join(HERE, "..", "..", "public", "landing", "otter")
+OTTER = os.path.join(HERE, "..", "..", "public", "otter")
 
 # In the 2048 px art: where the tail's tip and floor strip are in the body layer.
 TIP = {"x": 1495, "y": (1000, 1450)}  # the tail tip, painted into the body layer

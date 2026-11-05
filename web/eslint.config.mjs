@@ -8,7 +8,7 @@ const eslintConfig = defineConfig([
   // Havi's otter and pond components are kept as written. They predate React's newest
   // compiler rules (refs and state updates during render), which flag them but don't break them.
   {
-    files: ["src/components/otter/AyinOtter.tsx", "src/components/pond/*.tsx", "src/landing/components/otter/*.tsx"],
+    files: ["src/components/otter/AyinOtter.tsx", "src/components/pond/*.tsx"],
     rules: {
       "react-hooks/refs": "off",
       "react-hooks/set-state-in-effect": "off",

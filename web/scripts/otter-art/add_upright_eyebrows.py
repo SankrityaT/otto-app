@@ -15,7 +15,7 @@ from PIL import Image
 from scipy import ndimage
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OTTER = os.path.join(HERE, "..", "..", "public", "landing", "otter")
+OTTER = os.path.join(HERE, "..", "..", "public", "otter")
 
 # In the floating otter's 2048 px art.
 SRC_BROW = (895, 755, 1005, 815)  # left, top, right, bottom: around the right eyebrow

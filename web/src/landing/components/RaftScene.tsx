@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ringColor } from "@/landing/lib/fur";
-import AyinOtter, { type AyinOtterHandle } from "./otter/AyinOtter";
+import AyinOtter, { type AyinOtterHandle } from "@/components/otter/AyinOtter";
 import { OtterSays } from "./OtterSays";
 import { RaftLeaves } from "./RaftLeaves";
 import { Ripples } from "./Pond";
-import UprightOtter from "./otter/UprightOtter";
+import UprightOtter from "@/components/otter/UprightOtter";
 
 export type RaftMember = {
   name: string;

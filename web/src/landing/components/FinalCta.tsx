@@ -2,7 +2,7 @@ import { site } from "@/landing/lib/site";
 import { Leaf } from "./Leaf";
 import { OtterSays } from "./OtterSays";
 import { Reveal } from "./Reveal";
-import UprightOtter from "./otter/UprightOtter";
+import UprightOtter from "@/components/otter/UprightOtter";
 
 const TELL_SCHOOL = `mailto:?subject=${encodeURIComponent("Have you seen Ayin?")}&body=${encodeURIComponent(
   "Hi! I found Ayin, a calm step-by-step coach that helps students learn job tasks and do them on their own. Could it work at our school?\n\n",

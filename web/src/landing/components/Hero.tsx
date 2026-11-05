@@ -5,7 +5,7 @@ import { site } from "@/landing/lib/site";
 import { Leaf } from "./Leaf";
 import { OtterSays } from "./OtterSays";
 import { Pond } from "./Pond";
-import type { AyinOtterHandle } from "./otter/AyinOtter";
+import type { AyinOtterHandle } from "@/components/otter/AyinOtter";
 
 /** What the otter says each time someone taps it. It never runs out; it just starts again. */
 const BOOPS = [

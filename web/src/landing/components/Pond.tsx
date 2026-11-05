@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, type CSSProperties } from "react";
-import AyinOtter, { type AyinOtterHandle } from "./otter/AyinOtter";
+import AyinOtter, { type AyinOtterHandle } from "@/components/otter/AyinOtter";
 
 /** A wavy ellipse line, like the painted ripples under the otter (from Havi's PondLeaves). */
 function wavyRing(rx: number, ry: number, waves: number, amp: number, phase: number) {
