@@ -7,7 +7,8 @@
 *.db
 *.db-journal
 *.sqlite
-data/
+# The app's database folder only (not src/lib/data, which is code)
+/web/data/
 
 # Node / Next.js
 node_modules/
