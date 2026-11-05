@@ -130,7 +130,12 @@ export default function RaftPage() {
   const invites = raft.invites.filter((i) => i.fromId !== me && i.status === "waiting");
   const waitingOn = raft.invites.find((i) => i.fromId === me && i.status === "waiting");
   // Keep the card in step with the latest check, not the moment it was tapped.
-  const current = picked ? (raft.members.find((m) => m.id === picked.id) ?? null) : null;
+  const tapped = picked ? (raft.members.find((m) => m.id === picked.id) ?? null) : null;
+  // With nothing tapped, the card is about whoever matters most right now: someone who needs
+  // help, then someone working, then someone who just finished. The same card as tapping them.
+  const others = raft.members.filter((m) => m.id !== me);
+  const spotlight = others.find((m) => m.asking) ?? others.find((m) => m.now) ?? others.find((m) => m.justFinished) ?? null;
+  const current = tapped ?? spotlight;
 
   async function act(action: Promise<unknown>) {
     await action.catch((e) => setMessage(e.message));
@@ -148,10 +153,15 @@ export default function RaftPage() {
 
   /** The card under the pond: what you can do with the otter you tapped, or what's going on. */
   function card() {
-    const invite = current ? invites.find((i) => i.fromId === current.id) : invites[0];
-    const close = current ? () => setPicked(null) : undefined;
+    const invite = tapped ? invites.find((i) => i.fromId === tapped.id) : invites[0];
+    const close = tapped ? () => setPicked(null) : undefined;
+    const backToMine = waitingOn?.fromRunId && (
+      <Link href={`/run/${waitingOn.fromRunId}`} className="btn btn--text self-start px-0">
+        Back to {waitingOn.about} (waiting for {waitingOn.toName})
+      </Link>
+    );
 
-    if (invite && (!current || invite.fromId === current.id)) {
+    if (invite) {
       return (
         <Card furHue={raft!.members.find((m) => m.id === invite.fromId)?.furHue} onClose={close}>
           <p className="text-[18px]">
@@ -196,25 +206,18 @@ export default function RaftPage() {
               {self ? "Your profile" : `How ${current.name} works best`}
             </Link>
           </div>
+          {!tapped && <p className="text-[15px] text-ink-3">Tap any otter to see them.</p>}
+          {backToMine}
         </Card>
       );
     }
 
-    // Nothing tapped: what's going on, in plain words.
-    const happening = raft!.members
-      .filter((m) => m.id !== me)
-      .flatMap((m) =>
-        m.asking ? [`${m.name} needs help`] : m.now ? [`${m.name} is on ${m.now.title}`] : m.justFinished ? [`${m.name} just finished!`] : [],
-      );
+    // Nobody is doing anything right now.
     return (
       <Card>
-        <p className="text-[18px]">{happening.length ? `${happening.slice(0, 2).join(". ")}.` : "It's quiet in the pond right now."}</p>
-        <p className="text-[15px] text-ink-3">Tap an otter to see what they&apos;re up to.</p>
-        {waitingOn?.fromRunId && (
-          <Link href={`/run/${waitingOn.fromRunId}`} className="btn btn--text self-start px-0">
-            Back to {waitingOn.about} (waiting for {waitingOn.toName})
-          </Link>
-        )}
+        <p className="text-[18px]">It&apos;s quiet in the pond right now.</p>
+        <p className="text-[15px] text-ink-3">Tap any otter to see them.</p>
+        {backToMine}
       </Card>
     );
   }

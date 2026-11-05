@@ -11,7 +11,7 @@ import { toneFor } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
 import { Welcome } from "@/components/Welcome";
 import type { Student } from "@/lib/data/crew";
-import { api } from "@/lib/client/api";
+import { api, ApiError } from "@/lib/client/api";
 import { hush, speak } from "@/lib/client/speech";
 import { useStudentId } from "@/lib/client/settings";
 
@@ -60,7 +60,7 @@ export default function Today() {
     api
       .student(studentId)
       .then((r) => setStudent(r.student))
-      .catch(() => setStudentId(null));
+      .catch((e) => (e instanceof ApiError && e.status === 404 ? setStudentId(null) : setMessage(e.message)));
   }, [studentId, setStudentId]);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function Today() {
       />
     );
   }
-  if (student?.id !== studentId) return <OtterWaits says="Finding your otter" />;
+  if (student?.id !== studentId) return <OtterWaits says={message ?? "Finding your otter"} />;
 
   async function start(routineId: string) {
     const { runId } = await api.startRun(routineId, student!.id);
