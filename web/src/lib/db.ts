@@ -17,7 +17,10 @@ const SCHEMA = `
     name          TEXT NOT NULL,
     crew_id       TEXT REFERENCES crews(id),
     weekly_target INTEGER NOT NULL,   -- steps on my own that fill this student's ring
-    fur_hue       INTEGER NOT NULL DEFAULT 0  -- the student's own otter colour (a hue shift)
+    fur_hue       INTEGER NOT NULL DEFAULT 0, -- the student's own otter colour (a hue shift)
+    goal          TEXT,                       -- the student's own goal, in their words
+    goal_routine_id TEXT,                     -- the task the goal is about, if any
+    work_style    TEXT                        -- JSON list of "how I work best" phrases
   );
 
   CREATE TABLE IF NOT EXISTS routines (
@@ -82,6 +85,45 @@ const SCHEMA = `
     created_at  TEXT NOT NULL
   );
 
+  -- The raft's social side. Posts are wins or help asks; everything stays inside one raft.
+  CREATE TABLE IF NOT EXISTS posts (
+    id         TEXT PRIMARY KEY,
+    crew_id    TEXT NOT NULL REFERENCES crews(id),
+    author_id  TEXT NOT NULL REFERENCES students(id),
+    kind       TEXT NOT NULL,         -- win or ask
+    body       TEXT NOT NULL,
+    photo      TEXT,                  -- a photo of the work the student chose to share (checked: no faces)
+    step_id    TEXT REFERENCES steps(id),
+    task_title TEXT,
+    status     TEXT NOT NULL,         -- shown or reported
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS replies (
+    id         TEXT PRIMARY KEY,
+    post_id    TEXT NOT NULL REFERENCES posts(id),
+    author_id  TEXT NOT NULL REFERENCES students(id),
+    body       TEXT NOT NULL,
+    helped     INTEGER NOT NULL,      -- the asker said "This helped"
+    status     TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS reactions (
+    post_id    TEXT NOT NULL REFERENCES posts(id),
+    from_id    TEXT NOT NULL REFERENCES students(id),
+    kind       TEXT NOT NULL,         -- clap, proud, me-too or wow
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (post_id, from_id, kind)
+  );
+
+  CREATE TABLE IF NOT EXISTS reports (
+    id         TEXT PRIMARY KEY,
+    post_id    TEXT NOT NULL REFERENCES posts(id),
+    from_id    TEXT NOT NULL REFERENCES students(id),
+    created_at TEXT NOT NULL
+  );
+
   -- Button presses from the otter, picked up by the screen at the same station
   CREATE TABLE IF NOT EXISTS button_presses (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,6 +148,9 @@ function addMissingColumns(db: DatabaseSync): void {
   if (!has("steps", "scene_json")) db.exec("ALTER TABLE steps ADD COLUMN scene_json TEXT");
   if (!has("steps", "seconds")) db.exec("ALTER TABLE steps ADD COLUMN seconds INTEGER");
   if (!has("students", "fur_hue")) db.exec("ALTER TABLE students ADD COLUMN fur_hue INTEGER NOT NULL DEFAULT 0");
+  if (!has("students", "goal")) db.exec("ALTER TABLE students ADD COLUMN goal TEXT");
+  if (!has("students", "goal_routine_id")) db.exec("ALTER TABLE students ADD COLUMN goal_routine_id TEXT");
+  if (!has("students", "work_style")) db.exec("ALTER TABLE students ADD COLUMN work_style TEXT");
 }
 
 // Reuse one connection across hot reloads in development.

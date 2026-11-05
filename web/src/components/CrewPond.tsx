@@ -5,14 +5,15 @@ import UprightOtter from "./otter/UprightOtter";
 /**
  * The crew's shared goal as a pond the otters fill together. Every step anyone does on
  * their own raises the water a little. Everyone's otter sits in it, in their own colour.
- * The water only ever rises; a new week starts with a fresh pond.
+ * The water only ever rises; a new week starts with a fresh pond. It shows the group's total
+ * only, never each person's count, so nobody is ranked.
  */
 export function CrewPond({
   fill,
   members,
 }: {
   fill: number;
-  members: { id: string; name: string; furHue: number; onOwn: number }[];
+  members: { id: string; name: string; furHue: number }[];
 }) {
   const waterTop = 260 - 260 * Math.min(Math.max(fill, 0), 1);
   return (
@@ -33,9 +34,6 @@ export function CrewPond({
           <li key={member.id} className="flex w-[22%] flex-col items-center">
             <UprightOtter className="aspect-square w-full" furHue={member.furHue} active={false} />
             <span className="rounded-full bg-card px-2.5 py-0.5 text-[15px] font-semibold">{member.name}</span>
-            <span className="mt-0.5 text-[13px] font-medium text-ink-2">
-              {member.onOwn} {member.onOwn === 1 ? "step" : "steps"}
-            </span>
           </li>
         ))}
       </ul>

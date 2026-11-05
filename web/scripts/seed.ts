@@ -5,7 +5,7 @@
 import { createRoutine } from "../src/lib/data/routines";
 import { db, newId } from "../src/lib/db";
 
-const TABLES = ["invites", "asks", "cheers", "step_logs", "runs", "steps", "routines", "students", "crews", "button_presses"];
+const TABLES = ["reports", "reactions", "replies", "posts", "invites", "asks", "cheers", "step_logs", "runs", "steps", "routines", "students", "crews", "button_presses"];
 for (const table of TABLES) db.exec(`DELETE FROM ${table}`);
 
 // Staff set these up: the crew, its weekly goal and the cheers students can send.
@@ -99,6 +99,47 @@ db.prepare("INSERT INTO invites (id, from_id, to_id, about, status, created_at) 
   students.Jordan,
   "Put on a lid",
   at,
+);
+
+// What each student chose for "how I work best", and Jordan's own goal.
+const styles: Record<string, string[]> = {
+  Jordan: ["One step at a time", "Show me, then let me try", "Pictures over words"],
+  Sam: ["Quiet is good", "Show me, then let me try"],
+  Ava: ["Talking it through helps", "Give me time to think"],
+  Leo: ["Pictures over words", "Tell me what's changing first"],
+};
+for (const [name, style] of Object.entries(styles)) {
+  db.prepare("UPDATE students SET work_style = ? WHERE id = ?").run(JSON.stringify(style), students[name]);
+}
+db.prepare("UPDATE students SET goal = ?, goal_routine_id = ? WHERE id = ?").run(
+  "Make iced lattes on my own for the café",
+  latte.id,
+  students.Jordan,
+);
+
+// A few raft posts, so the feed has life on first run.
+const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+function post(name: string, kind: "win" | "ask", body: string, ago: number, stepText?: string): string {
+  const id = newId();
+  const step = stepText ? latte.steps.find((s) => s.text === stepText) : undefined;
+  db.prepare(
+    `INSERT INTO posts (id, crew_id, author_id, kind, body, photo, step_id, task_title, status, created_at)
+     VALUES (?, ?, ?, ?, ?, NULL, ?, ?, 'shown', ?)`,
+  ).run(id, crewId, students[name], kind, body, step?.id ?? null, latte.title, minutesAgo(ago));
+  return id;
+}
+const samWin = post("Sam", "win", "First time making an iced latte all on my own!", 90);
+const avaAsk = post("Ava", "ask", "My milk keeps going over the line. How do you stop in time?", 12, "Pour milk to the line");
+post("Leo", "win", "Finished my first latte. Only needed one hint this time.", 60 * 26);
+for (const [from, kind] of [["Ava", "proud"], ["Leo", "clap"]] as const) {
+  db.prepare("INSERT INTO reactions (post_id, from_id, kind, created_at) VALUES (?, ?, ?, ?)").run(samWin, students[from], kind, minutesAgo(80));
+}
+db.prepare("INSERT INTO replies (id, post_id, author_id, body, helped, status, created_at) VALUES (?, ?, ?, ?, 0, 'shown', ?)").run(
+  newId(),
+  avaAsk,
+  students.Sam,
+  "Pour slowly when it gets close, and stop when the milk touches the bottom of the line. It rises a bit after.",
+  minutesAgo(5),
 );
 
 console.log(`Seeded the Café raft (${names.join(", ")}) and the "${latte.title}" routine.`);

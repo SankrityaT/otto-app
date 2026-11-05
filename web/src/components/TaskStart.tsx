@@ -61,6 +61,9 @@ export function TaskStart({ run, onStart }: { run: Run; onStart: (mode: "steps" 
       )}
 
       <div className="mt-auto flex flex-col gap-3">
+        <a href={`/print/${run.routineId}`} className="btn btn--text self-center">
+          Print a paper step card for the station
+        </a>
         {run.stage === 5 ? (
           <>
             <Button look="main" className="h-14" onClick={() => onStart("alone")}>

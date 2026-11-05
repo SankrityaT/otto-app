@@ -16,7 +16,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [camera] = useCameraChoice();
-  const current = SECTIONS.find(([path]) => path === pathname)?.[0] ?? "/";
+  // Pages inside a section (a raft post, a profile) keep that section's tab lit.
+  const current = SECTIONS.find(([path]) => path !== "/" && pathname.startsWith(path))?.[0] ?? "/";
 
   return (
     <div className="app">
