@@ -60,6 +60,12 @@
 .pond__upright.is-shown .pond__upright-otter,
 .pond__center.is-tappable { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
 
+/* Today fits on one screen: the pond shrinks on short screens so the tasks under it never
+   need scrolling to find. */
+.today__center { padding-top: 12px; }
+@media (min-width: 960px) { .today__center { padding-top: 12px; } }
+.today__center > .pond { width: min(100%, 560px, calc((100dvh - 460px) * 400 / 260)); margin-top: 44px; }
+
 /* The pond draws in smoothly when a conversation starts. */
 .pond { transition: width 450ms ease, margin 450ms ease; }
 

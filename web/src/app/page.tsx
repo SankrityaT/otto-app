@@ -129,6 +129,8 @@ export default function Today() {
   }
 
   const chatting = chat.length > 0;
+  // Each task once: the latest unfinished try of it (newest first from the server).
+  const carryOn = started.filter((s, i) => started.findIndex((other) => other.title === s.title) === i);
 
   const leaves: LeafItem[] = routines.map((r) => ({ id: r.id, title: r.title, line: `${r.stepCount} steps`, tone: toneFor(r.id) }));
   const finished: LeafItem[] = done.map((d) => ({
@@ -178,8 +180,8 @@ export default function Today() {
             />
           )}
           <TalkBar status={status} onListening={(on) => setStatus(on ? "listening" : "idle")} onSend={(text) => converse(text)} />
-          <label className="btn btn--text mt-1 inline-flex cursor-pointer items-center gap-2">
-            <Camera size={18} /> Or show Ayin a photo of the task
+          <label className="btn btn--text inline-flex cursor-pointer items-center gap-2 py-1 text-[15px]">
+            <Camera size={17} /> Or show Ayin a photo of the task
             <input
               type="file"
               accept="image/*"
@@ -208,10 +210,10 @@ export default function Today() {
             </section>
           )}
           {!chatting && (
-            <div className="mt-5 w-full">
+            <div className="mt-3 w-full">
               <TaskLeaves
-                started={started.map((s) => ({ ...s, id: s.runId, tone: toneFor(routines.find((r) => r.title === s.title)?.id ?? s.runId) }))}
-                tasks={routines.map((r) => ({ ...r, tone: toneFor(r.id) }))}
+                started={carryOn.map((s) => ({ ...s, id: s.runId, tone: toneFor(routines.find((r) => r.title === s.title)?.id ?? s.runId) }))}
+                tasks={routines.filter((r) => !carryOn.some((s) => s.title === r.title)).map((r) => ({ ...r, tone: toneFor(r.id) }))}
                 onCarryOn={(runId) => router.push(`/run/${runId}`)}
                 onStart={start}
               />
