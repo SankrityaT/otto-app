@@ -4,11 +4,15 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ringColor } from "@/lib/fur";
 import AyinOtter, { type AyinOtterHandle } from "./otter/AyinOtter";
 import { OtterSays } from "./OtterSays";
+import { Ripples } from "./Pond";
+import UprightOtter from "./otter/UprightOtter";
 
 export type RaftMember = {
   name: string;
   /** Fur colour as a hue shift. The same shift colours this otter's ring. */
   hue: number;
+  /** Float on its back (the default), or sit up in the water. */
+  pose?: "float" | "upright";
 };
 
 /**
@@ -25,10 +29,13 @@ const SPOTS = [
 const OTTER_W = 30;
 /** The scene is 2.3 times wider than tall, so an otter is this tall, as % of the scene. */
 const OTTER_H = OTTER_W * 2.3;
-/** Where the head sits in Havi's drawing, as a fraction of the otter's box (before any flip). */
-const HEAD = { x: 0.33, y: 0.32 };
-const headX = (i: number) => SPOTS[i].x + OTTER_W * (SPOTS[i].flip ? 1 - HEAD.x : HEAD.x);
-const headY = (i: number) => SPOTS[i].y + OTTER_H * HEAD.y;
+/** Where the head sits in Havi's drawings, as a fraction of the otter's box (before any flip). */
+const HEADS = { float: { x: 0.33, y: 0.32 }, upright: { x: 0.46, y: 0.4 } };
+/**
+ * The upright drawing fills more of its frame than the floating one, so it is drawn in a smaller
+ * box, nudged so it sits in the water where a floating otter would: [size, left, top] of the box.
+ */
+const UPRIGHT_BOX = { size: 85, left: 5.7, top: 10 };
 
 type Bubble = { who: number; text: string; key: number };
 type Emoji = { x: number; y: number; char: string; key: number };
@@ -80,6 +87,7 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
   const [visible, setVisible] = useState(false);
   const [bubble, setBubble] = useState<Bubble | null>(null);
   const [emojis, setEmojis] = useState<Emoji[]>([]);
+  const [hop, setHop] = useState<{ who: number; key: number } | null>(null);
   const [nudged, setNudged] = useState<[number, number] | null>(null);
 
   // Only play while the raft is on screen.
@@ -96,10 +104,20 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
     const timers: ReturnType<typeof setTimeout>[] = [];
     const later = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
     let key = 0;
+    const pose = (i: number) => members[i]?.pose ?? "float";
+    const head = (i: number) => {
+      const h = HEADS[pose(i)];
+      return [SPOTS[i].x + OTTER_W * (SPOTS[i].flip ? 1 - h.x : h.x), SPOTS[i].y + OTTER_H * h.y];
+    };
+    // A sitting otter has no tail swish or head tilt to play, so it does a little happy hop instead.
+    const hopOr = (i: number, move: () => void) => {
+      if (pose(i) === "upright") setHop({ who: i, key: ++key });
+      else move();
+    };
 
     const api: Api = {
-      swing: (i) => otters.current[i]?.swingTail(),
-      tilt: (i) => otters.current[i]?.tiltHead(),
+      swing: (i) => hopOr(i, () => otters.current[i]?.swingTail()),
+      tilt: (i) => hopOr(i, () => otters.current[i]?.tiltHead()),
       blink: (i) => otters.current[i]?.blink(),
       say(i, text) {
         const k = ++key;
@@ -113,8 +131,10 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
       emoji([a, b], char) {
         const k = ++key;
         // Halfway between the two otters' heads, a little above them.
-        const x = (headX(a) + headX(b)) / 2;
-        const y = (headY(a) + headY(b)) / 2 - 18;
+        const [ax, ay] = head(a);
+        const [bx, by] = head(b);
+        const x = (ax + bx) / 2;
+        const y = (ay + by) / 2 - 18;
         setEmojis((e) => [...e, { x, y, char, key: k }]);
         later(2200, () => setEmojis((e) => e.filter((p) => p.key !== k)));
       },
@@ -134,7 +154,7 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
       setEmojis([]);
       setNudged(null);
     };
-  }, [still, visible]);
+  }, [still, visible, members]);
 
   /** How far an otter leans toward its neighbour during a bump, as % of its own width. */
   const lean = (i: number) => {
@@ -158,6 +178,8 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
 
       {members.slice(0, SPOTS.length).map((m, i) => {
         const spot = SPOTS[i];
+        const upright = m.pose === "upright";
+        const h = HEADS[upright ? "upright" : "float"];
         return (
           <div
             key={m.name}
@@ -166,15 +188,28 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
           >
             <div className="raft-float" style={{ animationDelay: `${i * -1.7}s`, animationDuration: `${7 + i * 0.6}s` }}>
               <div style={{ transform: spot.flip ? "scaleX(-1)" : undefined, filter: "var(--otter-dim, none)" }}>
-                <AyinOtter
-                  ref={(h) => {
-                    otters.current[i] = h;
-                  }}
-                  size="100%"
-                  seed={spot.seed}
-                  furHue={m.hue}
-                  alt=""
-                />
+                {upright ? (
+                  <div className="relative aspect-square w-full">
+                    <div
+                      key={hop?.who === i ? hop.key : "still"}
+                      className={`absolute ${hop?.who === i ? "otter-hop" : ""}`}
+                      style={{ width: `${UPRIGHT_BOX.size}%`, left: `${UPRIGHT_BOX.left}%`, top: `${UPRIGHT_BOX.top}%` }}
+                    >
+                      <Ripples className="pointer-events-none absolute left-[56%] top-[86%] w-[78%] -translate-x-1/2 -translate-y-1/2 overflow-visible" />
+                      <UprightOtter className="relative block aspect-square w-full" furHue={m.hue} active={visible && !still} />
+                    </div>
+                  </div>
+                ) : (
+                  <AyinOtter
+                    ref={(handle) => {
+                      otters.current[i] = handle;
+                    }}
+                    size="100%"
+                    seed={spot.seed}
+                    furHue={m.hue}
+                    alt=""
+                  />
+                )}
               </div>
             </div>
             <span className="absolute bottom-[4%] left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card/90 px-2.5 py-1 text-[13px] font-semibold text-ink-2 shadow-[0_0_0_1px_var(--line)] md:text-[14px]">
@@ -185,7 +220,7 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
               <div
                 key={bubble.key}
                 className="bubble-pop absolute top-[-8%] z-10 -translate-x-1/2 whitespace-nowrap"
-                style={{ left: `${(spot.flip ? 1 - HEAD.x : HEAD.x) * 100}%` }}
+                style={{ left: `${(spot.flip ? 1 - h.x : h.x) * 100}%` }}
               >
                 <OtterSays className="!px-3 !py-1.5 !text-[17px] md:!text-[20px]" tailX="50%">
                   {bubble.text}

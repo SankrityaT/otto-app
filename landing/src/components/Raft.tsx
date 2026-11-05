@@ -11,7 +11,7 @@ import { Section } from "./Section";
 const CREW = [
   { name: "You", hue: 0, done: 9, target: 12 },
   { name: "Kelp", hue: 120, done: 12, target: 12 },
-  { name: "Pebble", hue: 190, done: 5, target: 10 },
+  { name: "Pebble", hue: 190, done: 5, target: 10, pose: "upright" as const },
   { name: "Ripple", hue: 270, done: 7, target: 10 },
 ];
 const CHEERS = ["Nice work!", "You got this", "Way to go!", "High five"];
