@@ -18,6 +18,8 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 ## What Ayin does
 
+**Five stages, like First Place AZ.** First Place teaches a skill in five stages: watch, first tries, with help, with a check-in, on your own. Ayin follows the same path for each student and each task, works out the stage from the student's own log, and shows it before every task. A new task starts by watching every step; a mastered one is done alone, with Ayin checking only at the end.
+
 **One step at a time.** The student says, types or shows a task ("make an iced latte"). Claude breaks it into small physical steps. Ayin shows one step at a time: a picture drawn for that step, 8 words or fewer, read aloud, with progress dots.
 
 - **Done:** Ayin takes one photo and checks the step, then moves on or says what's missing.
@@ -26,13 +28,16 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
 - **Time you can see:** a step that takes a set time (wash hands for 20 seconds) gets a calm ring timer. It never turns red.
 - **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.
+- **Talk to Ayin:** students can just ask out loud ("is this the right way up?"). Ayin looks through the camera and answers in a sentence or two, like a coach beside them.
+- **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Ayin can look at a shared screen or tab instead.
 
 **Crew.** A small group from the same work site, set up by staff.
 
-- A shared weekly goal ("Café crew: 20 of 30 steps on our own"), never a ranking.
+- A shared weekly goal shown as one pond that every crewmate's otter sits in. Each step anyone does on their own raises the water. Never a ranking.
 - Weekly rings that quietly restart each week. There is no streak to break.
 - **Practice buddies:** Ayin pairs crewmates so each can show the other a step they've mastered. The help a student no longer needs from Ayin is exactly what they can now offer a friend.
-- **Ask a crewmate** who has done the step on their own, and one-tap cheers with preset words.
+- **Practise together:** ask your buddy to practise a step with you; they answer "Yes, let's" or "Not today".
+- **Ask a crewmate** who has done the step on their own, and cheers with preset words that show up on the win.
 
 **Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket.
 

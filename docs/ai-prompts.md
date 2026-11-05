@@ -46,3 +46,5 @@ This file lists the prompts that shaped the project. Small requests like "fix th
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
 | Nov 5 | The crew screen reads like a list, not a community. Make it about the crew together, and fix it in dark mode. | One pond everyone fills together, buddies with "practise together" invites, and a feed with cheers |
 | Nov 5 | Ayin should talk with the student like a coach beside them while they look at the diagram or hold the real part. | Spoken questions answered from the step, the 3D model and what the camera sees, in about 3 seconds |
+| Nov 5 | Read our First Place AZ tour notes and build what they teach: their five-stage skill model, pause points, and personal goals. | The five-stage path on every task, a calm start screen, "Watch" and "On my own" modes |
+| Nov 5 | Look at Ama (withama.ai), a competitor, and say where Ayin is different. | Added to the research notes |

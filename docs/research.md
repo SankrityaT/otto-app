@@ -4,6 +4,7 @@ What we learned from our partner visit and the literature, and how each finding 
 
 - **[school]**: heard or seen at the AZACS main campus tour on Oct 29, 2026
 - **[partner]**: from First Place AZ's own materials
+- **[partner]**: from our First Place AZ tour with Josh Munoz, or First Place's own materials
 - **[research]**: published studies and guidance
 
 ## Who we build for
@@ -23,11 +24,22 @@ Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They le
 | No photos of students on campus; Arizona requires a parent's written consent to record a child (A.R.S. 1-602) | [school] [research] | Photos are taken only when asked, never stored |
 | About 40% of autistic young adults never got together with friends in a year; 28% had no social contact | [research] [NLTS2 via WashU](https://source.washu.edu/2013/05/new-study-examines-social-isolation-of-young-adults-with-autism-spectrum-disorder/) | The crew feature |
 | "Independent living takes practice … one first at a time"; support steps down as skills grow | [partner] [First Place AZ](https://firstplaceaz.org/transition-academy/) | Fading help, and crews that celebrate firsts |
+| First Place teaches a skill in 5 stages: observe, assess, with assistance, with supervision, independent | [partner] tour | Ayin follows the same 5 stages for each student and task, and shows the student where they are |
+| "Leave space": doorway nooks give residents a pause to decide; don't flood people with prompts | [partner] tour | A calm "start when you're ready" screen before each task; one step at a time; nothing auto-advances |
+| "Create ways for people to engage, like goals" and "once they're happy they will learn" | [partner] tour | The stage path is the student's own goal for each task; their own otter; buddies and a crew pond |
+| Mix high tech and low tech; affordability matters | [partner] tour | Works on any phone, with a shared screen when there's no camera; the otter uses low-cost boards |
+| Most neurodivergent adults still live with parents over 60; employment is the strongest focus | [partner] tour | Job tasks first, so independence is built before support at home runs out |
+| Ama (withama.ai) is a screen-only app for autistic children 3–17: social stories, reading, communication; $20/month | [competitor] [withama.ai](https://www.withama.ai/) | Ayin focuses where Ama doesn't: ages 16–22, hands-on job tasks, a camera that checks real steps, and help that fades |
 | Peer-based instruction is an evidence-based practice when an adult sets up the context | [research] [AFIRM / NCAEP](https://afirm.fpg.unc.edu/wp-content/uploads/Peer-Based-Instruction-Intervention-Brief-Packet-Sam-AFIRM-Team-2025.pdf) | Staff create crews |
 | Autistic-to-autistic information transfer works as well as between non-autistic people | [research] [Crompton et al. 2020](https://pure.qub.ac.uk/en/publications/autistic-peer-to-peer-information-transfer-is-highly-effective/) | "Ask a crewmate who has done it" |
 | Seeing a broken streak lowers later engagement | [research] [Silverman & Barasch 2023](https://www.colorado.edu/business/faculty-research/2023/04/19/or-track-how-broken-streaks-affect-consumer-decisions) | Weekly rings, never a broken streak |
 | A leaderboard and badges lowered motivation and exam scores | [research] [Hanus & Fox 2015](https://dblp.org/rec/journals/ce/HanusF15) | A shared crew goal, no ranking |
 | 44% of autistic people report being victimized | [research] [Trundle et al. 2023](https://pubmed.ncbi.nlm.nih.gov/35524162/) | Closed crews, no location, preset messages only |
+
+## Still to build (from the First Place tour)
+
+- **A side for employers and coworkers**, Josh's suggestion: a short "how I work best" card the student shares, with tips for giving clear instructions.
+- **Quiet mode** for low-sensory settings: light and vibration cues instead of read-aloud.
 
 ## What we chose not to build
 

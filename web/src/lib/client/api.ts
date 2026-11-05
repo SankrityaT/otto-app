@@ -38,6 +38,11 @@ export const api = {
     ),
   ask: (runId: string, stepId: string, question: string, photo: string | null, showing: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/ask`, post({ stepId, question, photo, showing })),
+  checkAlone: (runId: string, photo: string | null) =>
+    call<{ done: boolean; say: string; finished: boolean; summary: Summary | null }>(
+      `/api/runs/${runId}/alone`,
+      post({ photo }),
+    ),
   help: (runId: string, stepId: string, level: number, photo: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/help`, post({ stepId, level, photo })),
   splitStep: (stepId: string) => call(`/api/steps/${stepId}/split`, post({})),
