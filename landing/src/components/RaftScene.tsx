@@ -16,14 +16,13 @@ export type RaftMember = {
 };
 
 /**
- * Where each otter floats, as % of the scene: a zigzag chain with neighbours cuddled up.
- * Flips alternate so the first two and last two meet head to head, and the middle pair tail to tail.
+ * Where each otter floats, as % of the scene: a zigzag chain in the middle of the pond with
+ * neighbours cuddled up. The first two meet head to head, and the last two tail to tail.
  */
 const SPOTS = [
-  { x: 4, y: 24, flip: true, seed: 3 },
-  { x: 25, y: 2, flip: false, seed: 11 },
-  { x: 46, y: 24, flip: true, seed: 23 },
-  { x: 67, y: 2, flip: false, seed: 37 },
+  { x: 14, y: 24, flip: true, seed: 3 },
+  { x: 35, y: 2, flip: false, seed: 11 },
+  { x: 56, y: 24, flip: true, seed: 23 },
 ];
 /** Each otter's width, as % of the scene. */
 const OTTER_W = 30;
@@ -63,12 +62,12 @@ const BEATS: ((o: Api) => [number, () => void][])[] = [
   (o) => [[0, () => o.nudge(0, 1)], [550, () => (o.emoji([0, 1], "😊"), o.blink(0), o.blink(1))], [900, () => o.say(1, "Hey, you!")]],
   // A tail splash in the middle, and the neighbour turns to look and laughs.
   (o) => [[0, () => o.swing(1)], [600, () => o.tilt(2)], [800, () => o.say(2, "Nice work! 😄")]],
-  // A cheer passes down the raft, with a clap.
-  (o) => [[0, () => o.say(3, "You got this! 👏")], [350, () => o.tilt(2)], [1500, () => o.swing(3)]],
+  // A cheer passes back down the raft, with a clap.
+  (o) => [[0, () => o.say(2, "You got this! 👏")], [350, () => o.tilt(1)], [1500, () => o.swing(0)]],
   // The raft wave: tails swish one after another, then a little party.
-  (o) => [[0, () => o.say(0, "Raft wave! 🌊")], [500, () => o.swing(0)], [900, () => o.swing(1)], [1300, () => o.swing(2)], [1700, () => o.swing(3)], [2100, () => o.emoji([1, 2], "🎉")]],
-  // The other pair bumps heads for a high five.
-  (o) => [[0, () => o.nudge(2, 3)], [550, () => (o.emoji([2, 3], "🙌"), o.blink(2), o.blink(3))], [1000, () => o.say(3, "High five!")]],
+  (o) => [[0, () => o.say(0, "Raft wave! 🌊")], [500, () => o.swing(0)], [900, () => o.swing(1)], [1300, () => o.swing(2)], [1700, () => o.emoji([1, 2], "🎉")]],
+  // The other pair bumps for a high five.
+  (o) => [[0, () => o.nudge(1, 2)], [550, () => (o.emoji([1, 2], "🙌"), o.blink(1), o.blink(2))], [1000, () => o.say(2, "High five!")]],
 ];
 /** A quiet pause after each beat, so it never feels busy. */
 const REST_MS = 2600;
@@ -87,7 +86,7 @@ function usePrefersReducedMotion(): boolean {
   );
 }
 
-/** Four otters floating together, each in its own fur colour, cheering and bumping each other. */
+/** The raft's otters floating together, each in its own fur colour, cheering and bumping each other. */
 export function RaftScene({ members }: { members: RaftMember[] }) {
   const still = usePrefersReducedMotion();
   const scene = useRef<HTMLDivElement>(null);

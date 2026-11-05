@@ -12,7 +12,6 @@ const CREW = [
   { name: "You", hue: 0, done: 9, target: 12 },
   { name: "Kelp", hue: 120, done: 12, target: 12 },
   { name: "Pebble", hue: 190, done: 5, target: 10, pose: "upright" as const },
-  { name: "Ripple", hue: 270, done: 7, target: 10 },
 ];
 const CHEERS = ["Nice work!", "You got this", "Way to go!", "High five"];
 
@@ -38,7 +37,7 @@ function Ring({ done, target, color }: { done: number; target: number; color: st
 
 export function Raft() {
   const total = CREW.reduce((sum, m) => sum + m.done, 0);
-  const goal = 40;
+  const goal = 32;
 
   return (
     <Section
@@ -78,9 +77,9 @@ export function Raft() {
         <Reveal>
           <div className="card p-6 md:p-8">
             <p className="font-display text-[30px] leading-none">Everyone&apos;s ring</p>
-            <ul className="mt-5 grid grid-cols-2 gap-3">
+            <ul className="mt-5 grid grid-cols-3 gap-3">
               {CREW.map((m) => (
-                <li key={m.name} className="flex items-center gap-3 rounded-2xl bg-ground p-3">
+                <li key={m.name} className="flex flex-col items-center gap-2 rounded-2xl bg-ground p-3 text-center">
                   <Ring done={m.done} target={m.target} color={ringColor(m.hue)} />
                   <div>
                     <p className="font-semibold">{m.name}</p>
