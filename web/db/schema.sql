@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS crews (
   id          TEXT PRIMARY KEY,
   name        TEXT NOT NULL,
   weekly_goal INTEGER NOT NULL,     -- steps done on our own, together, per week
-  cheers      TEXT NOT NULL         -- JSON array of preset cheer phrases staff chose
+  cheers      TEXT NOT NULL,        -- JSON array of preset cheer phrases staff chose
+  join_code   TEXT UNIQUE           -- the code staff give students to join this raft
 );
 
 CREATE TABLE IF NOT EXISTS students (

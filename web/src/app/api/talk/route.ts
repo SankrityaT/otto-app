@@ -1,3 +1,4 @@
+import { safeReply } from "@/lib/ai/safety";
 import { talk } from "@/lib/ai/talk";
 import { getStudent } from "@/lib/data/crew";
 import { profile } from "@/lib/data/raft";
@@ -28,6 +29,10 @@ export async function POST(request: Request) {
       goal: (await profile(student.id))?.goal?.text ?? null,
       busyWith: busy,
     });
+    // Any safety concern: just Ayin's words (with staff and 988 when someone may be at risk), never a task.
+    if (turn.concern !== "none") {
+      return Response.json({ say: safeReply(turn.say, turn.concern), choices: [], startTask: null, routineId: null });
+    }
     // If the task they asked for is one they've practised, start that one instead of a new list.
     const known = turn.task ? routines.find((r) => r.title.toLowerCase() === turn.task!.toLowerCase()) : undefined;
     return Response.json({ say: turn.say, choices: turn.choices.slice(0, 3), startTask: turn.intent === "start-task" ? turn.task : null, routineId: known?.id ?? null });

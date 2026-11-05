@@ -3,7 +3,7 @@
 import { MessagesSquare, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/Button";
@@ -18,7 +18,7 @@ import { RaftIcon } from "@/components/raft/Stickers";
 import { TogetherSheet } from "@/components/raft/TogetherSheet";
 import type { CrewView } from "@/lib/data/crew";
 import type { Post, PostKind, Reaction } from "@/lib/data/raft";
-import { api } from "@/lib/client/api";
+import { api, ApiError } from "@/lib/client/api";
 import { useStudentId } from "@/lib/client/settings";
 import { ringColor } from "@/lib/fur";
 
@@ -43,10 +43,15 @@ export default function RaftPage() {
   const [together, setTogether] = useState<{ with: Member | null } | null>(null);
   const [introOpen, setIntroOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [noRaft, setNoRaft] = useState(false);
+  const [code, setCode] = useState("");
 
   const load = useCallback(() => {
     if (!studentId) return;
-    api.crew(studentId).then((r) => setRaft(r.crew)).catch((e) => setMessage(e.message));
+    api
+      .crew(studentId)
+      .then((r) => setRaft(r.crew))
+      .catch((e) => (e instanceof ApiError && e.status === 404 ? setNoRaft(true) : setMessage(e.message)));
     api.feed(studentId, null).then((r) => setPosts(r.posts)).catch(() => {});
   }, [studentId]);
 
@@ -63,6 +68,46 @@ export default function RaftPage() {
     return () => clearTimeout(open);
   }, []);
 
+  /** Join a raft later, with the code from their teacher. */
+  async function join(event: FormEvent) {
+    event.preventDefault();
+    try {
+      await api.joinRaft(studentId!, code);
+      setNoRaft(false);
+      setMessage(null);
+      load();
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+
+  if (noRaft && studentId) {
+    return (
+      <AppShell>
+        <form onSubmit={join} className="page flex max-w-md flex-col items-center gap-3 pt-10 text-center">
+          <h1 className="page__h">Join your raft</h1>
+          <p className="text-ink-2">A raft is a few classmates from your work site. Your teacher has its code.</p>
+          <label htmlFor="code" className="sr-only">
+            Raft code
+          </label>
+          <input
+            id="code"
+            className="w-full rounded-2xl border-[1.5px] border-line bg-card px-4 py-3 text-center text-[20px] uppercase tracking-[0.2em] outline-none focus:border-ink"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="Raft code"
+            autoComplete="off"
+            maxLength={12}
+          />
+          <button className="btn btn--primary w-full" disabled={!code.trim()}>
+            Join my raft
+          </button>
+          {message && <p className="text-ink-2">{message}</p>}
+        </form>
+      </AppShell>
+    );
+  }
+
   if (!raft || !studentId) {
     return (
       <AppShell>
@@ -70,7 +115,7 @@ export default function RaftPage() {
           <OtterWaits says="Paddling over to your raft" />
         ) : (
           <div className="page flex flex-col items-center gap-3 pt-10 text-center">
-            <p>{message ?? "Pick your name on the Today screen first."}</p>
+            <p>{message ?? "Say hi to Ayin on the Today screen first."}</p>
             <Link href="/" className="btn btn--text">
               Go to Today
             </Link>

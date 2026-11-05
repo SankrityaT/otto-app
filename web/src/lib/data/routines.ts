@@ -28,7 +28,7 @@ export function listRoutines(): Promise<{ id: string; title: string; stepCount: 
   );
 }
 
-export async function createRoutine(plan: StepPlan): Promise<Routine> {
+export async function createRoutine(plan: Pick<StepPlan, "title" | "steps">): Promise<Routine> {
   const routineId = newId();
   await run("INSERT INTO routines (id, title, created_at) VALUES (?, ?, ?)", routineId, plan.title, now());
   for (const [index, step] of plan.steps.entries()) {

@@ -26,15 +26,16 @@ const TABLES = [
 async function main() {
   await exec(`TRUNCATE ${TABLES.join(", ")}`);
 
-  // Staff set these up: the crew, its weekly goal and the cheers students can send.
+  // Staff set these up: the crew, its weekly goal, the cheers students can send and the code to join.
   // Fixed ids, so a browser that picked a student still knows them after re-seeding.
   const crewId = "crew-cafe";
   await run(
-    "INSERT INTO crews (id, name, weekly_goal, cheers) VALUES (?, ?, ?, ?)",
+    "INSERT INTO crews (id, name, weekly_goal, cheers, join_code) VALUES (?, ?, ?, ?, ?)",
     crewId,
     "Café raft",
     30,
     JSON.stringify(["Nice work!", "You did it on your own!", "Proud of you", "Keep going"]),
+    "OTTER",
   );
 
   // Each student picked their own otter colour (a hue shift; 0 is the painted brown).

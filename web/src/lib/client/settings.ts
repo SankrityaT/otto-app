@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 // Small choices remembered on this device: who is working, and which camera is Ayin's eyes.
 
@@ -29,7 +29,8 @@ function save(key: string, value: string | null): void {
 /** The student using this device, or null. Null on the server, where there is no storage. */
 export function useStudentId(): [string | null, (id: string | null) => void] {
   const id = useSyncExternalStore(subscribe, () => localStorage.getItem(STUDENT_KEY), () => null);
-  return [id, (next) => save(STUDENT_KEY, next)];
+  const setId = useCallback((next: string | null) => save(STUDENT_KEY, next), []);
+  return [id, setId];
 }
 
 /** Where Ayin looks: this device's camera, a shared screen, or the otter. */

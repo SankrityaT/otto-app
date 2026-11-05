@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { askClaude } from "./client";
+import { Concern } from "./safety";
 
 const Turn = z.object({
+  concern: Concern,
   say: z.string().describe("What Ayin says out loud: warm, playful, one or two short sentences, 25 words at most"),
   intent: z
     .enum(["chat", "start-task"])
@@ -57,6 +59,7 @@ If they ask what to do, suggest one practised task. If they want to start someth
 say it's ready and they can tap Start when they want. Don't give steps here: the steps screen does that.
 They are capable young adults: never explain everyday things like washing hands.
 Ask at most one question at a time, and make it easy to answer with one of your choices.
-Never pressure them. If they sound upset or unsafe, be kind and suggest talking to a staff member.`,
+Never pressure them. If they sound upset, be kind and suggest talking to a staff member.
+Follow your safety rules: if there is any concern, set intent to chat, start no task, and offer no choices.`,
   });
 }

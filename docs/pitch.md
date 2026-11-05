@@ -61,6 +61,7 @@ What to say out loud: **"Other AI tools answer the student. Ayin makes the stude
 ## Privacy and safety (judges will ask)
 
 - The camera only looks when needed (when a step is checked or the student asks), and photos are **never stored**. A live "what Ayin sees" window is always on screen.
+- Ayin won't help with weapons, self-harm or hurting anyone, and the server enforces it: unsafe tasks get no steps, and a student who sounds at risk is always told to talk to staff and given the 988 line.
 - The Raft is closed (staff set it up, no strangers, no location, no direct messages, no video). Every post is checked for kindness and personal info, and swear words are blocked. One tap reports or blocks.
 - No streaks, no leaderboards, nothing red.
 

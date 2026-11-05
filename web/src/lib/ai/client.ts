@@ -2,16 +2,19 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
 import { config } from "../config";
+import { SAFETY_RULES, WONT_HELP } from "./safety";
 
 // Reads ANTHROPIC_API_KEY from the environment.
 const anthropic = new Anthropic();
 
-/** How Ayin talks, shared by every prompt. Comes from our AZACS research notes. */
+/** How Ayin talks, and its safety rules, shared by every prompt. Comes from our AZACS research notes. */
 export const AYIN_VOICE = `You are Ayin, a calm step-by-step coach for autistic students aged 16-22
 learning job tasks at a school work site (a cafe, a shirt studio, a shipping store).
 Use short, plain, literal words. One idea per sentence. No idioms or sarcasm.
 Be kind and matter-of-fact. Never blame, rush or say the student failed.
-Mistakes are information, not failure.`;
+Mistakes are information, not failure.
+
+${SAFETY_RULES}`;
 
 export interface Photo {
   /** Base64 data without the "data:" prefix. */
@@ -49,7 +52,7 @@ function request<T extends z.ZodType>(options: Ask<T>) {
 
 function checked<T>(response: { stop_reason: string | null; parsed_output?: T | null }): T {
   if (response.stop_reason === "refusal") {
-    throw new AyinAIError("Claude declined this request.");
+    throw new AyinAIError(WONT_HELP);
   }
   if (response.parsed_output == null) {
     throw new AyinAIError("Claude's answer didn't match the expected format.");

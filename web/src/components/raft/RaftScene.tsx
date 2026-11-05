@@ -109,7 +109,13 @@ export function RaftScene({
   onPick: (member: Member) => void;
 }) {
   const still = useStill();
-  const members = raft.members.slice(0, SPOTS.length);
+  // Four otters fit on the raft. In a bigger raft, always show you, then whoever needs help.
+  const members =
+    raft.members.length <= SPOTS.length
+      ? raft.members
+      : [...raft.members]
+          .sort((a, b) => Number(b.id === meId) - Number(a.id === meId) || Number(Boolean(b.asking)) - Number(Boolean(a.asking)))
+          .slice(0, SPOTS.length);
   const otters = useRef(new Map<string, AyinOtterHandle | null>());
   const hoppers = useRef(new Map<string, HTMLDivElement | null>());
   const previous = useRef<CrewView | null>(null);

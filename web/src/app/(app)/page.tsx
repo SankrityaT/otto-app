@@ -4,11 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AyinChat, type ChatTurn, type Voice } from "@/components/AyinChat";
-import { StudentPicker } from "@/components/StudentPicker";
+import { OtterWaits } from "@/components/OtterWaits";
 import { TaskLeaves } from "@/components/TaskLeaves";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
 import { toneFor } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
+import { Welcome } from "@/components/Welcome";
 import type { Student } from "@/lib/data/crew";
 import { api } from "@/lib/client/api";
 import { hush, speak } from "@/lib/client/speech";
@@ -29,7 +30,7 @@ function readPhoto(file: File): Promise<string> {
 export default function Today() {
   const router = useRouter();
   const [studentId, setStudentId] = useStudentId();
-  const [students, setStudents] = useState<Student[]>([]);
+  const [student, setStudent] = useState<Student | null>(null);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [started, setStarted] = useState<Started[]>([]);
   const [status, setStatus] = useState<PondStatus>("idle");
@@ -50,9 +51,17 @@ export default function Today() {
   }, [setStudentId]);
 
   useEffect(() => {
-    api.students().then((r) => setStudents(r.students)).catch((e) => setMessage(e.message));
     api.routines().then((r) => setRoutines(r.routines)).catch((e) => setMessage(e.message));
   }, []);
+
+  // Only this student is ever fetched; there's no list of everyone. If they're gone, start over.
+  useEffect(() => {
+    if (!studentId) return;
+    api
+      .student(studentId)
+      .then((r) => setStudent(r.student))
+      .catch(() => setStudentId(null));
+  }, [studentId, setStudentId]);
 
   useEffect(() => {
     if (!studentId) return;
@@ -62,8 +71,17 @@ export default function Today() {
       .catch(() => {});
   }, [studentId]);
 
-  const student = students.find((s) => s.id === studentId);
-  if (!student) return <StudentPicker students={students} onPick={setStudentId} message={message} />;
+  if (!studentId) {
+    return (
+      <Welcome
+        onReady={(chosen) => {
+          setStudent(chosen);
+          setStudentId(chosen.id);
+        }}
+      />
+    );
+  }
+  if (student?.id !== studentId) return <OtterWaits says="Finding your otter" />;
 
   async function start(routineId: string) {
     const { runId } = await api.startRun(routineId, student!.id);

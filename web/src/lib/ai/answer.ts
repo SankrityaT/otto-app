@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { askClaude, type Photo } from "./client";
+import { Concern, safeReply } from "./safety";
 
 const Answer = z.object({
+  concern: Concern,
   say: z.string().describe("What Ayin says out loud: one or two short sentences, 25 words at most"),
 });
 
@@ -27,7 +29,7 @@ ${options.photo ? "The photo shows what is in front of them right now." : ""}
 They just said out loud: "${options.question}"
 Answer like a calm coach standing beside them. Talk about what you can see: name the part, where it is and which way to move it.
 If they are doing it right, say so. If the question is about a later step, help with this step first.
-If something looks unsafe, tell them to stop and get a staff member.`,
+If something looks unsafe, tell them to stop and get a staff member. Follow your safety rules for anything off the task.`,
   });
-  return answer.say;
+  return safeReply(answer.say, answer.concern);
 }

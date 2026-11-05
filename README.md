@@ -4,7 +4,7 @@
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
 
-**Try it:** [ayin-jade.vercel.app](https://ayin-jade.vercel.app) · landing page for students and parents: [/landing](https://ayin-jade.vercel.app/landing) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
+**Try it:** [ayin-jade.vercel.app](https://ayin-jade.vercel.app) (raft code `OTTER` joins the demo raft) · landing page for students and parents: [/landing](https://ayin-jade.vercel.app/landing) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
 
 ## Our approach
 
@@ -138,6 +138,8 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 
 ## Privacy and safety
 
+- **Ayin won't help anyone get hurt.** Every Claude prompt shares one set of safety rules: no weapons, self-harm, violence, drugs, sexual content or hiding things from staff, even "as a joke" or "for a class". The server enforces it too. Claude must decide a task is safe before writing any steps, so an unsafe task saves nothing: no steps, pictures or 3D models. If a student sounds at risk, Ayin starts no task, and every reply tells them to talk to a staff member and gives the 988 crisis line, whatever words Claude chose. The rules are in `web/src/lib/ai/safety.ts`.
+- **Names stay inside the raft.** Students give a first name only, checked for letters and swear words. There is no list of all students: a returning student types their raft's code and sees only that raft's otters.
 - **Camera only when asked.** One photo when the student taps Done, Help or Show me. Photos go to Claude for that one answer and are never stored.
 - **Pictures can't run code.** Step drawings are checked against a strict list of allowed SVG features and shown as images.
 - **Rafts are closed.** Staff add members from the same program. No strangers, no location, no direct messages and no live video between students. Shared photos are of the work, checked for faces first.
@@ -147,7 +149,8 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 ## Status and limitations
 
 - This repo was started fresh on Nov 4, during the challenge sprint. Our earlier prototype (a voice assistant and camera glasses) is not in it.
-- There are no student or staff accounts yet: the demo uses a profile picker, and the crew comes from the seed script.
+- There are no passwords or staff accounts yet. A new student joins with a raft code (the demo raft's code is `OTTER`); real rafts need long, random codes and limits on wrong guesses.
+- Safety concerns are answered on the spot, but staff aren't alerted yet. A staff alert is the next safety feature to build.
 - The XIAO camera works. The Raspberry Pi otter code is written but hasn't been run on a Pi yet, and the current enclosure fits a Pi Zero, not the Pi 4.
 - Peer-support evidence covers ages 3–18 and mostly non-autistic peers; peer mentoring for ages 19–22 is barely studied.
 

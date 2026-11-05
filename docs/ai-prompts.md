@@ -47,6 +47,7 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Nov 5 | Every screen must fit without scrolling, and the "Watch" stage should be 3D and talked through, not a list. | Watch plays each step as a 3D model, read aloud; the student can say "next", "back" or ask a question |
 | Nov 5 | You can't tap Done with soapy hands, and students won't trust a camera they can't see. | Voice during tasks; Ayin notices a step is done when the student moves and then holds still; a "What Ayin sees" window is always on screen |
 | Nov 5 | Ayin should coach out loud like someone beside the student, looking at what they're holding. | Spoken questions answered from the step, the 3D model and the camera, in about 3 seconds |
+| Nov 5 | Be very careful with safety: Ayin must never help with weapons, self-harm or hurting anyone. | One set of safety rules in every prompt, enforced by the server: unsafe tasks get no steps, and a student at risk always hears "talk to a staff member" and the 988 line |
 | Nov 5 | Our students are capable young adults; don't teach them to wash their hands. | Step planning and chat teach the job, not everyday life |
 | Nov 5 | Use the real voice we had before (Cartesia or Deepgram). While a 3D model takes time, show it being built and make small talk, not a loading screen. Nothing hardcoded. | Cartesia Sonic with a Deepgram backup; models stream in part by part as blueprint wireframes with the otter calling out each part; Claude makes small talk until the model is ready |
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
@@ -73,4 +74,5 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Date | Prompt | Result |
 | --- | --- | --- |
 | Nov 5 | The otter looks fuzzy on phones. Make the artwork sharper without changing it. | Havi's layers upscaled 4× and saved at 2048 px |
+| Nov 5 | The "Who's working today?" picker doesn't make sense, and it shows every student's name. | Ayin asks your first name, you pick your otter's colour and join your raft with a code from your teacher; names are only shown inside a raft |
 | Nov 5 | Connecting the otter or a phone should need no typing. | Automatic otter discovery with a live test photo, and a QR code that opens Ayin on a phone already set to the student |

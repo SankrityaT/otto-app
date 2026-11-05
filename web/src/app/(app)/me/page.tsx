@@ -22,11 +22,14 @@ export default function MePage() {
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
-    api.students().then(({ students }) => {
-      const me = students.find((s) => s.id === studentId) ?? null;
-      setStudent(me);
-      if (me) setFurHue(me.furHue);
-    });
+    if (!studentId) return;
+    api
+      .student(studentId)
+      .then(({ student: me }) => {
+        setStudent(me);
+        setFurHue(me.furHue);
+      })
+      .catch(() => setStudent(null));
   }, [studentId]);
 
   function changeFur(hue: number) {

@@ -1,7 +1,11 @@
 import { z } from "zod";
-import { askClaude, type Photo } from "./client";
+import { AyinAIError, askClaude, type Photo } from "./client";
+import { WONT_HELP } from "./safety";
 
 const StepPlan = z.object({
+  safe: z
+    .boolean()
+    .describe("Decide this first. false if the task is on the never list in your safety rules; then leave steps empty"),
   title: z.string().describe("Short name for the task, like 'Make an iced latte'"),
   steps: z
     .array(
@@ -15,15 +19,17 @@ const StepPlan = z.object({
           .describe("Only when the step itself takes a set time (steam milk for 30 seconds, let it set for 2 minutes). Otherwise null"),
       }),
     )
-    .min(2)
     .max(12),
 });
 
 export type StepPlan = z.infer<typeof StepPlan>;
 
-/** Break any task into small physical steps. The task comes from the student, not from code. */
-export function planSteps(task: string, photo?: Photo | null): Promise<StepPlan> {
-  return askClaude({
+/**
+ * Break any task into small physical steps. The task comes from the student, not from code.
+ * A task Ayin shouldn't help with gets no steps at all, so nothing about it is ever saved or shown.
+ */
+export async function planSteps(task: string, photo?: Photo | null): Promise<StepPlan> {
+  const plan = await askClaude({
     schema: StepPlan,
     photo,
     effort: "medium",
@@ -34,6 +40,9 @@ Each step is one physical action. Include safety steps (gloves, hot surfaces) wh
 The students are capable young adults learning a job. Teach the job, not everyday life: leave out things
 anyone already does (washing hands, walking over, picking things up) unless the task itself is about them.`,
   });
+  if (!plan.safe) throw new AyinAIError(WONT_HELP);
+  if (plan.steps.length < 2) throw new AyinAIError("Ayin couldn't break that into steps. Try saying it another way.");
+  return plan;
 }
 
 const SmallerSteps = z.object({ steps: StepPlan.shape.steps.element.array().min(2).max(4) });

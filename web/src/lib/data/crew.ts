@@ -110,12 +110,46 @@ async function finishedJustNow(studentId: string): Promise<string | null> {
 
 const STUDENT = `SELECT id, name, crew_id AS "crewId", fur_hue AS "furHue" FROM students`;
 
-export function listStudents(): Promise<Student[]> {
-  return all(`${STUDENT} ORDER BY name`);
+/** Everyone in the raft a code belongs to, so a returning student can tap their own otter. */
+export function raftByCode(code: string): Promise<Student[]> {
+  return all(`${STUDENT} WHERE crew_id = (SELECT id FROM crews WHERE join_code = ?) ORDER BY name`, normalCode(code));
 }
 
 export function getStudent(id: string): Promise<Student | null> {
   return one(`${STUDENT} WHERE id = ?`, id);
+}
+
+/** Steps on their own that fill a new student's ring each week. */
+const NEW_STUDENT_TARGET = 8;
+
+/** Codes ignore case and spaces. */
+function normalCode(code: string): string {
+  return code.replace(/\s/g, "").toUpperCase();
+}
+
+/** A new student, from the welcome screen, in the raft they joined (or none yet). */
+export async function addStudent(name: string, furHue: number, crewId: string | null): Promise<Student> {
+  const id = newId();
+  await run(
+    "INSERT INTO students (id, name, crew_id, weekly_target, fur_hue) VALUES (?, ?, ?, ?, ?)",
+    id,
+    name,
+    crewId,
+    NEW_STUDENT_TARGET,
+    Math.round(furHue),
+  );
+  return { id, name, crewId, furHue: Math.round(furHue) };
+}
+
+/** The raft a code from staff belongs to. */
+export async function crewForCode(code: string): Promise<string | null> {
+  const crew = await one<{ id: string }>("SELECT id FROM crews WHERE join_code = ?", normalCode(code));
+  return crew?.id ?? null;
+}
+
+/** Put a student who isn't in a raft yet into one. */
+export async function joinCrew(studentId: string, crewId: string): Promise<boolean> {
+  return (await run("UPDATE students SET crew_id = ? WHERE id = ? AND crew_id IS NULL", crewId, studentId)) > 0;
 }
 
 /** Change the colour of a student's otter. */

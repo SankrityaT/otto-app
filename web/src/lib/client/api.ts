@@ -13,8 +13,18 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error ?? "Something went wrong. Please try again.");
+  if (!response.ok) throw new ApiError(body.error ?? "Something went wrong. Please try again.", response.status);
   return body as T;
+}
+
+/** A readable message, plus the HTTP status for screens that act on it. */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
 }
 
 const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(body) });
@@ -60,7 +70,11 @@ export type Summary = { total: number; onOwn: number };
 export type PostReview = { ok: boolean; problem: string; why: string; kinderVersion: string | null };
 
 export const api = {
-  students: () => call<{ students: Student[] }>("/api/students"),
+  student: (studentId: string) => call<{ student: Student }>(`/api/students/${encodeURIComponent(studentId)}`),
+  addStudent: (name: string, furHue: number, raftCode: string) =>
+    call<{ student: Student }>("/api/students", post({ name, furHue, raftCode })),
+  joinRaft: (studentId: string, code: string) => call(`/api/students/${encodeURIComponent(studentId)}/raft`, post({ code })),
+  raftByCode: (code: string) => call<{ members: Student[] }>("/api/crew/members", post({ code })),
   setFurHue: (studentId: string, furHue: number) =>
     call(`/api/students/${studentId}`, { method: "PATCH", body: JSON.stringify({ furHue }) }),
   doneThisWeek: (studentId: string) =>
