@@ -40,7 +40,8 @@ export function useCamera(enabled: boolean, source: EyesSource = "camera", onSti
   useEffect(() => {
     if (!enabled || source !== "camera") return;
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 } }, audio: false })
+      // About 2 megapixels: enough for small parts and labels, and still quick to send.
+      .getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } }, audio: false })
       .then(attach)
       .catch(() => setError("Ayin can't use the camera. Check the browser's camera permission."));
     return () => streamRef.current?.getTracks().forEach((track) => track.stop());
