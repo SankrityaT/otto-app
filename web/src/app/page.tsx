@@ -43,6 +43,14 @@ export default function Today() {
   const [message, setMessage] = useState<string | null>(null);
   const [binSignal, setBinSignal] = useState(0);
 
+  // Opened from the "Use Ayin on your phone" QR code: remember who this is, then tidy the address.
+  useEffect(() => {
+    const fromLink = new URLSearchParams(window.location.search).get("student");
+    if (!fromLink) return;
+    setStudentId(fromLink);
+    window.history.replaceState(null, "", "/");
+  }, [setStudentId]);
+
   useEffect(() => {
     api.students().then((r) => setStudents(r.students)).catch((e) => setMessage(e.message));
     api.routines().then((r) => setRoutines(r.routines)).catch((e) => setMessage(e.message));

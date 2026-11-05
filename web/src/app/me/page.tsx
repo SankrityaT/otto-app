@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { PhoneLink } from "@/components/PhoneLink";
 import AyinOtter from "@/components/otter/AyinOtter";
 import FurSlider from "@/components/pond/FurSlider";
 import type { Student } from "@/lib/data/crew";
@@ -70,6 +71,8 @@ export default function MePage() {
           </div>
           <p className="choice__help">Ayin looks only when you tap Done, Help or Show me, and never saves what it sees. Share a screen when the task is on a computer, or when there is no camera.</p>
         </fieldset>
+
+        {student && <PhoneLink studentId={student.id} />}
 
         <Link href="/me/otter" className="card flex items-center gap-4">
           <span className="text-[17px]">

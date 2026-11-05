@@ -91,6 +91,8 @@ npm run seed                   # a demo crew so the crew screen has data
 npm run dev                    # open http://localhost:3000
 ```
 
+**On a phone:** start with `npm run dev:phone` instead (it serves Ayin over https on your Wi-Fi, which phones need before they allow the camera). Then open **Me** on the computer and scan the **Use Ayin on your phone** QR code with the phone's camera. Ayin opens on the phone, already set to that student. The first time, the phone may ask you to trust the development certificate.
+
 Use Chrome or Safari: Ayin uses the browser's built-in speech to read steps aloud and to hear "done", "help" and "show me". The first time a step is shown, its picture takes 15–30 seconds to draw; after that it is instant.
 
 Checks:
