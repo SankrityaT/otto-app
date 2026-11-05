@@ -66,6 +66,14 @@ def report_press(button: str) -> None:
 def serve_camera(camera: Picamera2) -> ThreadingHTTPServer:
     class CaptureHandler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:
+            if self.path == "/hello":  # lets the app find this otter on the Wi-Fi by itself
+                body = json.dumps({"ayin": "otter", "buttons": True}).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
             if self.path != "/capture":
                 self.send_error(404)
                 return

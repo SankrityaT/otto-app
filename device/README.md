@@ -2,7 +2,7 @@
 
 The otter is a desk buddy that sits at a work station. It is Ayin's camera and, on the Raspberry Pi version, three big buttons. The phone or tablet next to it shows the steps and speaks them.
 
-The server doesn't care which camera a photo comes from. Set `AYIN_CAMERA_URL` in `web/.env.local` to the otter's address and choose **The otter** under *Me → Ayin's eyes*. The server then takes its photo from `<AYIN_CAMERA_URL>/capture` and gives exactly the same answer it would give for a phone photo.
+The server doesn't care which camera a photo comes from. In the app, open **Me → Connect your otter** and tap **Find my otter**: Ayin searches the Wi-Fi for it (each otter answers `/hello` and the name `ayin-otter.local`), shows a live photo through it, and tests its buttons. Staff can still type an address, or set `AYIN_CAMERA_URL` in `web/.env.local`. The server then takes its photo from `<AYIN_CAMERA_URL>/capture` and gives exactly the same answer it would give for a phone photo.
 
 | Folder | Hardware | Status |
 | --- | --- | --- |
@@ -34,6 +34,7 @@ git clone https://github.com/SankrityaT/ayin-app.git ~/ayin-app
 cd ~/ayin-app/device/pi
 cp .env.example .env        # set AYIN_SERVER_URL to the computer running the web app
 set -a; . ./.env; set +a
+sudo hostnamectl set-hostname ayin-otter   # so the app can find it as ayin-otter.local
 python3 ayin_otter.py        # or install ayin-otter.service to start on boot
 ```
 

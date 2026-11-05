@@ -9,6 +9,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <ESPmDNS.h>
 #include "esp_camera.h"
 #include "secrets.h"
 
@@ -102,6 +103,9 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) delay(500);
   Serial.printf("Ayin camera ready at http://%s/capture\n", WiFi.localIP().toString().c_str());
 
+  // Let the app find this otter by itself: by name (ayin-otter.local) and by asking "/hello".
+  MDNS.begin("ayin-otter");
+  server.on("/hello", []() { server.send(200, "application/json", "{\"ayin\":\"otter\",\"buttons\":false}"); });
   server.on("/capture", handleCapture);
   server.begin();
 }

@@ -26,6 +26,7 @@ export default function ConnectOtter() {
   const [message, setMessage] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const [typing, setTyping] = useState(false);
 
   useEffect(() => {
     api.otter().then((r) => r.address && setAddress(r.address));
@@ -43,6 +44,22 @@ export default function ConnectOtter() {
     }, PRESS_POLL_MS);
     return () => clearInterval(timer);
   }, [step, pressed]);
+
+  /** Search the Wi-Fi for the otter. */
+  async function find() {
+    setTesting(true);
+    setMessage(null);
+    try {
+      const found = await api.findOtter();
+      setAddress(found.address);
+      if (found.photo) setPhoto(found.photo);
+      else setMessage("Found your otter, but its camera sent no photo. Check the camera cable.");
+    } catch (e) {
+      setMessage((e as Error).message);
+    } finally {
+      setTesting(false);
+    }
+  }
 
   async function test() {
     setTesting(true);
@@ -93,20 +110,12 @@ export default function ConnectOtter() {
         {step === "find" && (
           <>
             <h1 className="page__h">Find your otter</h1>
-            <p className="text-[18px] text-ink-2">
-              Type the address your otter shows when it starts. It looks like <strong>http://192.168.1.50</strong>.
-            </p>
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="http://192.168.1.50"
-              inputMode="url"
-              aria-label="Otter address"
-              className="h-14 rounded-2xl border border-line bg-card px-4 text-[18px]"
-            />
-            <Button look={photo ? "soft" : "main"} className="h-14" disabled={testing || !address.trim()} onClick={test}>
-              {testing ? "Looking for it" : photo ? "Try again" : "Find it"}
-            </Button>
+            <p className="text-[18px] text-ink-2">Ayin looks for your otter on your Wi-Fi. This takes a few seconds.</p>
+            {!photo && (
+              <Button look="main" className="h-14" disabled={testing} onClick={find}>
+                {testing ? "Looking for your otter" : "Find my otter"}
+              </Button>
+            )}
             {message && <p className="rounded-2xl bg-card p-4 text-[17px]">{message}</p>}
             {photo && (
               <>
@@ -117,6 +126,25 @@ export default function ConnectOtter() {
                   That looks right
                 </Button>
               </>
+            )}
+            {typing ? (
+              <div className="flex flex-col gap-3">
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="http://192.168.1.50"
+                  inputMode="url"
+                  aria-label="Otter address"
+                  className="h-14 rounded-2xl border border-line bg-card px-4 text-[18px]"
+                />
+                <Button disabled={testing || !address.trim()} onClick={test}>
+                  Try this address
+                </Button>
+              </div>
+            ) : (
+              <button onClick={() => setTyping(true)} className="btn btn--text self-center">
+                Type the address instead (for staff)
+              </button>
             )}
           </>
         )}
