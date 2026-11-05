@@ -1,5 +1,6 @@
 import { getStudent } from "@/lib/data/crew";
-import { startRun } from "@/lib/data/runs";
+import { doneThisWeek, startRun } from "@/lib/data/runs";
+import type { NextRequest } from "next/server";
 import { jsonError, readJson } from "@/lib/http";
 
 export async function POST(request: Request) {
@@ -10,4 +11,11 @@ export async function POST(request: Request) {
   const runId = startRun(routineId, studentId);
   if (!runId) return jsonError("That task doesn't exist.", 404);
   return Response.json({ runId }, { status: 201 });
+}
+
+/** What this student finished this week. */
+export function GET(request: NextRequest) {
+  const studentId = request.nextUrl.searchParams.get("studentId") ?? "";
+  if (!getStudent(studentId)) return jsonError("Student not found.", 404);
+  return Response.json({ done: doneThisWeek(studentId) });
 }

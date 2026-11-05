@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Gloock, Gochi_Hand, Lexend } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Gochi_Hand, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import "./pond.css";
 
-// Lexend was designed to make reading easier; Gloock is for the few large lines.
-const lexend = Lexend({ variable: "--font-lexend", subsets: ["latin"] });
-const gloock = Gloock({ variable: "--font-gloock", subsets: ["latin"], weight: "400" });
+// Atkinson Hyperlegible is built to be easy to read; Instrument Serif is for the few large lines.
+const sans = Atkinson_Hyperlegible_Next({ variable: "--font-atkinson", subsets: ["latin"] });
+const serif = Instrument_Serif({ variable: "--font-instrument", subsets: ["latin"], weight: "400" });
 // A hand-drawn face for "show me" explainers, so they read like a quick sketch from a tutor.
 const hand = Gochi_Hand({ variable: "--font-gochi", subsets: ["latin"], weight: "400" });
 
@@ -13,12 +14,21 @@ export const metadata: Metadata = {
   description: "A calm step-by-step coach for hands-on job tasks",
 };
 
-export const viewport: Viewport = { themeColor: "#f3eee6" };
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F3EEE6" },
+    { media: "(prefers-color-scheme: dark)", color: "#1D1B18" },
+  ],
+};
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${lexend.variable} ${gloock.variable} ${hand.variable} h-full antialiased`}>
-      <body className="min-h-full">{children}</body>
+    <html
+      lang="en"
+      className={`${sans.variable} ${serif.variable} ${hand.variable}`}
+      style={{ ["--sans" as string]: "var(--font-atkinson)", ["--serif" as string]: "var(--font-instrument)" }}
+    >
+      <body>{children}</body>
     </html>
   );
 }

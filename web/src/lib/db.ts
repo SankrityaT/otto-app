@@ -16,7 +16,8 @@ const SCHEMA = `
     id            TEXT PRIMARY KEY,
     name          TEXT NOT NULL,
     crew_id       TEXT REFERENCES crews(id),
-    weekly_target INTEGER NOT NULL    -- steps on my own that fill this student's ring
+    weekly_target INTEGER NOT NULL,   -- steps on my own that fill this student's ring
+    fur_hue       INTEGER NOT NULL DEFAULT 0  -- the student's own otter colour (a hue shift)
   );
 
   CREATE TABLE IF NOT EXISTS routines (
@@ -89,10 +90,10 @@ function open(): DatabaseSync {
 
 /** Columns added after the first version, for databases created before them. */
 function addMissingColumns(db: DatabaseSync): void {
-  const columns = db.prepare("PRAGMA table_info(steps)").all() as { name: string }[];
-  if (!columns.some((column) => column.name === "scene_json")) {
-    db.exec("ALTER TABLE steps ADD COLUMN scene_json TEXT");
-  }
+  const has = (table: string, column: string) =>
+    (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).some((c) => c.name === column);
+  if (!has("steps", "scene_json")) db.exec("ALTER TABLE steps ADD COLUMN scene_json TEXT");
+  if (!has("students", "fur_hue")) db.exec("ALTER TABLE students ADD COLUMN fur_hue INTEGER NOT NULL DEFAULT 0");
 }
 
 // Reuse one connection across hot reloads in development.

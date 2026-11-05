@@ -1,18 +1,27 @@
 "use client";
 
-import { Camera, ChevronRight, Users } from "lucide-react";
-import Link from "next/link";
+import { Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/Button";
-import UprightOtter from "@/components/otter/UprightOtter";
+import { AppShell } from "@/components/AppShell";
+import { StudentPicker } from "@/components/StudentPicker";
+import Fold from "@/components/pond/Fold";
+import Pond, { type PondStatus } from "@/components/pond/Pond";
+import { LEAF_TONES, type LeafItem } from "@/components/pond/PondLeaves";
+import TalkBar from "@/components/pond/TalkBar";
 import type { Student } from "@/lib/data/crew";
 import { api } from "@/lib/client/api";
-import { useCameraChoice, useStudentId } from "@/lib/client/settings";
+import { useStudentId } from "@/lib/client/settings";
 
 type Routine = { id: string; title: string; stepCount: number };
+type Done = { runId: string; title: string; onOwn: number; total: number };
 
-/** Read a photo the student took into a data URL the API understands. */
+/** Each task keeps the same leaf colour every time, picked from its id. */
+function toneFor(id: string): LeafItem["tone"] {
+  const sum = [...id].reduce((total, char) => total + char.charCodeAt(0), 0);
+  return LEAF_TONES[sum % LEAF_TONES.length];
+}
+
 function readPhoto(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -22,152 +31,118 @@ function readPhoto(file: File): Promise<string> {
   });
 }
 
-export default function Home() {
+export default function Today() {
   const router = useRouter();
-  const [students, setStudents] = useState<Student[]>([]);
   const [studentId, setStudentId] = useStudentId();
+  const [students, setStudents] = useState<Student[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
-  const [camera, setCamera] = useCameraChoice();
-  const [task, setTask] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<Done[]>([]);
+  const [status, setStatus] = useState<PondStatus>("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [binSignal, setBinSignal] = useState(0);
 
   useEffect(() => {
     api.students().then((r) => setStudents(r.students)).catch((e) => setMessage(e.message));
     api.routines().then((r) => setRoutines(r.routines)).catch((e) => setMessage(e.message));
   }, []);
 
+  useEffect(() => {
+    if (studentId) api.doneThisWeek(studentId).then((r) => setDone(r.done)).catch(() => {});
+  }, [studentId]);
+
   const student = students.find((s) => s.id === studentId);
+  if (!student) return <StudentPicker students={students} onPick={setStudentId} message={message} />;
 
   async function start(routineId: string) {
-    if (!studentId) return;
-    const { runId } = await api.startRun(routineId, studentId);
+    const { runId } = await api.startRun(routineId, student!.id);
     router.push(`/run/${runId}`);
   }
 
-  async function startNewTask(photo: string | null) {
-    setBusy(true);
+  async function newTask(task: string, photo: string | null) {
+    setStatus("thinking");
     setMessage("Ayin is breaking it into steps");
     try {
       const { routine } = await api.newRoutine(task, photo);
       await start(routine.id);
     } catch (error) {
       setMessage((error as Error).message);
-      setBusy(false);
+      setStatus("idle");
     }
   }
 
-  if (!student) {
-    return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-8 px-5 py-10">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <UprightOtter className="h-44 w-44" />
-          <h1 className="font-display text-[42px] leading-none">Who&apos;s working today?</h1>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {students.map((s) => (
-            <Button key={s.id} className="h-16 text-[19px]" onClick={() => setStudentId(s.id)}>
-              {s.name}
-            </Button>
-          ))}
-        </div>
-        {students.length === 0 && (
-          <p className="text-center text-ink-3">
-            No students yet. Run <code>npm run seed</code> to add a demo crew.
-          </p>
-        )}
-        {message && <p className="text-center text-ink-3">{message}</p>}
-      </main>
-    );
-  }
+  const leaves: LeafItem[] = routines.map((r) => ({ id: r.id, title: r.title, line: `${r.stepCount} steps`, tone: toneFor(r.id) }));
+  const finished: LeafItem[] = done.map((d) => ({
+    id: d.runId,
+    title: d.title,
+    line: `${d.onOwn} of ${d.total} on your own`,
+    tone: toneFor(d.runId),
+  }));
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-7 px-5 py-6">
-      <header className="flex items-center justify-between">
-        <button
-          onClick={() => setStudentId(null)}
-          className="flex items-center gap-2 rounded-full bg-card py-1.5 pl-1.5 pr-4 text-[15px] font-medium"
-        >
-          <UprightOtter className="h-8 w-8 rounded-full bg-clay" active={false} />
-          {student.name}
-          <span className="text-ink-3">· switch</span>
-        </button>
-        <Link href="/crew" className="flex items-center gap-2 rounded-full bg-card px-4 py-2.5 text-[15px] font-medium">
-          <Users size={18} /> My crew
-        </Link>
-      </header>
-
-      <section className="flex flex-col gap-4">
-        <h1 className="font-display text-[42px] leading-[1.02]">What are you working on?</h1>
-        <input
-          aria-label="The task"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && task.trim() && !busy && startNewTask(null)}
-          placeholder="Make an iced latte"
-          className="h-16 rounded-2xl border border-line bg-card px-5 text-[19px] placeholder:text-ink-3"
-        />
-        <div className="flex gap-3">
-          <Button look="main" className="h-14 flex-1" disabled={busy || !task.trim()} onClick={() => startNewTask(null)}>
-            Start
-          </Button>
-          <label className="inline-flex h-14 cursor-pointer items-center gap-2 rounded-full bg-clay px-5 text-[17px] font-medium has-[:disabled]:opacity-40">
-            <Camera size={20} /> Show it
+    <AppShell>
+      <div className="today">
+        <div className="today__center">
+          <h1 className="sr-only">Today</h1>
+          <Pond
+            motion="idle"
+            furHue={student.furHue}
+            agentStatus={status}
+            open={leaves}
+            done={finished}
+            onLeafSelect={start}
+            onBin={() => setBinSignal((n) => n + 1)}
+            upright={status !== "idle"}
+          />
+          <TalkBar status={status} onListening={(on) => setStatus(on ? "listening" : "idle")} onSend={(text) => newTask(text, null)} />
+          <label className="btn btn--text mt-1 inline-flex cursor-pointer items-center gap-2">
+            <Camera size={18} /> Or show Ayin a photo of the task
             <input
               type="file"
               accept="image/*"
               capture="environment"
               className="sr-only"
-              disabled={busy}
+              disabled={status === "thinking"}
               onChange={async (e) => {
                 const file = e.target.files?.[0];
-                if (file) startNewTask(await readPhoto(file));
+                if (file) newTask("", await readPhoto(file));
               }}
             />
           </label>
+          {message && <p className="mt-2 text-center text-ink-2">{message}</p>}
         </div>
-        {message && <p className="text-[17px] text-ink-2">{message}</p>}
-      </section>
 
-      {routines.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-[15px] font-medium text-ink-3">Practise again</h2>
-          <ul className="flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-line bg-card">
-            {routines.map((r) => (
-              <li key={r.id} className="border-b border-line last:border-0">
-                <button
-                  disabled={busy}
-                  onClick={() => start(r.id)}
-                  className="flex w-full items-center justify-between px-5 py-4 text-left disabled:opacity-40"
-                >
-                  <span className="flex flex-col">
-                    <span className="text-[17px] font-medium">{r.title}</span>
-                    <span className="text-[15px] text-ink-3">{r.stepCount} steps</span>
+        <aside className="today__right" aria-label="Your tasks">
+          <Fold id="practise" title="Practise again" summary={`${routines.length} ${routines.length === 1 ? "task" : "tasks"}`}>
+            <ul className="flex flex-col">
+              {routines.map((r) => (
+                <li key={r.id} className="border-b border-line last:border-0">
+                  <button onClick={() => start(r.id)} className="flex w-full items-center justify-between py-3 text-left">
+                    <span className="font-semibold">{r.title}</span>
+                    <span className="text-ink-3">{r.stepCount} steps</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Fold>
+          <Fold
+            id="done"
+            toggleSignal={binSignal}
+            title="Done this week"
+            summary={done.length === 0 ? "Nothing yet" : `${done.length} ${done.length === 1 ? "task" : "tasks"}`}
+          >
+            <ul className="flex flex-col">
+              {done.map((d) => (
+                <li key={d.runId} className="flex justify-between border-b border-line py-3 last:border-0">
+                  <span className="font-semibold">{d.title}</span>
+                  <span className="text-ink-3">
+                    {d.onOwn} of {d.total} on your own
                   </span>
-                  <ChevronRight size={20} className="text-ink-3" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <section className="mt-auto flex items-center justify-between gap-3 text-[15px] text-ink-3">
-        <span>Ayin&apos;s eyes</span>
-        <div className="flex rounded-full bg-clay p-1" role="radiogroup" aria-label="Which camera Ayin uses">
-          {(["this-device", "otter"] as const).map((choice) => (
-            <button
-              key={choice}
-              role="radio"
-              aria-checked={camera === choice}
-              onClick={() => setCamera(choice)}
-              className={`rounded-full px-4 py-2 font-medium ${camera === choice ? "bg-card text-ink" : "text-ink-2"}`}
-            >
-              {choice === "this-device" ? "This phone" : "The otter"}
-            </button>
-          ))}
-        </div>
-      </section>
-    </main>
+                </li>
+              ))}
+            </ul>
+          </Fold>
+        </aside>
+      </div>
+    </AppShell>
   );
 }

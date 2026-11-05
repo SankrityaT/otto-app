@@ -1,36 +1,22 @@
 @import "tailwindcss";
 
-/* Ayin's design tokens, from our design system. Warm and quiet: no red anywhere. */
+/* Tailwind names for the colours and fonts in Havi's pond styles (pond.css), so both agree. */
 @theme inline {
-  --color-ground: #f3eee6;
-  --color-card: #fffdf9;
+  --color-ground: var(--ground);
+  --color-card: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-soft);
+  --color-ink-3: var(--ink-faint);
+  --color-line: var(--line);
   --color-clay: #e7dfd3;
   --color-clay-2: #d9cfc1;
-  --color-line: rgba(40, 33, 26, 0.1);
-  --color-ink: #23201c;
-  --color-ink-2: #554e46;
-  --color-ink-3: #6b6359;
-  --color-cel: #8fb7a3;
-  --color-cel-deep: #2b6652;
-  --color-cel-wash: #e2ede7;
-  --color-ochre: #7a571a;
-  --color-ochre-wash: #f4ead6;
-  --font-display: var(--font-gloock), Georgia, serif;
-  --font-sans: var(--font-lexend), system-ui, sans-serif;
+  --color-cel: var(--celadon);
+  --color-cel-deep: var(--celadon-text);
+  --color-cel-wash: var(--celadon-wash);
+  --font-display: var(--serif);
+  --font-sans: var(--sans);
   --font-hand: var(--font-gochi), "Comic Sans MS", cursive;
-  --radius-card: 24px;
-}
-
-body {
-  background: var(--color-ground);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-}
-
-/* Big, obvious focus rings for keyboard and switch users. */
-:focus-visible {
-  outline: 3px solid var(--color-cel-deep);
-  outline-offset: 3px;
+  --radius-card: 22px;
 }
 
 /* Graph paper behind "show me" explainers. */

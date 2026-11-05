@@ -17,11 +17,19 @@ db.prepare("INSERT INTO crews (id, name, weekly_goal, cheers) VALUES (?, ?, ?, ?
   JSON.stringify(["Nice work!", "You did it on your own!", "Proud of you", "Keep going"]),
 );
 
-const names = ["Jordan", "Ava", "Sam", "Leo"];
+// Each student picked their own otter colour (a hue shift; 0 is the painted brown).
+const otters: Record<string, number> = { Jordan: 0, Ava: 300, Sam: 150, Leo: 210 };
+const names = Object.keys(otters);
 const students = Object.fromEntries(
   names.map((name) => {
     const id = newId();
-    db.prepare("INSERT INTO students (id, name, crew_id, weekly_target) VALUES (?, ?, ?, ?)").run(id, name, crewId, 8);
+    db.prepare("INSERT INTO students (id, name, crew_id, weekly_target, fur_hue) VALUES (?, ?, ?, ?, ?)").run(
+      id,
+      name,
+      crewId,
+      8,
+      otters[name],
+    );
     return [name, id];
   }),
 );

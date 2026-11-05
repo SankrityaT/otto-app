@@ -21,6 +21,12 @@ export type Summary = { total: number; onOwn: number };
 
 export const api = {
   students: () => call<{ students: Student[] }>("/api/students"),
+  setFurHue: (studentId: string, furHue: number) =>
+    call(`/api/students/${studentId}`, { method: "PATCH", body: JSON.stringify({ furHue }) }),
+  doneThisWeek: (studentId: string) =>
+    call<{ done: { runId: string; title: string; onOwn: number; total: number }[] }>(
+      `/api/runs?studentId=${encodeURIComponent(studentId)}`,
+    ),
   routines: () => call<{ routines: { id: string; title: string; stepCount: number }[] }>("/api/routines"),
   newRoutine: (task: string, photo: string | null) => call<{ routine: Routine }>("/api/routines", post({ task, photo })),
   startRun: (routineId: string, studentId: string) => call<{ runId: string }>("/api/runs", post({ routineId, studentId })),
