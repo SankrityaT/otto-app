@@ -18,6 +18,8 @@ import { Ring } from "./Ring";
 import { StepPicture } from "./StepPicture";
 import { StepTimer } from "./StepTimer";
 import { TaskStart } from "./TaskStart";
+import { Composer } from "./raft/Composer";
+import { RaftIcon } from "./raft/Stickers";
 import type { Scene } from "@/lib/ai/scene";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
@@ -65,6 +67,8 @@ export function StepCoach({
   const [looking, setLooking] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [listening, setListening] = useState(false);
+  // Posting to the raft from inside a task: asking for help on a step, or sharing a finished task.
+  const [composing, setComposing] = useState<"ask" | "win" | null>(null);
   // Hands-free: Ayin checks the step every few seconds until it's done. The student turns it on.
   const [watching, setWatching] = useState(false);
   // The step Ayin couldn't see being done, so the student can say "I did it".
@@ -242,14 +246,12 @@ export function StepCoach({
     }
   }
 
-  async function askCrewmate() {
+  /** Still stuck: ask the raft's help board, with this step attached. */
+  async function askRaft() {
     if (!step) return;
+    setComposing("ask");
     const { helperName } = await api.askCrewmate(run.studentId, step.id);
-    tell(
-      helperName
-        ? `${helperName} has done this step on their own. We let them know you'd like help.`
-        : "Nobody in your raft has done this step yet. A staff member can help.",
-    );
+    if (helperName) tell(`${helperName} has done this step on their own and can help.`);
   }
 
   // Voice, the on-screen buttons and the otter's buttons all end in the same three actions.
@@ -364,18 +366,36 @@ export function StepCoach({
     );
   }
 
+  const composer = composing && (
+    <Composer
+      authorId={run.studentId}
+      startKind={composing}
+      step={composing === "ask" && step ? { id: step.id, text: step.text } : null}
+      onClose={() => setComposing(null)}
+      onShared={() => {
+        setComposing(null);
+        tell(composing === "ask" ? "Asked your raft. Someone who knows this step can answer." : "Shared with your raft.");
+      }}
+    />
+  );
+
   if (summary || !step || !current) {
     return (
-      <Finished
-        title={run.title}
-        furHue={run.furHue}
-        summary={summary ?? { total: run.steps.length, onOwn: 0 }}
-      />
+      <>
+        {composer}
+        <Finished
+          title={run.title}
+          furHue={run.furHue}
+          summary={summary ?? { total: run.steps.length, onOwn: 0 }}
+          onShare={() => setComposing("win")}
+        />
+      </>
     );
   }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 px-5 pb-6 pt-5">
+      {composer}
       <header className="flex items-center justify-between gap-3">
         <Link
           href="/"
@@ -485,7 +505,7 @@ export function StepCoach({
       )}
 
       {current.level === HELP_LEVELS.showMe && (
-        <Button look="quiet" className="self-start px-0" onClick={askCrewmate}>
+        <Button look="quiet" className="self-start px-0" onClick={askRaft}>
           <Users size={18} /> Still stuck? Ask someone in your raft
         </Button>
       )}
@@ -561,10 +581,12 @@ function Finished({
   title,
   furHue,
   summary,
+  onShare,
 }: {
   title: string;
   furHue: number;
   summary: Summary;
+  onShare: () => void;
 }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-5 text-center">
@@ -583,10 +605,13 @@ function Finished({
       <p className="text-[17px] text-ink-2">
         {title} is done. It counts toward your raft&apos;s week.
       </p>
+      <Button look="main" className="h-14 w-full" onClick={onShare}>
+        <RaftIcon name="win" /> Share this win with my raft
+      </Button>
       <div className="flex gap-3">
         <Link
           href="/"
-          className="inline-flex min-h-12 items-center rounded-full bg-ink px-6 text-[17px] font-medium text-card"
+          className="inline-flex min-h-12 items-center rounded-full bg-clay px-6 text-[17px] font-medium"
         >
           Another task
         </Link>
