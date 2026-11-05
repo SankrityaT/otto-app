@@ -248,7 +248,7 @@ export function StepCoach({
     tell(
       helperName
         ? `${helperName} has done this step on their own. We let them know you'd like help.`
-        : "Nobody in your crew has done this step yet. A staff member can help.",
+        : "Nobody in your raft has done this step yet. A staff member can help.",
     );
   }
 
@@ -486,7 +486,7 @@ export function StepCoach({
 
       {current.level === HELP_LEVELS.showMe && (
         <Button look="quiet" className="self-start px-0" onClick={askCrewmate}>
-          <Users size={18} /> Still stuck? Ask a crewmate
+          <Users size={18} /> Still stuck? Ask someone in your raft
         </Button>
       )}
 
@@ -581,7 +581,7 @@ function Finished({
         {summary.onOwn} of {summary.total} on your own
       </h1>
       <p className="text-[17px] text-ink-2">
-        {title} is done. It counts toward your crew&apos;s week.
+        {title} is done. It counts toward your raft&apos;s week.
       </p>
       <div className="flex gap-3">
         <Link
@@ -591,10 +591,10 @@ function Finished({
           Another task
         </Link>
         <Link
-          href="/crew"
+          href="/raft"
           className="inline-flex min-h-12 items-center rounded-full bg-clay px-6 text-[17px] font-medium"
         >
-          See my crew
+          See my raft
         </Link>
       </div>
     </main>

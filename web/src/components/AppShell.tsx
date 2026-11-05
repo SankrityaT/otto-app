@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 import { useCameraChoice } from "@/lib/client/settings";
 import Tabs from "./pond/Tabs";
 
-const SECTIONS: ["/" | "/crew" | "/me", string][] = [
+const SECTIONS: ["/" | "/raft" | "/me", string][] = [
   ["/", "Today"],
-  ["/crew", "Crew"],
+  ["/raft", "Raft"],
   ["/me", "Me"],
 ];
 

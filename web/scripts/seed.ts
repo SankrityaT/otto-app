@@ -13,7 +13,7 @@ for (const table of TABLES) db.exec(`DELETE FROM ${table}`);
 const crewId = "crew-cafe";
 db.prepare("INSERT INTO crews (id, name, weekly_goal, cheers) VALUES (?, ?, ?, ?)").run(
   crewId,
-  "Café crew",
+  "Café raft",
   30,
   JSON.stringify(["Nice work!", "You did it on your own!", "Proud of you", "Keep going"]),
 );
@@ -101,4 +101,4 @@ db.prepare("INSERT INTO invites (id, from_id, to_id, about, status, created_at) 
   at,
 );
 
-console.log(`Seeded the Café crew (${names.join(", ")}) and the "${latte.title}" routine.`);
+console.log(`Seeded the Café raft (${names.join(", ")}) and the "${latte.title}" routine.`);
