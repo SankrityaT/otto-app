@@ -62,6 +62,12 @@ function pastRun(name: string, daysAgo: number, helpLevels: number[]) {
 const today = new Date().getDay(); // keep sample runs inside this week (weeks start Monday)
 const earlierThisWeek = Math.min((today + 6) % 7, 2);
 
+pastRun("Sam", 9, [0, 1, 0, 0, 0, 1]); // last week
+pastRun("Ava", 8, [0, 0, 0, 0, 0, 0]);
+pastRun("Ava", 8, [0, 0, 0, 1, 0, 0]);
+pastRun("Jordan", 11, [0, 0, 2, 1, 0, 0]);
+pastRun("Jordan", 10, [0, 0, 1, 2, 0, 0]);
+pastRun("Jordan", 8, [0, 0, 2, 3, 0, 0]);
 pastRun("Sam", earlierThisWeek, [0, 0, 0, 0, 0, 0]);
 pastRun("Sam", 0, [0, 0, 0, 0, 0, 0]);
 pastRun("Ava", 0, [0, 0, 1, 0, 0, 0]);

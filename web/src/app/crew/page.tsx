@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, HandHeart } from "lucide-react";
+import { ArrowLeft, HandHeart, Handshake } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Ring } from "@/components/Ring";
@@ -68,6 +68,25 @@ export default function CrewPage() {
           ))}
         </ul>
       </section>
+
+      {crew.buddy && (
+        <section className="flex flex-col gap-3 rounded-[var(--radius-card)] bg-cel-wash p-5 text-cel-deep">
+          <h2 className="flex items-center gap-2 text-[15px] font-medium">
+            <Handshake size={18} /> Your practice buddy
+          </h2>
+          <p className="font-display text-[34px] leading-none text-ink">{crew.buddy.name}</p>
+          {crew.buddy.theyCanShowYou.length > 0 && (
+            <p className="text-[17px] leading-snug">
+              {crew.buddy.name} can show you: {crew.buddy.theyCanShowYou.join(", ").toLowerCase()}
+            </p>
+          )}
+          {crew.buddy.youCanShowThem.length > 0 && (
+            <p className="text-[17px] leading-snug">
+              You can show {crew.buddy.name}: {crew.buddy.youCanShowThem.join(", ").toLowerCase()}
+            </p>
+          )}
+        </section>
+      )}
 
       {crew.asksForMe.length > 0 && (
         <section className="flex flex-col gap-3">
