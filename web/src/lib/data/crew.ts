@@ -28,6 +28,8 @@ export interface CrewView {
     furHue: number;
     ring: number;
     onOwn: number;
+    /** Steps on their own that fill their ring this week. */
+    target: number;
     /** The task they're doing right now, if they started one in the last few hours. */
     now: { routineId: string; title: string; done: number; total: number } | null;
     /** Their open question to the raft from the last day, if nobody has helped yet. */
@@ -216,6 +218,7 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
         furHue: member.furHue,
         onOwn,
         ring: ringFill(onOwn, member.weeklyTarget),
+        target: member.weeklyTarget,
         now: doing,
         asking,
         justFinished,

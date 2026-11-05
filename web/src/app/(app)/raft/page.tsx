@@ -278,8 +278,10 @@ export default function RaftPage() {
           {mine && (
             <div className="flex shrink-0 items-center gap-2 text-right">
               <span className="text-[14px] leading-tight text-ink-2">
-                <strong className="block text-[18px] text-ink">{mine.onOwn}</strong>
-                on your own
+                <strong className="block text-[18px] text-ink">
+                  {Math.min(mine.onOwn, mine.target)} of {mine.target}
+                </strong>
+                steps on your own
               </span>
               <Ring fill={mine.ring} size={44} stroke={6} color={ringColor(mine.furHue)} label="Your ring this week" />
             </div>
@@ -296,7 +298,7 @@ export default function RaftPage() {
               <div className="h-full rounded-full bg-[var(--water-edge)]" style={{ width: `${Math.min(1, raft.onOwnTogether / raft.weeklyGoal) * 100}%` }} />
             </div>
             <p className="shrink-0 text-[14px] text-ink-2">
-              {raft.onOwnTogether} of {raft.weeklyGoal} together
+              {raft.onOwnTogether} of {raft.weeklyGoal} steps together
             </p>
           </div>
         </section>
