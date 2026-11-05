@@ -4,7 +4,7 @@
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
 
-> **Status (Nov 4, 2026):** in active development for the Nov 5 submission. See [Status and limitations](#status-and-limitations).
+We're building this for the Nov 5 submission, so some parts are still in progress. See [Status and limitations](#status-and-limitations).
 
 ---
 
@@ -59,7 +59,7 @@ ayin-app/
 ├── web/        Next.js app: student screens and the API
 ├── device/     Raspberry Pi client for the otter (camera, speaker)
 ├── hardware/   3D-printable otter enclosure and build guide
-└── docs/       Research notes and the AI prompt ledger
+└── docs/       Our plan, research notes and AI prompts
 ```
 
 Each folder has its own README.
@@ -82,8 +82,9 @@ To run the otter device, see [`device/README.md`](device/README.md).
 
 ## How we use AI
 
-- **In the product:** Claude (via the official Anthropic SDK) creates steps, checks steps from photos, writes hints and draws step pictures. Prompts live in [`web/src/lib/ai/`](web/src/lib/ai/).
-- **In building it:** we used Claude Code for research, design and code, with a teammate reviewing every change. Every prompt is in [`docs/ai-prompts.md`](docs/ai-prompts.md).
+In the product, Claude (through the official Anthropic SDK) breaks a task into steps, checks a step from a photo, writes hints and draws step pictures. Those prompts live in [`web/src/lib/ai/`](web/src/lib/ai/).
+
+To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then worked through it with Claude Code as a pair programmer, reviewing every change. The prompts that shaped the project are in [`docs/ai-prompts.md`](docs/ai-prompts.md).
 
 ## Privacy and safety
 
