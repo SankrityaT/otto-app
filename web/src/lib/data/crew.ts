@@ -1,7 +1,7 @@
 import { matchBuddies, type StepHistory } from "../buddies";
 import { all, newId, now, one, run } from "../db";
 import { RUNS_TO_FADE } from "../help";
-import { daysPractised, ringFill, startOfWeek, stepsOnOwn, type StepLog } from "../week";
+import { ringFill, startOfWeek, stepsOnOwn, type StepLog } from "../week";
 
 // The crew: a few students from one work site, set up by staff. Students see it as their
 // "raft", the name for a group of otters floating together. A shared goal instead
@@ -28,7 +28,6 @@ export interface CrewView {
     furHue: number;
     ring: number;
     onOwn: number;
-    days: number;
     /** The task they're doing right now, if they started one in the last few hours. */
     now: { routineId: string; title: string; done: number; total: number } | null;
     /** Their open question to the raft from the last day, if nobody has helped yet. */
@@ -50,7 +49,6 @@ export interface CrewView {
     /** Help each step took, in step order: 0 means on their own. */
     stepHelp: number[];
   }[];
-  asksForMe: { id: string; fromName: string; stepText: string }[];
   /** This student's practice buddy, or null if nobody in the crew can swap help with them yet. */
   buddy: { id: string; name: string; furHue: number; theyCanShowYou: string[]; youCanShowThem: string[] } | null;
   /** "Do it together" invites today, to or from this student, with each side's run once started. */
@@ -133,7 +131,7 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
   const crewId = student.crewId;
   const weekStart = startOfWeek(new Date()).toISOString();
 
-  const [crew, members, logs, wins, asksForMe, invites] = await Promise.all([
+  const [crew, members, logs, wins, invites] = await Promise.all([
     one<{ name: string; weeklyGoal: number; cheers: string }>(
       `SELECT name, weekly_goal AS "weeklyGoal", cheers FROM crews WHERE id = ?`,
       crewId,
@@ -163,13 +161,6 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
       crewId,
       weekStart,
     ),
-    all<CrewView["asksForMe"][number]>(
-      `SELECT a.id, f.name AS "fromName", st.text AS "stepText"
-       FROM asks a JOIN students f ON f.id = a.from_id JOIN steps st ON st.id = a.step_id
-       WHERE a.to_id = ? AND a.created_at >= ? ORDER BY a.created_at DESC`,
-      studentId,
-      weekStart,
-    ),
     all<CrewView["invites"][number]>(
       `SELECT i.id, i.from_id AS "fromId", f.name AS "fromName", t.name AS "toName", i.about, i.status,
               i.from_run_id AS "fromRunId", i.to_run_id AS "toRunId"
@@ -191,7 +182,6 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
         furHue: member.furHue,
         onOwn,
         ring: ringFill(onOwn, member.weeklyTarget),
-        days: daysPractised(logs, member.id),
         now: doing,
         asking,
         justFinished,
@@ -208,7 +198,6 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
     wins: await Promise.all(
       wins.map(async (win) => ({ ...win, cheers: await cheersFor(win.runId), stepHelp: await stepHelp(win.runId) })),
     ),
-    asksForMe,
     buddy: await findBuddy(studentId, members),
     invites,
   };
@@ -231,15 +220,12 @@ export async function addCheer(fromId: string, runId: string, phrase: string): P
   return true;
 }
 
-/**
- * Find the crewmate who has done this step on their own most often, and let them know
- * someone would like help. Returns their name, or null if nobody has done it yet.
- */
-export async function askCrewmate(fromId: string, stepId: string): Promise<string | null> {
+/** The crewmate who has done this step on their own most often, or null if nobody has yet. */
+export async function helperFor(fromId: string, stepId: string): Promise<string | null> {
   const student = await getStudent(fromId);
   if (!student?.crewId) return null;
-  const helper = await one<{ id: string; name: string }>(
-    `SELECT s.id, s.name, COUNT(*) AS times
+  const helper = await one<{ name: string }>(
+    `SELECT s.name, COUNT(*) AS times
      FROM step_logs l JOIN students s ON s.id = l.student_id
      WHERE l.step_id = ? AND l.help_level = 0 AND s.crew_id = ? AND s.id != ?
      GROUP BY s.id ORDER BY times DESC LIMIT 1`,
@@ -247,9 +233,7 @@ export async function askCrewmate(fromId: string, stepId: string): Promise<strin
     student.crewId,
     fromId,
   );
-  if (!helper) return null;
-  await run("INSERT INTO asks (id, from_id, to_id, step_id, created_at) VALUES (?, ?, ?, ?, ?)", newId(), fromId, helper.id, stepId, now());
-  return helper.name;
+  return helper?.name ?? null;
 }
 
 /** Pair the crew into practice buddies and return this student's buddy. */

@@ -99,7 +99,8 @@ export const api = {
     call<{ runId: string | null }>(`/api/crew/invites/${inviteId}`, post({ studentId, answer })),
   together: (runId: string) => call<{ together: Together | null }>(`/api/runs/${runId}/together`),
   cheerPartner: (runId: string, phrase: string) => call(`/api/runs/${runId}/together`, post({ phrase })),
-  askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),
+  helperFor: (studentId: string, stepId: string) =>
+    call<{ helperName: string | null }>(`/api/crew/helper?studentId=${encodeURIComponent(studentId)}&stepId=${encodeURIComponent(stepId)}`),
   talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[], busyWith: string | null = null) =>
     call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history, busyWith })),
   feed: (studentId: string, kind: PostKind | null) =>

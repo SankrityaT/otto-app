@@ -308,7 +308,7 @@ export function StepCoach({
   async function askRaft() {
     if (!step) return;
     setComposing("ask");
-    const { helperName } = await api.askCrewmate(run.studentId, step.id);
+    const { helperName } = await api.helperFor(run.studentId, step.id);
     if (helperName) tell(`${helperName} has done this step on their own and can help.`);
   }
 

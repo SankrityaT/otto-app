@@ -63,14 +63,6 @@ CREATE TABLE IF NOT EXISTS cheers (
   created_at TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS asks (
-  id         TEXT PRIMARY KEY,
-  from_id    TEXT NOT NULL REFERENCES students(id),
-  to_id      TEXT NOT NULL REFERENCES students(id),
-  step_id    TEXT NOT NULL REFERENCES steps(id),
-  created_at TEXT NOT NULL
-);
-
 -- "Do it together": one student invites a raftmate to do the same task at the same time.
 -- Each works in their own step coach; the two runs are linked so they see each other's progress.
 CREATE TABLE IF NOT EXISTS invites (
@@ -156,7 +148,6 @@ ALTER TABLE steps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE runs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE step_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cheers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE asks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE invites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE replies ENABLE ROW LEVEL SECURITY;

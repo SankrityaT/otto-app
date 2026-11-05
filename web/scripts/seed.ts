@@ -11,7 +11,6 @@ const TABLES = [
   "replies",
   "posts",
   "invites",
-  "asks",
   "cheers",
   "step_logs",
   "runs",
