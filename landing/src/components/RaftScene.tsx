@@ -36,6 +36,14 @@ const HEADS = { float: { x: 0.33, y: 0.32 }, upright: { x: 0.46, y: 0.4 } };
  * box, nudged so it sits in the water where a floating otter would: [size, left, top] of the box.
  */
 const UPRIGHT_BOX = { size: 85, left: 5.7, top: 10 };
+/** A small happy hop for a sitting otter: a squash, up, and a soft landing. */
+const HOP: Keyframe[] = [
+  { transform: "none" },
+  { transform: "translateY(0) scale(1.03, 0.96)", offset: 0.14 },
+  { transform: "translateY(-8%) scale(0.98, 1.03)", offset: 0.45 },
+  { transform: "translateY(0) scale(1.03, 0.97)", offset: 0.78 },
+  { transform: "none" },
+];
 
 type Bubble = { who: number; text: string; key: number };
 type Emoji = { x: number; y: number; char: string; key: number };
@@ -87,7 +95,8 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
   const [visible, setVisible] = useState(false);
   const [bubble, setBubble] = useState<Bubble | null>(null);
   const [emojis, setEmojis] = useState<Emoji[]>([]);
-  const [hop, setHop] = useState<{ who: number; key: number } | null>(null);
+  // Sitting otters hop by animating this element directly, so the otter's canvas is never remounted.
+  const hoppers = useRef<(HTMLDivElement | null)[]>([]);
   const [nudged, setNudged] = useState<[number, number] | null>(null);
 
   // Only play while the raft is on screen.
@@ -111,8 +120,8 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
     };
     // A sitting otter has no tail swish or head tilt to play, so it does a little happy hop instead.
     const hopOr = (i: number, move: () => void) => {
-      if (pose(i) === "upright") setHop({ who: i, key: ++key });
-      else move();
+      if (pose(i) !== "upright") return move();
+      hoppers.current[i]?.animate(HOP, { duration: 760, easing: "cubic-bezier(0.33, 0, 0.25, 1)" });
     };
 
     const api: Api = {
@@ -191,8 +200,10 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
                 {upright ? (
                   <div className="relative aspect-square w-full">
                     <div
-                      key={hop?.who === i ? hop.key : "still"}
-                      className={`absolute ${hop?.who === i ? "otter-hop" : ""}`}
+                      ref={(el) => {
+                        hoppers.current[i] = el;
+                      }}
+                      className="absolute origin-[56%_86%] will-change-transform"
                       style={{ width: `${UPRIGHT_BOX.size}%`, left: `${UPRIGHT_BOX.left}%`, top: `${UPRIGHT_BOX.top}%` }}
                     >
                       <Ripples className="pointer-events-none absolute left-[56%] top-[86%] w-[78%] -translate-x-1/2 -translate-y-1/2 overflow-visible" />

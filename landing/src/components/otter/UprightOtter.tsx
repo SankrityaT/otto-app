@@ -4,7 +4,9 @@
  * Written by Havi (@Havishea) for the Ayin team and copied from
  * https://github.com/Havishea/Ayin. We changed the default asset folder, moved the fur tint into useMemo to satisfy
  * our lint rules, and draw the layers at a fixed size so 2048 px art stays sharp. On the landing page the whole
- * tail is one layer that swings from its root, so the pivot moved.
+ * tail is one layer that swings from its root, so the pivot moved; the layers are shrunk to the canvas once
+ * instead of every frame, so it stays smooth; and blinks are a solid eyelid closing, like the floating otter's,
+ * instead of a fade.
  *
  * UprightOtter: the otter sitting up, holding its stone. Shown while you ask
  * something or while Ayin is explaining a task.
@@ -13,7 +15,7 @@
  * (1024×1024, made from Havishea's upright drawing):
  *   upright-body.png  the otter without its tail
  *   upright-tail.png  the tail on its own, swung from its base
- *   upright-eyes.png  closed eyes, faded in for blinks
+ *   upright-eyes.png  closed eyes; revealed from the top down, like an eyelid, for blinks
  *
  * Motion is kept small: slow breathing, a very slight bob and lean,
  * a gentle tail sway, and a blink every few seconds.
@@ -32,6 +34,20 @@ const MAX_PIXELS = 2048;
 const SEAT = { x: 512, y: 880 };
 /** The tail swings from its root, where it leaves the hip along the floor (see scripts/fix_upright_tail.py). */
 const TAIL_PIVOT = { x: 739, y: 830 };
+/** The eyelid's travel: from just above the eyes to the bottom of the closed-eyes layer. */
+const LID = { top: 398, bottom: 492 };
+
+const smoothstep = (lo: number, hi: number, x: number) => {
+  const u = Math.max(0, Math.min(1, (x - lo) / (hi - lo)));
+  return u * u * (3 - 2 * u);
+};
+/** The floating otter's blink: close in 0.20s, hold 0.08s, reopen in 0.28s. */
+const blinkClosure = (d: number) => {
+  if (d < 0 || d >= 0.56) return 0;
+  if (d < 0.2) return smoothstep(0, 0.2, d);
+  if (d < 0.28) return 1;
+  return 1 - smoothstep(0.28, 0.56, d);
+};
 
 const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -130,12 +146,28 @@ export default function UprightOtter({
     const g = cv.getContext('2d');
     if (!g) return;
 
+    // Shrinking 2048 px layers on every frame is slow and makes the motion stutter.
+    // Shrink them to the canvas size once (and again only if the size changes).
+    let sized: { px: number; body: CanvasImageSource; tail: CanvasImageSource; eyes: CanvasImageSource } | null = null;
+    const shrink = (img: CanvasImageSource, px: number) => {
+      const c = document.createElement('canvas');
+      c.width = c.height = px;
+      const cg = c.getContext('2d');
+      if (!cg) return img;
+      cg.imageSmoothingQuality = 'high';
+      cg.drawImage(img, 0, 0, px, px);
+      return c;
+    };
     const fit = () => {
       const px = Math.min(MAX_PIXELS, Math.round(cv.clientWidth * (window.devicePixelRatio || 1)));
       if (px > 0 && cv.width !== px) {
         cv.width = px;
         cv.height = px;
       }
+      if (cv.width > 0 && sized?.px !== cv.width) {
+        sized = { px: cv.width, body: shrink(layers.body, cv.width), tail: shrink(layers.tail, cv.width), eyes: shrink(layers.eyes, cv.width) };
+      }
+      return sized ?? layers;
     };
 
     // Blinks: a quick close and open every 2.8–5.5s, now and then a double blink.
@@ -144,7 +176,7 @@ export default function UprightOtter({
     let doubleAt = -1;
 
     const draw = (t: number) => {
-      fit();
+      const art = fit();
       const k = cv.width / SIZE;
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.clearRect(0, 0, cv.width, cv.height);
@@ -172,7 +204,7 @@ export default function UprightOtter({
         doubleAt = -1;
       }
       const bt = t - blinkStart;
-      const shut = bt < 0 || bt > 0.2 ? 0 : bt < 0.06 ? bt / 0.06 : bt < 0.12 ? 1 : 1 - (bt - 0.12) / 0.08;
+      const shut = still ? 0 : blinkClosure(bt);
 
       g.scale(k, k);
       g.translate(SEAT.x, SEAT.y + bob);
@@ -184,14 +216,18 @@ export default function UprightOtter({
       g.translate(TAIL_PIVOT.x, TAIL_PIVOT.y);
       g.rotate(tail);
       g.translate(-TAIL_PIVOT.x, -TAIL_PIVOT.y);
-      g.drawImage(layers.tail, 0, 0, SIZE, SIZE);
+      g.drawImage(art.tail, 0, 0, SIZE, SIZE);
       g.restore();
 
-      g.drawImage(layers.body, 0, 0, SIZE, SIZE);
+      g.drawImage(art.body, 0, 0, SIZE, SIZE);
+      // The eyelid: the closed-eyes layer, solid, shown from the top down as the eye shuts.
       if (shut > 0) {
-        g.globalAlpha = shut;
-        g.drawImage(layers.eyes, 0, 0, SIZE, SIZE);
-        g.globalAlpha = 1;
+        g.save();
+        g.beginPath();
+        g.rect(0, LID.top, SIZE, (LID.bottom - LID.top) * shut);
+        g.clip();
+        g.drawImage(art.eyes, 0, 0, SIZE, SIZE);
+        g.restore();
       }
     };
 
