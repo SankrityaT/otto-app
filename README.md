@@ -32,7 +32,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Hands-free:** voice is on during a task, so "done" works with wet hands. Ayin also notices when a step is done: the browser compares tiny frames on the device, and only when the student moves and then holds still does it send one photo to check. With the otter's camera it checks every few seconds. "I did it" moves on when the camera can't see the step.
 - **See what Ayin sees:** a live camera window is always on screen and lights up when Ayin looks, so nobody has to trust a camera they can't see.
 - **Talk to Ayin:** students can just ask out loud ("is this the right way up?"). Ayin looks through the camera and answers in a sentence or two, like a coach beside them.
-- **Chat with Ayin:** on the home screen, saying hi gets a real answer. It happens right in the pond, not in a chat window: the task leaves drift off, the pond draws in, and Ayin's words appear under the otter, each one lighting up as Ayin says it, any line can be heard again, and there are always 2–3 ready answers to tap. Ayin offers a task; the student taps Start. The otter reacts instead of looping: it leans toward the student's finger, leans in to listen, sways while thinking, hops on each word it says, and bounces when tapped. Tapping the otter starts a chat.
+- **Chat with Ayin:** on the home screen, saying hi gets a real answer. It happens right in the pond, not in a chat window: the pond draws in and Ayin's words appear under the otter, each one lighting up as Ayin says it, any line can be heard again, and there are always 2–3 ready answers to tap. Ayin offers a task; the student taps Start. The otter reacts instead of looping: it leans toward the student's finger, leans in to listen, sways while thinking, hops on each word it says, and bounces when tapped. Tapping the otter starts a chat.
 - **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Ayin can look at a shared screen or tab instead.
 
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
@@ -47,7 +47,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
 - **Buddies:** Ayin pairs raftmates so each can show the other a step they've mastered, and suggests your buddy when you pick someone to work with.
 
-**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket. Under the pond, the same tasks are leaves you can read and tap, and a task already started shows a ring for how far along it is.
+**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen. Under the pond are the student's tasks as leaves they can tap, and a task already started shows a ring for how far along it is.
 
 **The otter on the counter.** A 3D-printed otter holds the camera in its pebble, with a privacy shutter. The Raspberry Pi version adds Done, Help and Show me buttons for students who don't speak. "Connect your otter" in the Me tab finds it on the Wi-Fi, shows a live photo through it and tests its buttons, with no files to edit.
 
@@ -95,7 +95,7 @@ You need Node.js 22.13 or newer and an [Anthropic API key](https://console.anthr
 cd web
 cp .env.example .env.local     # then paste your API key into .env.local
 npm install
-npm run seed                   # a demo crew so the crew screen has data
+npm run seed                   # a demo raft so the Raft screen has data
 npm run dev                    # open http://localhost:3000
 ```
 
