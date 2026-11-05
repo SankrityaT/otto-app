@@ -27,6 +27,8 @@ __pycache__/
 # Generated 3D files (rebuilt by hardware/otter/otter.py)
 *.stl
 *.glb
+# ...except the small, compressed otter the landing page shows in 3D
+!landing/public/device/otter.glb
 
 # OS and editors
 .DS_Store

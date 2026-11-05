@@ -79,6 +79,7 @@ ayin-app/
 │   ├── src/lib/         data, Claude prompts (lib/ai), fading, buddies, weekly rings
 │   ├── scripts/seed.ts  demo crew
 │   └── tests/           unit tests
+├── landing/             the public landing page for students and parents (Next.js)
 ├── device/              the otter: XIAO camera sketch, Raspberry Pi camera and buttons
 ├── hardware/            3D-printable otter enclosure, built from code
 └── docs/                our plan, research notes and AI prompts
