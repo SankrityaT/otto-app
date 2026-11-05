@@ -26,24 +26,23 @@
   --plum: #c48fb4;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #1d1b18;
-    --surface: #2b2722;
-    --ink: #f6f1e8;
-    --ink-soft: #d8d0c4;
-    --ink-faint: #b0a79a;
-    --line: #4d463d;
-    --celadon-text: #b8ddc9;
-    --celadon-wash: #24332c;
-    --clay: #3a352f;
-    --bank: #2b2823;
-    --water-edge: #7d968b;
-    --water: #9aaea5;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --otter-dim: brightness(0.85);
-    color-scheme: dark;
-  }
+/* Dark is chosen by the theme button, or by the device setting on a first visit (see layout.tsx). */
+:root[data-theme="dark"] {
+  --ground: #1d1b18;
+  --surface: #2b2722;
+  --ink: #f6f1e8;
+  --ink-soft: #d8d0c4;
+  --ink-faint: #b0a79a;
+  --line: #4d463d;
+  --celadon-text: #b8ddc9;
+  --celadon-wash: #24332c;
+  --clay: #3a352f;
+  --bank: #2b2823;
+  --water-edge: #7d968b;
+  --water: #9aaea5;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --otter-dim: brightness(0.85);
+  color-scheme: dark;
 }
 
 @theme inline {

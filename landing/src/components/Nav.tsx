@@ -1,4 +1,5 @@
 import { NAV, site } from "@/lib/site";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Nav() {
   return (
@@ -18,9 +19,12 @@ export function Nav() {
             </li>
           ))}
         </ul>
-        <a href={site.appUrl} className="btn btn--primary btn--small">
-          Try Ayin
-        </a>
+        <div className="flex items-center gap-2.5">
+          <a href={site.appUrl} className="btn btn--primary btn--small">
+            Try Ayin
+          </a>
+          <ThemeToggle />
+        </div>
       </nav>
     </header>
   );
