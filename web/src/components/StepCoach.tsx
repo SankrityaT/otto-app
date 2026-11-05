@@ -34,6 +34,7 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
   const [doneIds, setDoneIds] = useState<string[]>(run.doneStepIds);
   const [help, setHelp] = useState<StepHelp | null>(null);
   const [say, setSay] = useState<string | null>(null);
+  const [heard, setHeard] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [looking, setLooking] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -74,6 +75,19 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
     const photo = capture();
     setTimeout(() => setLooking(false), 600);
     return photo;
+  }
+
+  /** The student asked something out loud. Ayin looks and answers like a coach beside them. */
+  async function answer(question: string) {
+    if (!step) return;
+    setHeard(question);
+    try {
+      const showing = stepScene?.scene && !flat ? stepScene.scene.title : null;
+      const result = await api.ask(run.id, step.id, question, await takePhoto(), showing);
+      tell(result.say);
+    } catch (error) {
+      tell((error as Error).message);
+    }
   }
 
   function tell(text: string) {
@@ -145,6 +159,10 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
   }
 
   // Voice, the on-screen buttons and the otter's buttons all end in the same three actions.
+  const onQuestion = useEffectEvent((question: string) => {
+    answer(question);
+  });
+
   const onCommand = useEffectEvent((command: VoiceCommand | string) => {
     if (command === "done") done();
     if (command === "help" && current) askForHelp(nextHelpLevel(current.level));
@@ -153,7 +171,7 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
 
   useEffect(() => {
     if (!listening) return;
-    return listen(onCommand);
+    return listen(onCommand, onQuestion);
   }, [listening]);
 
   useEffect(() => {
@@ -225,6 +243,12 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
       <h1 className="font-display text-[38px] leading-[1.05]">{step.text}</h1>
 
       {step.seconds && <StepTimer key={step.id} seconds={step.seconds} />}
+
+      {listening && (
+        <p className="text-[15px] text-ink-3" aria-live="polite">
+          {heard ? <>You said: &ldquo;{heard}&rdquo;</> : "Ayin is listening. Ask anything, or say done, help or show me."}
+        </p>
+      )}
 
       {say && (
         <p className="flex items-start gap-3 rounded-2xl bg-cel-wash px-4 py-3 text-[17px] leading-snug text-cel-deep" aria-live="polite">

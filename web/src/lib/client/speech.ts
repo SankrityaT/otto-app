@@ -34,8 +34,17 @@ export function toCommand(said: string): VoiceCommand | null {
   return null;
 }
 
-/** Listen until stopped. Returns a function that stops listening. */
-export function listen(onCommand: (command: VoiceCommand) => void): () => void {
+/** True while Ayin itself is talking, so the microphone doesn't answer Ayin's own voice. */
+export function isSpeaking(): boolean {
+  return typeof window !== "undefined" && window.speechSynthesis?.speaking === true;
+}
+
+/**
+ * Listen until stopped, like talking to a coach. Short commands ("done", "help", "show me")
+ * go to `onCommand`; anything else the student says goes to `onQuestion`.
+ * Returns a function that stops listening.
+ */
+export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (question: string) => void): () => void {
   const w = window as unknown as Record<string, new () => Recognition>;
   const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
   if (!Ctor) return () => {};
@@ -47,9 +56,11 @@ export function listen(onCommand: (command: VoiceCommand) => void): () => void {
   let stopped = false;
 
   recognition.onresult = (event) => {
-    const result = event.results[event.resultIndex];
-    const command = toCommand(result[0].transcript);
-    if (command) onCommand(command);
+    if (isSpeaking()) return; // that was Ayin's own voice
+    const said = event.results[event.resultIndex][0].transcript.trim();
+    const command = toCommand(said);
+    if (command && said.split(/\s+/).length <= 3) onCommand(command);
+    else if (said.split(/\s+/).length >= 2) onQuestion(said);
   };
   recognition.onend = () => {
     if (!stopped) recognition.start(); // browsers stop after a pause; keep going

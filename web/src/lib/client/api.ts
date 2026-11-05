@@ -36,6 +36,8 @@ export const api = {
       `/api/runs/${runId}/check`,
       post({ stepId, helpLevel, photo }),
     ),
+  ask: (runId: string, stepId: string, question: string, photo: string | null, showing: string | null) =>
+    call<{ say: string }>(`/api/runs/${runId}/ask`, post({ stepId, question, photo, showing })),
   help: (runId: string, stepId: string, level: number, photo: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/help`, post({ stepId, level, photo })),
   splitStep: (stepId: string) => call(`/api/steps/${stepId}/split`, post({})),
