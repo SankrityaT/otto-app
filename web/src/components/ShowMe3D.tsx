@@ -75,7 +75,7 @@ function StickyLabel({ label, anchor }: { label: Scene["labels"][number]; anchor
       </mesh>
       <Html position={end} center zIndexRange={[10, 0]}>
         <span
-          className={`whitespace-nowrap rounded-sm border-l-4 px-2.5 py-1 font-hand text-[18px] text-ink shadow-sm ${NOTE_TONES[label.tone]}`}
+          className={`whitespace-nowrap rounded-sm border-l-4 px-2.5 py-1 font-hand text-[18px] text-[#23201c] shadow-sm ${NOTE_TONES[label.tone]}`}
         >
           {label.text}
         </span>

@@ -9,7 +9,8 @@ const TABLES = ["asks", "cheers", "step_logs", "runs", "steps", "routines", "stu
 for (const table of TABLES) db.exec(`DELETE FROM ${table}`);
 
 // Staff set these up: the crew, its weekly goal and the cheers students can send.
-const crewId = newId();
+// Fixed ids, so a browser that picked a student still knows them after re-seeding.
+const crewId = "crew-cafe";
 db.prepare("INSERT INTO crews (id, name, weekly_goal, cheers) VALUES (?, ?, ?, ?)").run(
   crewId,
   "Café crew",
@@ -22,7 +23,7 @@ const otters: Record<string, number> = { Jordan: 0, Ava: 300, Sam: 150, Leo: 210
 const names = Object.keys(otters);
 const students = Object.fromEntries(
   names.map((name) => {
-    const id = newId();
+    const id = `student-${name.toLowerCase()}`;
     db.prepare("INSERT INTO students (id, name, crew_id, weekly_target, fur_hue) VALUES (?, ?, ?, ?, ?)").run(
       id,
       name,

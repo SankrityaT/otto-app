@@ -10,8 +10,8 @@
   --color-ink-2: var(--ink-soft);
   --color-ink-3: var(--ink-faint);
   --color-line: var(--line);
-  --color-clay: #e7dfd3;
-  --color-clay-2: #d9cfc1;
+  --color-clay: var(--clay);
+  --color-clay-2: var(--clay-2);
   --color-cel: var(--celadon);
   --color-cel-deep: var(--celadon-text);
   --color-cel-wash: var(--celadon-wash);
@@ -21,11 +21,27 @@
   --radius-card: 22px;
 }
 
+/* Our extra colours, with dark versions that follow Havi's dark theme. */
+:root {
+  --clay: #e7dfd3;
+  --clay-2: #d9cfc1;
+  --paper: #fbf8f2;
+  --paper-grid: rgba(43, 102, 82, 0.07);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --clay: #3a352f;
+    --clay-2: #4a443c;
+    --paper: #26231f;
+    --paper-grid: rgba(184, 221, 201, 0.08);
+  }
+}
+
 /* Graph paper behind "show me" explainers. */
 .graph-paper {
-  background-color: #fbf8f2;
+  background-color: var(--paper);
   background-image:
-    linear-gradient(rgba(43, 102, 82, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(43, 102, 82, 0.07) 1px, transparent 1px);
+    linear-gradient(var(--paper-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
   background-size: 20px 20px;
 }
