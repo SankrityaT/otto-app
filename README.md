@@ -1,12 +1,8 @@
 # Ayin
 
-**Ayin helps autistic students finish hands-on job tasks on their own.** It shows the next step as a simple picture, checks the step with the camera, gives more help only when asked, and connects the student with a small crew of peers. Help fades as the student succeeds.
+**Ayin helps autistic students finish hands-on job tasks on their own.** It shows one step at a time as a picture, checks the step with the camera, gives more help only when asked, and connects the student with a small crew of peers. Help fades as the student succeeds.
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
-
-We're building this for the Nov 5 submission, so some parts are still in progress. See [Status and limitations](#status-and-limitations).
-
----
 
 ## The problem
 
@@ -22,83 +18,100 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 ## What Ayin does
 
-**1. See it, step by step.** The student says or shows a task ("make an iced latte"). Ayin breaks it into steps and shows one at a time: a picture made for that step, 8 words or fewer, read aloud.
+**One step at a time.** The student says, types or shows a task ("make an iced latte"). Claude breaks it into small physical steps. Ayin shows one step at a time: a picture drawn for that step, 8 words or fewer, read aloud, with progress dots.
 
-- **Done**: the camera checks the step and Ayin moves on, or says what's missing.
-- **Help**: more help, one level at a time (nudge, then hint, then "show me" with a picture). Help only comes when asked.
-- **Fading**: after 3 runs of a step with no help, Ayin starts one level lower next time and tells the student. They can always turn it back up.
+- **Done:** Ayin takes one photo and checks the step, then moves on or says what's missing.
+- **Help:** one level at a time, and only when asked: a nudge, then a hint, then "show me".
+- **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing.
+- **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
+- **Time you can see:** a step that takes a set time (wash hands for 20 seconds) gets a calm ring timer. It never turns red.
+- **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.
 
-**2. Crew.** A small group of students from the same work site, set up by staff.
+**Crew.** A small group from the same work site, set up by staff.
 
-- A shared weekly goal ("our café crew: 20 tasks on our own"), not a ranking.
-- Weekly rings that quietly restart each week. There is no daily streak that can break.
-- One-tap cheers with preset words.
-- **Ask a crewmate**: when Ayin's hints aren't enough, it suggests a crewmate who has done that step on their own.
+- A shared weekly goal ("Café crew: 20 of 30 steps on our own"), never a ranking.
+- Weekly rings that quietly restart each week. There is no streak to break.
+- **Practice buddies:** Ayin pairs crewmates so each can show the other a step they've mastered. The help a student no longer needs from Ayin is exactly what they can now offer a friend.
+- **Ask a crewmate** who has done the step on their own, and one-tap cheers with preset words.
 
-Every step is logged as "on my own" or "with help". The student sees their log first, and that log drives both the rings and the fading.
+**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket.
+
+**The otter on the counter.** A 3D-printed otter holds the camera in its pebble, with a privacy shutter. The Raspberry Pi version adds Done, Help and Show me buttons for students who don't speak.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    student([Student]) -->|voice or tap| web[Web app<br/>phone or tablet]
+    student([Student]) -->|voice, tap or button| web[Web app<br/>phone or tablet]
     web -->|photo, only when asked| api[Next.js API routes]
-    otter[Otter device<br/>Raspberry Pi + camera] -->|photo, only when asked| api
-    api -->|steps, checks, pictures| claude[Claude API]
+    otter[Otter<br/>XIAO or Raspberry Pi] -->|photo when asked, button presses| api
+    api -->|steps, checks, hints, pictures, 3D| claude[Claude API]
     api --> db[(SQLite)]
 ```
 
-- **One server, many "doors."** The web app and the otter device call the same API. The phone camera works today; the otter runs the same flow.
-- **Claude** turns a task into steps, checks a step from a photo, writes hints, and draws a simple SVG picture for each step. Pictures are drawn once per task and reused.
-- **SQLite** stores tasks, steps, the log and crews. No photos are stored.
+- **One server, many doors.** The phone and the otter call the same API and get the same answers. The camera is just a different way in.
+- **Claude** breaks tasks into steps, checks a step from a photo, writes hints, draws an SVG picture per step and builds 3D models from simple shapes. Pictures and models are made once per step and reused.
+- **One log drives everything.** Every finished step is logged as "on my own" or with the help it took. That log fades the help, fills the rings and matches the buddies.
+- **SQLite** stores tasks, steps, the log and crews. No photos are ever stored.
 
 ## Repository layout
 
 ```
 ayin-app/
-├── web/        Next.js app: student screens and the API
-├── device/     Raspberry Pi client for the otter (camera, speaker)
-├── hardware/   3D-printable otter enclosure and build guide
-└── docs/       Our plan, research notes and AI prompts
+├── web/                 Next.js app: screens and API
+│   ├── src/app/         pages (Today, a task, Crew, Me) and API routes
+│   ├── src/components/  screens, the 3D viewer, Havi's pond and otter
+│   ├── src/lib/         data, Claude prompts (lib/ai), fading, buddies, weekly rings
+│   ├── scripts/seed.ts  demo crew
+│   └── tests/           unit tests
+├── device/              the otter: XIAO camera sketch, Raspberry Pi camera and buttons
+├── hardware/            3D-printable otter enclosure, built from code
+└── docs/                our plan, research notes and AI prompts
 ```
-
-Each folder has its own README.
 
 ## Run it locally
 
-You need Node.js 20+ and an [Anthropic API key](https://console.anthropic.com/).
+You need Node.js 22.13 or newer and an [Anthropic API key](https://console.anthropic.com/).
 
 ```bash
 cd web
 cp .env.example .env.local     # then paste your API key into .env.local
 npm install
-npm run seed                   # creates a demo crew so the crew screen has data
+npm run seed                   # a demo crew so the crew screen has data
 npm run dev                    # open http://localhost:3000
 ```
 
-Use Chrome or Safari: the app uses the browser's built-in speech for reading steps aloud and hearing "done" and "help".
+Use Chrome or Safari: Ayin uses the browser's built-in speech to read steps aloud and to hear "done", "help" and "show me". The first time a step is shown, its picture takes 15–30 seconds to draw; after that it is instant.
 
-To run the otter device, see [`device/README.md`](device/README.md).
+Checks:
+
+```bash
+npm test          # unit tests: help ladder, fading, weekly rings, buddies, picture safety
+npm run lint
+npx tsc --noEmit
+```
+
+The otter device is optional. See [`device/README.md`](device/README.md).
 
 ## How we use AI
 
-In the product, Claude (through the official Anthropic SDK) breaks a task into steps, checks a step from a photo, writes hints and draws step pictures. Those prompts live in [`web/src/lib/ai/`](web/src/lib/ai/).
+In the product, Claude (through the official Anthropic SDK) breaks tasks into steps, checks steps from photos, writes hints, draws step pictures and builds 3D models. Each prompt is a small file in [`web/src/lib/ai/`](web/src/lib/ai/), and every answer is checked against a schema.
 
 To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then worked through it with Claude Code as a pair programmer, reviewing every change. The prompts that shaped the project are in [`docs/ai-prompts.md`](docs/ai-prompts.md).
 
 ## Privacy and safety
 
-- **Camera only when asked.** A photo is taken when the student taps Done or Help. Photos are sent to Claude and never stored.
-- **The student owns their log.** They see it first.
-- **Crews are closed.** Staff add members from the same program. No strangers, no location, no free-text messages between students: cheers and asks use preset words.
-- **No guilt.** No red, no "overdue", no broken streaks, no leaderboard.
-- **No secrets in the repo.** Keys live in `.env.local`, which git ignores.
+- **Camera only when asked.** One photo when the student taps Done, Help or Show me. Photos go to Claude for that one answer and are never stored.
+- **Pictures can't run code.** Step drawings are checked against a strict list of allowed SVG features and shown as images.
+- **Crews are closed.** Staff add members from the same program. No strangers, no location, and cheers and asks use preset words, not free chat.
+- **No guilt.** No red, no "overdue", no streaks to break, no leaderboard.
+- **No secrets in the repo.** Keys live in `.env.local` and device secrets in `secrets.h`, both ignored by git.
 
 ## Status and limitations
 
-- Built during the challenge sprint. Ayin's earlier prototype (a voice assistant and camera glasses) is **not** in this repo; this repo was started fresh on Nov 4.
-- There are no student accounts yet: the demo uses a profile picker.
-- The otter device code is written but not yet tested on a real Raspberry Pi. The demo video uses a phone camera.
+- This repo was started fresh on Nov 4, during the challenge sprint. Our earlier prototype (a voice assistant and camera glasses) is not in it.
+- There are no student or staff accounts yet: the demo uses a profile picker, and the crew comes from the seed script.
+- The XIAO camera works. The Raspberry Pi otter code is written but hasn't been run on a Pi yet, and the current enclosure fits a Pi Zero, not the Pi 4.
 - Peer-support evidence covers ages 3–18 and mostly non-autistic peers; peer mentoring for ages 19–22 is barely studied.
 
 ## Team
@@ -106,9 +119,11 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 | Name | Role |
 | --- | --- |
 | Sankritya Thakur | Product, research, app and server |
-| Havi ([@Havishea](https://github.com/Havishea)) | Otter character and animations |
+| Havi ([@Havishea](https://github.com/Havishea)) | The otter character, its animation and the pond design |
 
 <!-- TODO: add the rest of the team and their roles before submitting. -->
+
+Havi's otter and pond components are credited at the top of each file in `web/src/components/otter` and `web/src/components/pond`.
 
 ## License
 

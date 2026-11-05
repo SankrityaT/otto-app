@@ -49,9 +49,11 @@ Two parts, one log:
 ## Milestones
 
 - [x] Repo, README, research notes, prompt ledger
-- [ ] Server: tasks, steps, step check, help ladder, log
-- [ ] Step screen with Havi's otter
-- [ ] Crew: goal, rings, cheers, ask a crewmate
-- [ ] Otter device client
+- [x] Server: tasks, steps, step check, help ladder, log
+- [x] Step screen with Havi's otter, step pictures and 3D "show me"
+- [x] Crew: goal, rings, cheers, ask a crewmate, practice buddies
+- [x] Havi's pond home screen, and an otter colour for every student
+- [x] Research pass: timers for timed steps, smaller steps on demand
+- [x] Otter device code (XIAO camera; Raspberry Pi camera and buttons, not yet run on a Pi)
 - [ ] Record the 30-second demo
 - [ ] Deck, Business Model Canvas, prompts PDF, essays
