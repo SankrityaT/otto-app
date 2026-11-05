@@ -1,8 +1,18 @@
 # Ayin
 
-**Ayin helps autistic students finish hands-on job tasks on their own.** It shows one step at a time as a picture, checks the step with the camera, gives more help only when asked, and connects the student with a small crew of peers. Help fades as the student succeeds.
+**Ayin helps autistic students finish hands-on job tasks on their own.** It turns any task into one small step at a time, shows each step as a 3D model you can turn and talks it through out loud, checks the real work through the camera, and connects students with a small "raft" of peers who've done it. Help fades as the student succeeds.
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
+
+**Try it:** [ayin-jade.vercel.app](https://ayin-jade.vercel.app) · landing page for students and parents: [/landing](https://ayin-jade.vercel.app/landing) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
+
+## Our approach
+
+- **Works on the device a school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Ayin sees the work. AZACS already gives students Chromebooks and iPads, and AZACS staff told us anything worn is a sensory problem, so there's nothing to buy and nothing to wear.
+- **Complex things made simple.** Every task becomes one step at a time, and every step a 3D model built live for that task, talked through with a natural voice. The student can ask out loud at any point.
+- **Real peers, not a chatbot.** The Raft routes help back to classmates who've mastered the step, lets students work side by side, and celebrates wins, with no video, no strangers and no rankings.
+- **Built to be needed less.** Help steps down through First Place AZ's five stages, from watching every step to doing it alone.
+- **Next: the Ayin lamp.** A desk lamp with a camera looking down at the work that talks the student through it and points at the real part with light. The 3D-printed desk otter in this repo is a first step toward it.
 
 ## The problem
 
