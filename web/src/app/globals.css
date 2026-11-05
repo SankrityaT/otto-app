@@ -17,6 +17,7 @@
   --color-ochre-wash: #f4ead6;
   --font-display: var(--font-gloock), Georgia, serif;
   --font-sans: var(--font-lexend), system-ui, sans-serif;
+  --font-hand: var(--font-gochi), "Comic Sans MS", cursive;
   --radius-card: 24px;
 }
 
@@ -30,4 +31,13 @@ body {
 :focus-visible {
   outline: 3px solid var(--color-cel-deep);
   outline-offset: 3px;
+}
+
+/* Graph paper behind "show me" explainers. */
+.graph-paper {
+  background-color: #fbf8f2;
+  background-image:
+    linear-gradient(rgba(43, 102, 82, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43, 102, 82, 0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

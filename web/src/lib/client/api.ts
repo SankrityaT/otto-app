@@ -1,5 +1,6 @@
 // Typed calls from the screens to our API. Every call throws a readable Error on failure.
 
+import type { Scene } from "../ai/scene";
 import type { CrewView, Student } from "../data/crew";
 import type { Routine } from "../data/routines";
 import type { Run } from "../data/runs";
@@ -31,6 +32,7 @@ export const api = {
     ),
   help: (runId: string, stepId: string, level: number, photo: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/help`, post({ stepId, level, photo })),
+  scene: (stepId: string, photo: string | null) => call<{ scene: Scene }>(`/api/steps/${stepId}/scene`, post({ photo })),
   crew: (studentId: string) => call<{ crew: CrewView }>(`/api/crew?studentId=${encodeURIComponent(studentId)}`),
   cheer: (fromId: string, runId: string, phrase: string) => call("/api/crew/cheers", post({ fromId, runId, phrase })),
   askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),

@@ -11,11 +11,16 @@ import { HELP_LEVELS, nextHelpLevel, type HelpLevel } from "@/lib/help";
 import { Button } from "./Button";
 import { Ring } from "./Ring";
 import { StepPicture } from "./StepPicture";
+import type { Scene } from "@/lib/ai/scene";
+import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
 import { Check, Eye, Lightbulb, MessageCircle, Mic, MicOff, Users, X } from "lucide-react";
 
 /** How often the screen checks for presses on the otter's physical buttons. */
 const BUTTON_POLL_MS = 1000;
+
+// three.js only runs in the browser, and only loads when a student asks to be shown.
+const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), { ssr: false });
 
 /** How much help the student has asked for on the step in front of them. */
 interface StepHelp {
@@ -32,6 +37,8 @@ export function StepCoach({ run }: { run: Run }) {
   const [looking, setLooking] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [listening, setListening] = useState(false);
+  const [scene, setScene] = useState<{ stepId: string; scene: Scene | null } | null>(null);
+  const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
   const useDeviceCamera = cameraChoice === "this-device";
   const { videoRef, capture, error: cameraError } = useCamera(useDeviceCamera && !summary);
@@ -46,6 +53,9 @@ export function StepCoach({ run }: { run: Run }) {
     : help?.stepId === step.id
       ? help
       : { stepId: step.id, level: HELP_LEVELS.onMyOwn, pictureShown: step.showPictureFirst };
+
+  // The 3D model belongs to one step; moving on hides it.
+  const stepScene = step && scene?.stepId === step.id ? scene : null;
 
   // A new step: read it aloud, and start drawing the next picture early.
   useEffect(() => {
@@ -87,8 +97,17 @@ export function StepCoach({ run }: { run: Run }) {
     setBusy(true);
     setHelp({ ...current, level, pictureShown: current.pictureShown || level === HELP_LEVELS.showMe });
     try {
-      const result = await api.help(run.id, step.id, level, await takePhoto());
-      tell(result.say);
+      if (level === HELP_LEVELS.showMe) {
+        // "Show me" builds a 3D model of the step; the flat picture stays one tap away.
+        setFlat(false);
+        setScene({ stepId: step.id, scene: null });
+        const result = await api.scene(step.id, await takePhoto());
+        setScene({ stepId: step.id, scene: result.scene });
+        tell(result.scene.say);
+      } else {
+        const result = await api.help(run.id, step.id, level, await takePhoto());
+        tell(result.say);
+      }
     } catch (error) {
       tell((error as Error).message);
     } finally {
@@ -166,7 +185,23 @@ export function StepCoach({ run }: { run: Run }) {
         )}
       </header>
 
-      <StepPicture stepId={step.id} alt={step.detail} shown={current.pictureShown} />
+      {stepScene && !flat ? (
+        <div className="flex flex-col gap-2">
+          {stepScene.scene ? (
+            <ShowMe3D scene={stepScene.scene} />
+          ) : (
+            <div className="graph-paper flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-line">
+              <UprightOtter className="h-40 w-40" />
+              <p className="font-hand text-[22px] text-ink-2">Ayin is building it for you</p>
+            </div>
+          )}
+          <Button look="quiet" className="self-center" onClick={() => setFlat(true)}>
+            See the flat picture
+          </Button>
+        </div>
+      ) : (
+        <StepPicture stepId={step.id} alt={step.detail} shown={current.pictureShown} />
+      )}
 
       <h1 className="font-display text-[34px] leading-[1.08]">{step.text}</h1>
 

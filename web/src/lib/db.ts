@@ -31,7 +31,8 @@ const SCHEMA = `
     position    INTEGER NOT NULL,
     text        TEXT NOT NULL,        -- 8 words or fewer
     detail      TEXT NOT NULL,        -- one plain sentence for "show me"
-    picture_svg TEXT                  -- drawn once, then reused
+    picture_svg TEXT,                 -- drawn once, then reused
+    scene_json  TEXT                  -- the 3D "show me" model, built once, then reused
   );
 
   CREATE TABLE IF NOT EXISTS runs (
@@ -82,7 +83,16 @@ function open(): DatabaseSync {
   const db = new DatabaseSync(config.databasePath);
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec(SCHEMA);
+  addMissingColumns(db);
   return db;
+}
+
+/** Columns added after the first version, for databases created before them. */
+function addMissingColumns(db: DatabaseSync): void {
+  const columns = db.prepare("PRAGMA table_info(steps)").all() as { name: string }[];
+  if (!columns.some((column) => column.name === "scene_json")) {
+    db.exec("ALTER TABLE steps ADD COLUMN scene_json TEXT");
+  }
 }
 
 // Reuse one connection across hot reloads in development.
