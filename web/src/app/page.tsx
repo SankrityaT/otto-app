@@ -4,6 +4,7 @@ import { Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { AyinChat, type ChatTurn, type Voice } from "@/components/AyinChat";
 import { StudentPicker } from "@/components/StudentPicker";
 import Fold from "@/components/pond/Fold";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
@@ -11,6 +12,7 @@ import { LEAF_TONES, type LeafItem } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
 import type { Student } from "@/lib/data/crew";
 import { api } from "@/lib/client/api";
+import { hush, speak } from "@/lib/client/speech";
 import { useStudentId } from "@/lib/client/settings";
 
 type Routine = { id: string; title: string; stepCount: number };
@@ -40,6 +42,12 @@ export default function Today() {
   const [done, setDone] = useState<Done[]>([]);
   const [started, setStarted] = useState<Started[]>([]);
   const [status, setStatus] = useState<PondStatus>("idle");
+  // The conversation with Ayin on this screen: the last few turns, and whether the otter is still talking.
+  const [chat, setChat] = useState<ChatTurn[]>([]);
+  const [voice, setVoice] = useState<Voice>(null);
+  // Ready answers under Ayin's last line, and the task Ayin offered to start (the student taps to go).
+  const [choices, setChoices] = useState<string[]>([]);
+  const [offer, setOffer] = useState<{ title: string; routineId: string | null } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [binSignal, setBinSignal] = useState(0);
 
@@ -75,6 +83,38 @@ export default function Today() {
     router.push(`/run/${runId}`);
   }
 
+  /** Talk with Ayin. It chats back out loud, and starts a task when that's what the student means. */
+  async function converse(said: string) {
+    if (!student) return;
+    setStatus("thinking");
+    setMessage(null);
+    setChoices([]);
+    setOffer(null);
+    const history: ChatTurn[] = [...chat, { who: "student", text: said }];
+    setChat(history);
+    try {
+      const reply = await api.talk(student.id, said, chat);
+      const turns: ChatTurn[] = [...history, { who: "ayin" as const, text: reply.say }].slice(-12);
+      setChat(turns);
+      setChoices(reply.choices);
+      if (reply.startTask) setOffer({ title: reply.startTask, routineId: reply.routineId });
+      setStatus("idle");
+      sayAloud(turns, turns.length - 1);
+    } catch (error) {
+      setMessage((error as Error).message);
+      setStatus("idle");
+    }
+  }
+
+  /** Read one of Ayin's lines out loud, lighting up each word as it's said. */
+  function sayAloud(turns: ChatTurn[], turn: number) {
+    setVoice({ turn, char: 0 });
+    speak(turns[turn].text, {
+      onWord: (char) => setVoice({ turn, char }),
+      onEnd: () => setVoice(null),
+    });
+  }
+
   async function newTask(task: string, photo: string | null) {
     setStatus("thinking");
     setMessage("Ayin is breaking it into steps");
@@ -86,6 +126,8 @@ export default function Today() {
       setStatus("idle");
     }
   }
+
+  const chatting = chat.length > 0;
 
   const leaves: LeafItem[] = routines.map((r) => ({ id: r.id, title: r.title, line: `${r.stepCount} steps`, tone: toneFor(r.id) }));
   const finished: LeafItem[] = done.map((d) => ({
@@ -100,17 +142,38 @@ export default function Today() {
       <div className="today">
         <div className="today__center">
           <h1 className="sr-only">Today</h1>
-          <Pond
-            motion="idle"
-            furHue={student.furHue}
-            agentStatus={status}
-            open={leaves}
-            done={finished}
-            onLeafSelect={start}
-            onBin={() => setBinSignal((n) => n + 1)}
-            upright={status !== "idle"}
-          />
-          <TalkBar status={status} onListening={(on) => setStatus(on ? "listening" : "idle")} onSend={(text) => newTask(text, null)} />
+          {chatting ? (
+            <AyinChat
+              turns={chat}
+              thinking={status === "thinking"}
+              voice={voice}
+              furHue={student.furHue}
+              choices={choices}
+              task={offer?.title ?? null}
+              onChoose={converse}
+              onHear={(turn) => sayAloud(chat, turn)}
+              onStartTask={() => offer && (offer.routineId ? start(offer.routineId) : newTask(offer.title, null))}
+              onClose={() => {
+                hush();
+                setVoice(null);
+                setChat([]);
+                setOffer(null);
+                setChoices([]);
+              }}
+            />
+          ) : (
+            <Pond
+              motion="idle"
+              furHue={student.furHue}
+              agentStatus={status}
+              open={leaves}
+              done={finished}
+              onLeafSelect={start}
+              onBin={() => setBinSignal((n) => n + 1)}
+              upright={status !== "idle"}
+            />
+          )}
+          <TalkBar status={status} onListening={(on) => setStatus(on ? "listening" : "idle")} onSend={(text) => converse(text)} />
           <label className="btn btn--text mt-1 inline-flex cursor-pointer items-center gap-2">
             <Camera size={18} /> Or show Ayin a photo of the task
             <input

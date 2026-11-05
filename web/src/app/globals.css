@@ -52,3 +52,48 @@
     linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+/* Talking with Ayin: a little pond for the otter, bubbles that pop in, words that light up as
+   Ayin says them, and answers that float like the pond's leaves. Reduce Motion stills it all. */
+.chat__pond {
+  position: relative; display: grid; place-items: center; flex-shrink: 0;
+  width: 84px; height: 84px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 60%, var(--water) 0 58%, var(--water-edge) 59% 66%, var(--bank) 67%);
+}
+.chat__pond > .chat__otter { animation: otter-bob 3.2s ease-in-out infinite; }
+.chat__pond.is-talking > .chat__otter { animation-duration: 0.9s; }
+.chat__pond.is-talking::before,
+.chat__pond.is-talking::after {
+  content: ""; position: absolute; inset: 10px; border-radius: 50%;
+  border: 2px solid var(--water-edge); animation: chat-ripple 1.8s ease-out infinite; pointer-events: none;
+}
+.chat__pond.is-talking::after { animation-delay: 0.9s; }
+@keyframes otter-bob { 50% { transform: translateY(-4px) rotate(-2deg); } }
+@keyframes chat-ripple { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(1.35); opacity: 0; } }
+
+.chat__bubble { animation: bubble-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(0.94); } }
+
+.chat__word { border-radius: 6px; transition: background-color 120ms ease; }
+.chat__word.is-now { background: var(--r-study); color: #1f1c18; }
+
+.chat__leaf {
+  border-radius: 26px 6px 26px 6px; padding: 12px 18px; font-size: 17px; font-weight: 600; color: #1f1c18;
+  background: var(--tone); box-shadow: 0 6px 16px -10px var(--shadow);
+  animation: leaf-in 320ms ease both, leaf-float 4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 80ms), calc(var(--i) * 400ms);
+  transition: transform 150ms ease;
+}
+.chat__leaf:hover { transform: translateY(-2px) rotate(-1deg); }
+.chat__leaf:active { transform: scale(0.96); }
+@keyframes leaf-float { 50% { translate: 0 -3px; } }
+
+.chat__dots span { display: inline-block; animation: dot-hop 1s ease-in-out infinite; }
+.chat__dots span:nth-child(2) { animation-delay: 0.15s; }
+.chat__dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot-hop { 40% { transform: translateY(-5px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat__pond > .chat__otter, .chat__pond::before, .chat__pond::after,
+  .chat__bubble, .chat__leaf, .chat__dots span { animation: none !important; }
+}

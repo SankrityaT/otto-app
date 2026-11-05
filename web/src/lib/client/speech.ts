@@ -1,14 +1,28 @@
-// The browser's built-in speech: read steps aloud, and hear "done", "help" and "show me".
+// The browser's built-in speech: read steps aloud, and hear "done", "help", "show me" and "back".
 
-export function speak(text: string): void {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+/**
+ * Say something out loud. `onWord` gets the position of each word as Ayin reaches it (so the
+ * screen can light it up), and `onEnd` runs when Ayin finishes, or right away if it can't talk.
+ */
+export function speak(text: string, { onEnd, onWord }: { onEnd?: () => void; onWord?: (charIndex: number) => void } = {}): void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    onEnd?.();
+    return;
+  }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.95;
+  if (onEnd) utterance.onend = onEnd;
+  if (onWord) utterance.onboundary = (event) => event.name === "word" && onWord(event.charIndex);
   window.speechSynthesis.speak(utterance);
 }
 
-export type VoiceCommand = "done" | "help" | "show-me";
+/** Stop talking mid-sentence. */
+export function hush(): void {
+  if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+}
+
+export type VoiceCommand = "done" | "help" | "show-me" | "back";
 
 // SpeechRecognition isn't in TypeScript's DOM types yet, so describe the part we use.
 interface Recognition {
@@ -30,7 +44,8 @@ export function toCommand(said: string): VoiceCommand | null {
   const words = said.toLowerCase();
   if (words.includes("show me")) return "show-me";
   if (words.includes("help") || words.includes("stuck")) return "help";
-  if (words.includes("done") || words.includes("finished")) return "done";
+  if (words.includes("done") || words.includes("finished") || words.includes("next")) return "done";
+  if (words.includes("back") || words.includes("again")) return "back";
   return null;
 }
 
@@ -60,7 +75,7 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
     const said = event.results[event.resultIndex][0].transcript.trim();
     const command = toCommand(said);
     if (command && said.split(/\s+/).length <= 3) onCommand(command);
-    else if (said.split(/\s+/).length >= 2) onQuestion(said);
+    else if (said.length >= 2) onQuestion(said);
   };
   recognition.onend = () => {
     if (!stopped) recognition.start(); // browsers stop after a pause; keep going

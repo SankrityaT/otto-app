@@ -61,6 +61,8 @@ export const api = {
   answerInvite: (inviteId: string, studentId: string, answer: "yes" | "not-today") =>
     call(`/api/crew/invites/${inviteId}`, post({ studentId, answer })),
   askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),
+  talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[]) =>
+    call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history })),
   feed: (studentId: string, kind: PostKind | null) =>
     call<{ posts: Post[] }>(`/api/raft/feed?studentId=${encodeURIComponent(studentId)}${kind ? `&kind=${kind}` : ""}`),
   post: (postId: string, studentId: string) =>

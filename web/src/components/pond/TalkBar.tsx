@@ -136,13 +136,13 @@ export default function TalkBar({ status, onListening, onSend }: Props) {
           id="ask"
           ref={input}
           className="talk__input"
-          placeholder={holding ? 'Listening…' : 'What are you working on?'}
+          placeholder={holding ? 'Listening…' : 'Say hi, or tell Ayin what you want to do'}
           value={holding ? heard : text}
           onChange={(e) => setText(e.target.value)}
           readOnly={holding}
           autoComplete="off"
         />
-        <button className="talk__send" type="submit" disabled={busy || !text.trim()}>Start</button>
+        <button className="talk__send" type="submit" disabled={busy || !text.trim()}>Send</button>
       </form>
       <p className="talk__hint">
         {holding ? 'Let go to send' : voiceOk ? 'Hold the button to talk' : 'Voice isn’t available in this browser. Type instead.'}
