@@ -2,7 +2,8 @@
 
 /*
  * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
- * We changed the words to fit starting a task.
+ * We changed the words to fit starting a task, put the camera in the bar (it turns into Send
+ * once you type), and only show the hint while it's needed.
  */
 import { useEffect, useRef, useState } from 'react';
 import type { PondStatus } from './Pond';
@@ -30,13 +31,15 @@ type Props = {
   status: PondStatus;
   onListening: (on: boolean) => void;
   onSend: (text: string, via: 'voice' | 'text') => void;
+  /** A photo of the task (a recipe card, instructions), as a data URL. */
+  onPhoto?: (file: File) => void;
 };
 
 /**
  * Hold to talk, or type. Voice uses the browser's speech recognition where it exists
  * (Chrome, Edge, Safari); everywhere else the text field does the same job.
  */
-export default function TalkBar({ status, onListening, onSend }: Props) {
+export default function TalkBar({ status, onListening, onSend, onPhoto }: Props) {
   const [text, setText] = useState('');
   const [holding, setHolding] = useState(false);
   const [voiceOk, setVoiceOk] = useState(true);
@@ -136,17 +139,37 @@ export default function TalkBar({ status, onListening, onSend }: Props) {
           id="ask"
           ref={input}
           className="talk__input"
-          placeholder={holding ? 'Listening…' : 'Say hi, or tell Ayin what you want to do'}
+          placeholder={holding ? 'Listening…' : 'Say hi to Ayin'}
           value={holding ? heard : text}
           onChange={(e) => setText(e.target.value)}
           readOnly={holding}
           autoComplete="off"
         />
-        <button className="talk__send" type="submit" disabled={busy || !text.trim()}>Send</button>
+        {onPhoto && !text.trim() ? (
+          <label className="talk__send grid cursor-pointer place-items-center" aria-label="Show Ayin a photo of the task">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+              <path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              <circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" strokeWidth="2" />
+            </svg>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              disabled={busy}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onPhoto(file);
+              }}
+            />
+          </label>
+        ) : (
+          <button className="talk__send" type="submit" disabled={busy || !text.trim()}>Send</button>
+        )}
       </form>
-      <p className="talk__hint">
-        {holding ? 'Let go to send' : voiceOk ? 'Hold the button to talk' : 'Voice isn’t available in this browser. Type instead.'}
-      </p>
+      {(holding || !voiceOk) && (
+        <p className="talk__hint">{holding ? 'Let go to send' : 'Voice isn’t available in this browser. Type instead.'}</p>
+      )}
     </div>
   );
 }

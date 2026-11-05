@@ -30,9 +30,11 @@ export interface CrewView {
     onOwn: number;
     days: number;
     /** The task they're doing right now, if they started one in the last few hours. */
-    now: { title: string; done: number; total: number } | null;
-    /** They asked the raft for help in the last day. */
-    asking: boolean;
+    now: { routineId: string; title: string; done: number; total: number } | null;
+    /** Their open question to the raft from the last day, if nobody has helped yet. */
+    asking: { postId: string; body: string } | null;
+    /** A task they finished in the last hour, to celebrate. */
+    justFinished: string | null;
   }[];
   wins: {
     runId: string;
@@ -64,23 +66,24 @@ export interface CrewView {
   }[];
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
 /** A task started longer ago than this counts as put down, not "doing it now". */
-const NOW_MS = 3 * 60 * 60 * 1000;
+const NOW_MS = 3 * HOUR_MS;
 
 /** The task a student is in the middle of right now, if any. */
-function workingOn(studentId: string): { title: string; done: number; total: number } | null {
+function workingOn(studentId: string): CrewView["members"][number]["now"] {
   return (
     (db
       .prepare(
-        `SELECT rt.title,
+        `SELECT rt.id AS routineId, rt.title,
                 (SELECT COUNT(*) FROM step_logs l WHERE l.run_id = r.id) AS done,
                 (SELECT COUNT(*) FROM steps s WHERE s.routine_id = r.routine_id) AS total
          FROM runs r JOIN routines rt ON rt.id = r.routine_id
          WHERE r.student_id = ? AND r.finished_at IS NULL AND r.started_at >= ?
          ORDER BY r.started_at DESC LIMIT 1`,
       )
-      .get(studentId, new Date(Date.now() - NOW_MS).toISOString()) as { title: string; done: number; total: number } | undefined) ?? null
+      .get(studentId, new Date(Date.now() - NOW_MS).toISOString()) as CrewView["members"][number]["now"] | undefined) ?? null
   );
 }
 
@@ -159,11 +162,24 @@ export function crewView(studentId: string): CrewView | null {
       ring: ringFill(onOwn, member.weeklyTarget),
       days: daysPractised(logs, member.id),
       now: workingOn(member.id),
-      asking: Boolean(
-        db
-          .prepare("SELECT 1 FROM posts WHERE author_id = ? AND kind = 'ask' AND created_at >= ?")
-          .get(member.id, new Date(Date.now() - DAY_MS).toISOString()),
-      ),
+      asking:
+        (db
+          .prepare(
+            `SELECT p.id AS postId, p.body FROM posts p
+             WHERE p.author_id = ? AND p.kind = 'ask' AND p.created_at >= ?
+               AND NOT EXISTS (SELECT 1 FROM replies r WHERE r.post_id = p.id AND r.helped = 1)
+             ORDER BY p.created_at DESC LIMIT 1`,
+          )
+          .get(member.id, new Date(Date.now() - DAY_MS).toISOString()) as { postId: string; body: string } | undefined) ?? null,
+      justFinished:
+        (
+          db
+            .prepare(
+              `SELECT rt.title FROM runs r JOIN routines rt ON rt.id = r.routine_id
+               WHERE r.student_id = ? AND r.finished_at >= ? ORDER BY r.finished_at DESC LIMIT 1`,
+            )
+            .get(member.id, new Date(Date.now() - HOUR_MS).toISOString()) as { title: string } | undefined
+        )?.title ?? null,
     };
   });
 

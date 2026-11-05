@@ -47,7 +47,7 @@ const SEAT = { x: 512, y: 880 };
 /** The tail swings from where it meets the hip. */
 const TAIL_PIVOT = { x: 770, y: 790 };
 
-const loadImage = (src: string) =>
+export const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -57,7 +57,7 @@ const loadImage = (src: string) =>
   });
 
 /** The same fur-only hue shift as the floating otter's shader (hue 2–58°, enough colour and light). */
-function tint(img: HTMLImageElement, hue: number): CanvasImageSource {
+export function tint(img: HTMLImageElement, hue: number): CanvasImageSource {
   if (!hue) return img;
   const c = document.createElement('canvas');
   c.width = img.naturalWidth;

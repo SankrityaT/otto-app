@@ -1,6 +1,5 @@
 "use client";
 
-import { Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -8,7 +7,7 @@ import { AyinChat, type ChatTurn, type Voice } from "@/components/AyinChat";
 import { StudentPicker } from "@/components/StudentPicker";
 import { TaskLeaves } from "@/components/TaskLeaves";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
-import { LEAF_TONES, type LeafItem } from "@/components/pond/PondLeaves";
+import { LEAF_TONES, type LeafTone } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
 import type { Student } from "@/lib/data/crew";
 import { api } from "@/lib/client/api";
@@ -16,11 +15,10 @@ import { hush, speak } from "@/lib/client/speech";
 import { useStudentId } from "@/lib/client/settings";
 
 type Routine = { id: string; title: string; stepCount: number };
-type Done = { runId: string; title: string; onOwn: number; total: number };
 type Started = { runId: string; title: string; done: number; total: number };
 
 /** Each task keeps the same leaf colour every time, picked from its id. */
-function toneFor(id: string): LeafItem["tone"] {
+function toneFor(id: string): LeafTone {
   const sum = [...id].reduce((total, char) => total + char.charCodeAt(0), 0);
   return LEAF_TONES[sum % LEAF_TONES.length];
 }
@@ -39,7 +37,6 @@ export default function Today() {
   const [studentId, setStudentId] = useStudentId();
   const [students, setStudents] = useState<Student[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
-  const [done, setDone] = useState<Done[]>([]);
   const [started, setStarted] = useState<Started[]>([]);
   const [status, setStatus] = useState<PondStatus>("idle");
   // The conversation with Ayin on this screen: the last few turns, and whether the otter is still talking.
@@ -49,8 +46,6 @@ export default function Today() {
   const [choices, setChoices] = useState<string[]>([]);
   const [offer, setOffer] = useState<{ title: string; routineId: string | null } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  // Tapping the basket in the pond shows what's been done this week.
-  const [showDone, setShowDone] = useState(false);
 
   // Opened from the "Use Ayin on your phone" QR code: remember who this is, then tidy the address.
   useEffect(() => {
@@ -69,10 +64,7 @@ export default function Today() {
     if (!studentId) return;
     api
       .doneThisWeek(studentId)
-      .then((r) => {
-        setDone(r.done);
-        setStarted(r.inProgress);
-      })
+      .then((r) => setStarted(r.inProgress))
       .catch(() => {});
   }, [studentId]);
 
@@ -132,28 +124,17 @@ export default function Today() {
   // Each task once: the latest unfinished try of it (newest first from the server).
   const carryOn = started.filter((s, i) => started.findIndex((other) => other.title === s.title) === i);
 
-  const leaves: LeafItem[] = routines.map((r) => ({ id: r.id, title: r.title, line: `${r.stepCount} steps`, tone: toneFor(r.id) }));
-  const finished: LeafItem[] = done.map((d) => ({
-    id: d.runId,
-    title: d.title,
-    line: `${d.onOwn} of ${d.total} on your own`,
-    tone: toneFor(d.runId),
-  }));
 
   return (
     <AppShell>
       <div className="today">
         <div className="today__center">
           <h1 className="sr-only">Today</h1>
-          {/* While talking, the task leaves drift off and the pond draws in, so the words have room. */}
+          {/* Just the otter in its pond. While talking, the pond draws in so the words have room. */}
           <Pond
             motion="idle"
             furHue={student.furHue}
             agentStatus={status}
-            open={chatting ? [] : leaves}
-            done={finished}
-            onLeafSelect={start}
-            onBin={() => setShowDone((on) => !on)}
             upright={status !== "idle" || chatting}
             mood={status !== "idle" ? status : voice ? "talking" : "idle"}
             beat={voice?.char}
@@ -179,36 +160,13 @@ export default function Today() {
               }}
             />
           )}
-          <TalkBar status={status} onListening={(on) => setStatus(on ? "listening" : "idle")} onSend={(text) => converse(text)} />
-          <label className="btn btn--text inline-flex cursor-pointer items-center gap-2 py-1 text-[15px]">
-            <Camera size={17} /> Or show Ayin a photo of the task
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="sr-only"
-              disabled={status === "thinking"}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) newTask("", await readPhoto(file));
-              }}
-            />
-          </label>
+          <TalkBar
+            status={status}
+            onListening={(on) => setStatus(on ? "listening" : "idle")}
+            onSend={(text) => converse(text)}
+            onPhoto={async (file) => newTask("", await readPhoto(file))}
+          />
           {message && <p className="mt-2 text-center text-ink-2">{message}</p>}
-          {showDone && (
-            <section className="mt-2 flex flex-col items-center gap-1 text-center" aria-label="Done this week">
-              <p className="font-semibold text-ink">Done this week</p>
-              {done.length === 0 ? (
-                <p className="text-ink-3">Nothing yet. Every task you finish lands in the basket.</p>
-              ) : (
-                done.map((d) => (
-                  <p key={d.runId} className="text-ink-2">
-                    {d.title}: {d.onOwn} of {d.total} steps on your own
-                  </p>
-                ))
-              )}
-            </section>
-          )}
           {!chatting && (
             <div className="mt-3 w-full">
               <TaskLeaves
