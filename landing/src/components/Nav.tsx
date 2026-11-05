@@ -1,4 +1,4 @@
-import { NAV, site } from "@/lib/site";
+import { asset, NAV, site } from "@/lib/site";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Nav() {
@@ -7,7 +7,7 @@ export function Nav() {
       <nav className="mx-auto flex h-[72px] max-w-6xl items-center justify-between gap-4 px-5 sm:px-8" aria-label="Main">
         <a href="#top" className="flex items-center gap-2.5 rounded-full">
           {/* eslint-disable-next-line @next/next/no-img-element -- a tiny static icon */}
-          <img src="/otter/otter-base.png" alt="" width={40} height={40} className="-my-1 size-11 object-contain" />
+          <img src={asset("/otter/otter-base.png")} alt="" width={40} height={40} className="-my-1 size-11 object-contain" />
           <span className="font-display text-[30px] leading-none">Ayin</span>
         </a>
         <ul className="hidden items-center gap-1 md:flex">

@@ -24,6 +24,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { asset } from '@/lib/site';
 
 export type UprightSources = { body: string; tail: string; eyes: string; lash: string };
 
@@ -103,7 +104,7 @@ function tint(img: HTMLImageElement, hue: number): CanvasImageSource {
 
 export default function UprightOtter({
   sources,
-  assetBase = '/otter',
+  assetBase = asset('/otter'),
   furHue = 0,
   active = true,
   className,

@@ -21,6 +21,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type CSSProperties } from 'react';
 import { createOtterMotion, createOtterRenderer, SRC, type OtterMotion, type OtterPose, type OtterRenderer } from './ayin-otter-engine';
+import { asset } from '@/lib/site';
 
 export { createOtterMotion } from './ayin-otter-engine';
 export type { OtterPose } from './ayin-otter-engine';
@@ -94,7 +95,7 @@ const AyinOtter = forwardRef<AyinOtterHandle, AyinOtterProps>(function AyinOtter
   paused = false,
   speed = 1,
   seed,
-  assetBase = '/otter',
+  assetBase = asset('/otter'),
   sources,
   motion = 'idle',
   furHue = 0,

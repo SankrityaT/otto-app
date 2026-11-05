@@ -5,10 +5,11 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Mesh, MeshStandardMaterial } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { asset } from "@/lib/site";
 
 // The 3D-printed otter, painted the way it will look on the counter. Built by
 // hardware/otter/otter.py and slimmed down for the web by hardware/otter/web_model.py.
-const MODEL = "/device/otter.glb";
+const MODEL = asset("/device/otter.glb");
 
 /** The model is in millimetres with Z up; three.js wants Y up and about one unit across. */
 const MM = 0.01;
