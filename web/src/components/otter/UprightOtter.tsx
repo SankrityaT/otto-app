@@ -2,8 +2,8 @@
 
 /**
  * Written by Havi (@Havishea) for the Ayin team and copied from
- * https://github.com/Havishea/Ayin. We changed only the default asset folder and
- * moved the fur tint into useMemo to satisfy our lint rules.
+ * https://github.com/Havishea/Ayin. We changed the default asset folder, moved the fur tint into useMemo to satisfy
+ * our lint rules, and draw the layers at a fixed size so 2048 px art stays sharp.
  *
  * UprightOtter: the otter sitting up, holding its stone. Shown while you ask
  * something or while Ayin is explaining a task.
@@ -23,7 +23,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 export type UprightSources = { body: string; tail: string; eyes: string };
 
+/** The drawing's coordinate space. The art files can be larger; they are drawn into this space. */
 const SIZE = 1024;
+/** The sharpest the canvas gets, matching the 2048 px art. */
+const MAX_PIXELS = 2048;
 /** The otter breathes and leans from the middle of its seat. */
 const SEAT = { x: 512, y: 880 };
 /** The tail swings from where it meets the hip. */
@@ -127,7 +130,7 @@ export default function UprightOtter({
     if (!g) return;
 
     const fit = () => {
-      const px = Math.min(SIZE, Math.round(cv.clientWidth * (window.devicePixelRatio || 1)));
+      const px = Math.min(MAX_PIXELS, Math.round(cv.clientWidth * (window.devicePixelRatio || 1)));
       if (px > 0 && cv.width !== px) {
         cv.width = px;
         cv.height = px;
@@ -180,13 +183,13 @@ export default function UprightOtter({
       g.translate(TAIL_PIVOT.x, TAIL_PIVOT.y);
       g.rotate(tail);
       g.translate(-TAIL_PIVOT.x, -TAIL_PIVOT.y);
-      g.drawImage(layers.tail, 0, 0);
+      g.drawImage(layers.tail, 0, 0, SIZE, SIZE);
       g.restore();
 
-      g.drawImage(layers.body, 0, 0);
+      g.drawImage(layers.body, 0, 0, SIZE, SIZE);
       if (shut > 0) {
         g.globalAlpha = shut;
-        g.drawImage(layers.eyes, 0, 0);
+        g.drawImage(layers.eyes, 0, 0, SIZE, SIZE);
         g.globalAlpha = 1;
       }
     };

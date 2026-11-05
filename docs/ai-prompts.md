@@ -42,3 +42,4 @@ This file lists the prompts that shaped the project. Small requests like "fix th
 | Nov 5 | Use Havi's pond UI instead of ours, and let each student customise their own otter. | Havi's pond, leaves, basket, talk bar and tabs wired to our data; each student's fur colour is saved |
 | Nov 5 | Check the code against our research: time blindness, task breakdown and overwhelm. Make the 3D view fit and move. | Visual timers only for timed steps, "Smaller steps" on demand, a 3D view that fits itself and turns until touched |
 | Nov 5 | Write the otter device code: the XIAO camera we have now, and the Raspberry Pi with Done, Help and Show me buttons for students who can't speak. | `device/xiao` and `device/pi`, both talking to the same API as the phone |
+| Nov 5 | The otter looks fuzzy on phones. Make the artwork sharper without changing it. | Havi's layers upscaled 4× locally with Real-ESRGAN and saved at 2048 px |
