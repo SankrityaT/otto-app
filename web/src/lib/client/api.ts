@@ -42,6 +42,9 @@ export const api = {
   scene: (stepId: string, photo: string | null) => call<{ scene: Scene }>(`/api/steps/${stepId}/scene`, post({ photo })),
   crew: (studentId: string) => call<{ crew: CrewView }>(`/api/crew?studentId=${encodeURIComponent(studentId)}`),
   cheer: (fromId: string, runId: string, phrase: string) => call("/api/crew/cheers", post({ fromId, runId, phrase })),
+  inviteBuddy: (fromId: string) => call("/api/crew/invites", post({ fromId })),
+  answerInvite: (inviteId: string, studentId: string, answer: "yes" | "not-today") =>
+    call(`/api/crew/invites/${inviteId}`, post({ studentId, answer })),
   askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),
   buttonPresses: (after: number) => call<{ presses: { id: number; button: string }[] }>(`/api/buttons?after=${after}`),
 };

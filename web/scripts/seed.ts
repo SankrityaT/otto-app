@@ -5,7 +5,7 @@
 import { createRoutine } from "../src/lib/data/routines";
 import { db, newId } from "../src/lib/db";
 
-const TABLES = ["asks", "cheers", "step_logs", "runs", "steps", "routines", "students", "crews", "button_presses"];
+const TABLES = ["invites", "asks", "cheers", "step_logs", "runs", "steps", "routines", "students", "crews", "button_presses"];
 for (const table of TABLES) db.exec(`DELETE FROM ${table}`);
 
 // Staff set these up: the crew, its weekly goal and the cheers students can send.
@@ -49,7 +49,7 @@ const latte = createRoutine({
 });
 
 /** Record a past run: `helpLevels` is the help each step took. */
-function pastRun(name: string, daysAgo: number, helpLevels: number[]) {
+function pastRun(name: string, daysAgo: number, helpLevels: number[]): string {
   const studentId = students[name];
   const when = new Date();
   when.setDate(when.getDate() - daysAgo);
@@ -66,6 +66,7 @@ function pastRun(name: string, daysAgo: number, helpLevels: number[]) {
       "INSERT INTO step_logs (id, run_id, step_id, student_id, help_level, done_at) VALUES (?, ?, ?, ?, ?, ?)",
     ).run(newId(), runId, step.id, studentId, helpLevels[index], when.toISOString());
   });
+  return runId;
 }
 
 const today = new Date().getDay(); // keep sample runs inside this week (weeks start Monday)
@@ -78,8 +79,26 @@ pastRun("Jordan", 11, [0, 0, 2, 1, 0, 0]);
 pastRun("Jordan", 10, [0, 0, 1, 2, 0, 0]);
 pastRun("Jordan", 8, [0, 0, 2, 3, 0, 0]);
 pastRun("Sam", earlierThisWeek, [0, 0, 0, 0, 0, 0]);
-pastRun("Sam", 0, [0, 0, 0, 0, 0, 0]);
+const samToday = pastRun("Sam", 0, [0, 0, 0, 0, 0, 0]);
 pastRun("Ava", 0, [0, 0, 1, 0, 0, 0]);
 pastRun("Leo", earlierThisWeek, [0, 2, 3, 1, 0, 0]);
+
+// A little crew life: a cheer on Sam's win, and Leo asking Jordan to practise together.
+const at = new Date().toISOString();
+db.prepare("INSERT INTO cheers (id, from_id, to_id, run_id, phrase, created_at) VALUES (?, ?, ?, ?, ?, ?)").run(
+  newId(),
+  students.Ava,
+  students.Sam,
+  samToday,
+  "Proud of you",
+  at,
+);
+db.prepare("INSERT INTO invites (id, from_id, to_id, about, status, created_at) VALUES (?, ?, ?, ?, 'waiting', ?)").run(
+  newId(),
+  students.Leo,
+  students.Jordan,
+  "Put on a lid",
+  at,
+);
 
 console.log(`Seeded the Café crew (${names.join(", ")}) and the "${latte.title}" routine.`);

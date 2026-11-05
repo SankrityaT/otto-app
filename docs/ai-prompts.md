@@ -44,3 +44,4 @@ This file lists the prompts that shaped the project. Small requests like "fix th
 | Nov 5 | Write the otter device code: the XIAO camera we have now, and the Raspberry Pi with Done, Help and Show me buttons for students who can't speak. | `device/xiao` and `device/pi`, both talking to the same API as the phone |
 | Nov 5 | The otter looks fuzzy on phones. Make the artwork sharper without changing it. | Havi's layers upscaled 4× locally with Real-ESRGAN and saved at 2048 px |
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
+| Nov 5 | The crew screen reads like a list, not a community. Make it about the crew together, and fix it in dark mode. | One pond everyone fills together, buddies with "practise together" invites, and a feed with cheers |

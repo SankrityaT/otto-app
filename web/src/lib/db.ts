@@ -72,6 +72,16 @@ const SCHEMA = `
     created_at TEXT NOT NULL
   );
 
+  -- "Practise together" invites between buddies, in preset words
+  CREATE TABLE IF NOT EXISTS invites (
+    id          TEXT PRIMARY KEY,
+    from_id     TEXT NOT NULL REFERENCES students(id),
+    to_id       TEXT NOT NULL REFERENCES students(id),
+    about       TEXT NOT NULL,        -- the step they'll practise
+    status      TEXT NOT NULL,        -- waiting, yes or not-today
+    created_at  TEXT NOT NULL
+  );
+
   -- Button presses from the otter, picked up by the screen at the same station
   CREATE TABLE IF NOT EXISTS button_presses (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
