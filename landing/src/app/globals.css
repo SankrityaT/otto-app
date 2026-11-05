@@ -138,6 +138,27 @@ body {
   50% { transform: translate(4px, -6px) rotate(calc(var(--r, 0deg) + 6deg)); }
 }
 
+/* The raft: each otter bobs on its own beat, cheers pop up, hearts float away */
+.raft-float { animation: raft-float 7s ease-in-out infinite; }
+@keyframes raft-float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(1.2%, -2.5%) rotate(1.2deg); }
+  66% { transform: translate(-1%, 1.5%) rotate(-1deg); }
+}
+.bubble-pop { animation: bubble-pop 380ms cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+@keyframes bubble-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+.heart-rise { animation: heart-rise 2.2s ease-out both; }
+@keyframes heart-rise {
+  0% { opacity: 0; transform: translateY(12px) scale(0.4); }
+  15% { opacity: 1; transform: translateY(0) scale(1.15); }
+  25% { transform: translateY(-4px) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-56px) scale(0.95); }
+}
+
 /* Sections fade up once as they scroll in */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 700ms ease, transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1); }
 .reveal.is-in { opacity: 1; transform: none; }
@@ -165,7 +186,7 @@ body {
 .faq[open] .faq__plus { transform: rotate(45deg); }
 
 @media (prefers-reduced-motion: reduce) {
-  .ripples__ring, .drift { animation: none; }
+  .ripples__ring, .drift, .raft-float, .bubble-pop, .heart-rise { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .dot, .ring__fill, .faq .faq__plus { transition: none; }
 }

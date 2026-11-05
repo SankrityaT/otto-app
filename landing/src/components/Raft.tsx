@@ -1,14 +1,18 @@
 import { HandHeart, Heart, Repeat, Users } from "lucide-react";
-import { Leaf } from "./Leaf";
+import { ringColor } from "@/lib/fur";
+import { RaftScene } from "./RaftScene";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
-/** A pretend raft for the picture, with otter nicknames. Rings fill with steps done on your own this week. */
+/**
+ * A pretend raft for the picture, with otter nicknames. `hue` is each otter's fur colour,
+ * and its ring uses the same colour. Rings fill with steps done on your own this week.
+ */
 const CREW = [
-  { name: "You", done: 9, target: 12, color: "var(--celadon)" },
-  { name: "Kelp", done: 12, target: 12, color: "var(--sky)" },
-  { name: "Pebble", done: 5, target: 10, color: "var(--apricot)" },
-  { name: "Ripple", done: 7, target: 10, color: "var(--lavender)" },
+  { name: "You", hue: 0, done: 9, target: 12 },
+  { name: "Kelp", hue: 120, done: 12, target: 12 },
+  { name: "Pebble", hue: 190, done: 5, target: 10 },
+  { name: "Ripple", hue: 270, done: 7, target: 10 },
 ];
 const CHEERS = ["Nice work!", "You got this", "Way to go!", "High five"];
 
@@ -49,32 +53,35 @@ export function Raft() {
       }
       intro="Real otters hold paws so they don't drift apart. Your raft is a few friends from your program who cheer each other on and help when someone's stuck."
     >
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+      <Reveal>
+        <div className="card overflow-hidden p-5 md:p-8">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="text-[14px] font-semibold uppercase tracking-[0.08em] text-ink-3">Café raft · this week</p>
+              <p className="mt-1 font-display text-[34px] leading-none">The pond is filling up</p>
+            </div>
+            <p className="text-[16px] text-ink-2">
+              {total} of {goal} steps on their own, together
+            </p>
+          </div>
+          <div className="mt-8 px-[3%]">
+            <RaftScene members={CREW} />
+          </div>
+          {/* The shared goal: every step anyone does on their own raises the water. */}
+          <div className="mt-8 h-3 overflow-hidden rounded-full bg-clay" aria-hidden>
+            <div className="h-full rounded-full bg-water" style={{ width: `${(total / goal) * 100}%` }} />
+          </div>
+        </div>
+      </Reveal>
+
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
         <Reveal>
           <div className="card p-6 md:p-8">
-            <div className="flex flex-wrap items-end justify-between gap-2">
-              <div>
-                <p className="text-[14px] font-semibold uppercase tracking-[0.08em] text-ink-3">Café raft · this week</p>
-                <p className="mt-1 font-display text-[34px] leading-none">The pond is filling up</p>
-              </div>
-              <p className="text-[16px] text-ink-2">
-                {total} of {goal} steps
-              </p>
-            </div>
-            {/* The shared pond: the water level is the raft's steps on their own this week. */}
-            <div className="relative mt-6 h-36 overflow-hidden rounded-[999px] border-[6px] border-[var(--bank)] bg-clay">
-              <div className="absolute inset-x-0 bottom-0 bg-water" style={{ height: `${(total / goal) * 100}%` }}>
-                <svg viewBox="0 0 400 12" preserveAspectRatio="none" className="absolute -top-[10px] h-3 w-full" aria-hidden>
-                  <path d="M0 12V6c33 0 33-6 66-6s33 6 67 6 33-6 66-6 33 6 67 6 33-6 67-6 33 6 67 6v6z" fill="var(--water)" />
-                </svg>
-              </div>
-              <Leaf color="var(--mustard)" className="drift absolute left-[18%] top-[34%] w-8" style={{ ["--r" as string]: "20deg" }} />
-              <Leaf color="var(--plum)" className="drift absolute right-[22%] top-[40%] w-7" style={{ ["--r" as string]: "-40deg", animationDelay: "-4s" }} />
-            </div>
-            <ul className="mt-6 grid grid-cols-2 gap-3">
+            <p className="font-display text-[30px] leading-none">Everyone&apos;s ring</p>
+            <ul className="mt-5 grid grid-cols-2 gap-3">
               {CREW.map((m) => (
                 <li key={m.name} className="flex items-center gap-3 rounded-2xl bg-ground p-3">
-                  <Ring {...m} />
+                  <Ring done={m.done} target={m.target} color={ringColor(m.hue)} />
                   <div>
                     <p className="font-semibold">{m.name}</p>
                     <p className="text-[14px] text-ink-3">{m.done === m.target ? "Ring full!" : `${m.done} on ${m.name === "You" ? "your" : "their"} own`}</p>

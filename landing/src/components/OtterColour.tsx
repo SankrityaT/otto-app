@@ -1,39 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { FUR_STOPS, furColor, furName } from "@/lib/fur";
 import { OtterSays } from "./OtterSays";
 import { Pond } from "./Pond";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
-
-// The colour maths is Havi's, from web/src/components/pond/FurSlider.tsx.
-/** The painted fur, as HSV: hue 30°, a soft brown. Hue shifts rotate from here. */
-const FUR = { h: 30, s: 0.32, v: 0.78 };
-
-function hsvToHex(h: number, s: number, v: number) {
-  const f = (n: number) => {
-    const k = (n + h / 60) % 6;
-    const c = v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
-    return Math.round(c * 255).toString(16).padStart(2, "0");
-  };
-  return `#${f(5)}${f(3)}${f(1)}`;
-}
-
-function furColor(shift: number) {
-  return hsvToHex((FUR.h + shift) % 360, FUR.s, FUR.v);
-}
-
-function furName(shift: number) {
-  if (shift === 0) return "Natural brown";
-  const h = (FUR.h + shift) % 360;
-  const names: [number, string][] = [
-    [15, "Rose"], [45, "Caramel"], [70, "Honey"], [100, "Olive"], [150, "Sage"],
-    [190, "Seafoam"], [230, "Sky"], [265, "Periwinkle"], [300, "Lilac"], [335, "Mauve"], [360, "Rose"],
-  ];
-  return names.find(([max]) => h < max)![1];
-}
-
-const STOPS = Array.from({ length: 13 }, (_, i) => `${furColor(i * 30)} ${((i / 12) * 100).toFixed(1)}%`).join(", ");
 
 /** A few colours to tap, as hue shifts. */
 const PRESETS = [0, 20, 130, 175, 220, 260, 300];
@@ -101,7 +73,7 @@ export function OtterColour() {
               step={1}
               value={hue}
               aria-valuetext={name}
-              style={{ ["--track" as string]: `linear-gradient(90deg, ${STOPS})`, ["--thumb" as string]: furColor(hue) }}
+              style={{ ["--track" as string]: `linear-gradient(90deg, ${FUR_STOPS})`, ["--thumb" as string]: furColor(hue) }}
               onChange={(e) => setHue(Number(e.target.value))}
             />
             <div className="mt-4 flex flex-wrap gap-2.5" role="group" aria-label="Quick colours">
