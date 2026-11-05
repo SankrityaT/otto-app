@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { WorkCard } from "@/components/WorkCard";
+import { OtterWaits } from "@/components/OtterWaits";
 
 export default function WorkCardPage() {
   return (
-    <Suspense fallback={<p className="p-6 text-center">Loading</p>}>
+    <Suspense fallback={<OtterWaits says="Getting the card" />}>
       <WorkCard />
     </Suspense>
   );

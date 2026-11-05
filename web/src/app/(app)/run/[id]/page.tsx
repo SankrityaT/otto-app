@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { RunScreen } from "@/components/RunScreen";
+import { OtterWaits } from "@/components/OtterWaits";
 
 export default function RunPage() {
   return (
-    <Suspense fallback={<p className="p-6 text-center text-lg text-muted">Getting your task ready…</p>}>
+    <Suspense fallback={<OtterWaits says="Getting your task ready" />}>
       <RunScreen />
     </Suspense>
   );

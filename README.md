@@ -25,7 +25,8 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Watch first:** at the first stage, Ayin walks through every step in 3D on one screen and talks it through. The student can say "next", "back", or ask about what they're looking at.
 - **Done:** Ayin takes one photo and checks the step, then moves on or says what's missing.
 - **Help:** one level at a time, and only when asked: a nudge, then a hint, then "show me".
-- **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing.
+- **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing. A new model streams in while Claude writes it: each part grows in as a blueprint wireframe and the otter says what it's adding, then it turns solid. While it builds, Ayin makes small talk out loud (written by Claude in the moment, never scripted), with answers to tap.
+- **A real voice:** Ayin speaks with Cartesia Sonic, with Deepgram Aura as a backup and the browser's own voice if neither is set up. Words still light up as they're said.
 - **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
 - **Time you can see:** a step that takes a set time (steam milk for 30 seconds) gets a calm ring timer. It never turns red.
 - **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.

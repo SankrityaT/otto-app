@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { ProfileScreen } from "@/components/raft/ProfileScreen";
+import { OtterWaits } from "@/components/OtterWaits";
 
 export default function PersonPage() {
   return (
-    <Suspense fallback={<p className="p-6 text-center">Loading</p>}>
+    <Suspense fallback={<OtterWaits says="Finding them in the pond" />}>
       <ProfileScreen />
     </Suspense>
   );

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { askClaude, type Photo } from "./client";
+import { streamClaude, type Photo } from "./client";
 
 // "Show me" in 3D: Claude builds the thing the student is stuck on out of simple shapes
 // and labels the parts that matter. The browser renders it with three.js.
@@ -46,14 +46,54 @@ const Scene = z.object({
 });
 
 export type Scene = z.infer<typeof Scene>;
+export type ScenePart = z.infer<typeof Part>;
 
-/** Build a simple 3D model of the step, with labels on the parts that matter. */
+/** A model while it's being built: the title and every part written so far. */
+export type SceneSoFar = { title: string | null; parts: ScenePart[] };
+
+/**
+ * Read a half-written scene: the title once it's complete, and every part whose JSON object
+ * has closed. Claude writes the title first and the parts in order, so this grows as it streams.
+ */
+export function sceneSoFar(json: string): SceneSoFar {
+  const title = /"title"\s*:\s*"((?:[^"\\]|\\.)*)"/.exec(json);
+  const parts: ScenePart[] = [];
+  const start = /"parts"\s*:\s*\[/.exec(json);
+  if (start) {
+    let depth = 0;
+    let from = -1;
+    let inString = false;
+    for (let i = start.index + start[0].length; i < json.length; i++) {
+      const ch = json[i];
+      if (inString) {
+        if (ch === "\\") i++;
+        else if (ch === '"') inString = false;
+      } else if (ch === '"') inString = true;
+      else if (ch === "{") {
+        if (depth++ === 0) from = i;
+      } else if (ch === "}") {
+        if (--depth === 0) {
+          const part = Part.safeParse(JSON.parse(json.slice(from, i + 1)));
+          if (part.success) parts.push(part.data);
+        }
+      } else if (ch === "]" && depth === 0) break;
+    }
+  }
+  return { title: title ? (JSON.parse(`"${title[1]}"`) as string) : null, parts };
+}
+
+/**
+ * Build a simple 3D model of the step, with labels on the parts that matter. `onProgress` gets
+ * the model so far each time another part is written, so it can be shown being built.
+ */
 export async function buildScene(
   taskTitle: string,
   step: { text: string; detail: string },
   photo?: Photo | null,
+  onProgress?: (soFar: SceneSoFar) => void,
 ): Promise<Scene> {
-  const scene = await askClaude({
+  let shown = -1;
+  const scene = await streamClaude({
     schema: Scene,
     photo,
     effort: "medium",
@@ -67,6 +107,13 @@ Build a simple, accurate 3D model of the objects this step uses, so the student 
 - Mark the one part to act on with highlight: true and label it. Label at most 3 other parts, each a different part.
 - If the step has a movement (pour, press, turn, push), add one arrow showing it.
 Before answering, check every shape stands the right way up and sits where it would in real life.`,
+    onText: (json) => {
+      if (!onProgress) return;
+      const soFar = sceneSoFar(json);
+      if (soFar.parts.length === shown) return;
+      shown = soFar.parts.length;
+      onProgress(soFar);
+    },
   });
   // One label per part, so notes never pile up on the same spot.
   const seen = new Set<string>();

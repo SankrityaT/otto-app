@@ -1,0 +1,188 @@
+{
+ "variant": "xiao",
+ "parts": [
+  {
+   "name": "01_body_front_tan.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 32,
+   "volume_cm3": 118.26,
+   "bbox": [
+    101.0,
+    55.6,
+    120.5
+   ],
+   "tris": 331134,
+   "components": 1,
+   "colour": "tan",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  },
+  {
+   "name": "02_body_back_tan.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 9,
+   "volume_cm3": 61.91,
+   "bbox": [
+    101.8,
+    34.9,
+    119.3
+   ],
+   "tris": 235226,
+   "components": 1,
+   "colour": "tan",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  },
+  {
+   "name": "03_puddle_base_teal_translucent.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 14,
+   "volume_cm3": 53.4,
+   "bbox": [
+    132.9,
+    114.6,
+    31.5
+   ],
+   "tris": 149624,
+   "components": 1,
+   "colour": "teal translucent",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  },
+  {
+   "name": "04_pebble_teal.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 2,
+   "volume_cm3": 11.82,
+   "bbox": [
+    54.4,
+    39.0,
+    10.2
+   ],
+   "tris": 84682,
+   "components": 1,
+   "colour": "teal",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  },
+  {
+   "name": "05_shutter_teal.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 0,
+   "volume_cm3": 0.3,
+   "bbox": [
+    11.2,
+    27.9,
+    3.2
+   ],
+   "tris": 844,
+   "components": 1,
+   "colour": "teal",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  },
+  {
+   "name": "06_light_ring_white_translucent.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 1,
+   "volume_cm3": 0.44,
+   "bbox": [
+    11.0,
+    21.1,
+    7.3
+   ],
+   "tris": 832,
+   "components": 1,
+   "colour": "white",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  },
+  {
+   "name": "00_fit_test_coupon_any_colour.stl",
+   "watertight": true,
+   "winding": true,
+   "manifold_status": "Error.NoError",
+   "genus": 3,
+   "volume_cm3": 6.57,
+   "bbox": [
+    105.5,
+    47.3,
+    10.4
+   ],
+   "tris": 1356,
+   "components": 1,
+   "colour": "any (print FIRST)",
+   "stl_reload_watertight": true,
+   "stl_reload_bodies": 1
+  }
+ ],
+ "overhangs": {
+  "01_body_front_tan.stl": [
+   3283.4719470029254,
+   {
+    "z_min": 0.4000577926635742,
+    "z_max": 115.43096415201823
+   }
+  ],
+  "02_body_back_tan.stl": [
+   1673.5895686579352,
+   {
+    "z_min": 0.40056196848551434,
+    "z_max": 106.82870737711589
+   }
+  ],
+  "03_puddle_base_teal_translucent.stl": [
+   103.80858389034984,
+   {
+    "z_min": 1.600000023841858,
+    "z_max": 27.5
+   }
+  ],
+  "04_pebble_teal.stl": [
+   267.62833454681913,
+   {
+    "z_min": 1.5,
+    "z_max": 8.399999618530273
+   }
+  ],
+  "05_shutter_teal.stl": [
+   0.0,
+   null
+  ],
+  "06_light_ring_white_translucent.stl": [
+   0.0,
+   null
+  ],
+  "00_fit_test_coupon_any_colour.stl": [
+   0.0,
+   null
+  ]
+ },
+ "interference": [],
+ "electronics_outside_skin": {},
+ "mic": [
+  [
+   30.402509264037974,
+   21.898857110077667,
+   67.45776401078516
+  ],
+  [
+   0.5429055632917577,
+   0.6245651481421806,
+   -0.5614017501513471
+  ],
+  3.700000000000002
+ ]
+}

@@ -15,6 +15,7 @@ import { whenWords } from "./when";
 import type { Scene } from "@/lib/ai/scene";
 import { shrinkPhoto } from "@/lib/client/photo";
 import dynamic from "next/dynamic";
+import { OtterWaits } from "../OtterWaits";
 
 // three.js only loads when someone opens a shared 3D model.
 const ShowMe3D = dynamic(() => import("../ShowMe3D").then((m) => m.ShowMe3D), { ssr: false });
@@ -90,7 +91,7 @@ export function Thread() {
   if (!data || !studentId) {
     return (
       <AppShell>
-        <p className="page pt-10 text-center">{message ?? "Loading"}</p>
+        {message ? <p className="page pt-10 text-center">{message}</p> : <OtterWaits says="Opening the post" />}
       </AppShell>
     );
   }

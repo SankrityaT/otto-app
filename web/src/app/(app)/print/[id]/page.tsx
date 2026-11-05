@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { StepCard } from "@/components/StepCard";
+import { OtterWaits } from "@/components/OtterWaits";
 
 export default function PrintPage() {
   return (
-    <Suspense fallback={<p className="p-6 text-center">Loading</p>}>
+    <Suspense fallback={<OtterWaits says="Getting the step card" />}>
       <StepCard />
     </Suspense>
   );

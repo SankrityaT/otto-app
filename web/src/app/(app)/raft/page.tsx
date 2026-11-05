@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/Button";
+import { OtterWaits } from "@/components/OtterWaits";
 import { RaftIntro } from "@/components/RaftIntro";
 import { Ring } from "@/components/Ring";
 import { Composer } from "@/components/raft/Composer";
@@ -65,12 +66,16 @@ export default function RaftPage() {
   if (!raft || !studentId) {
     return (
       <AppShell>
-        <div className="page flex flex-col items-center gap-3 pt-10 text-center">
-          <p>{message ?? (studentId ? "Loading your raft" : "Pick your name on the Today screen first.")}</p>
-          <Link href="/" className="btn btn--text">
-            Go to Today
-          </Link>
-        </div>
+        {studentId && !message ? (
+          <OtterWaits says="Paddling over to your raft" />
+        ) : (
+          <div className="page flex flex-col items-center gap-3 pt-10 text-center">
+            <p>{message ?? "Pick your name on the Today screen first."}</p>
+            <Link href="/" className="btn btn--text">
+              Go to Today
+            </Link>
+          </div>
+        )}
       </AppShell>
     );
   }

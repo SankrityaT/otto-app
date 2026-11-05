@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { StepCoach } from "./StepCoach";
 import type { Run } from "@/lib/data/runs";
 import { api } from "@/lib/client/api";
+import { OtterWaits } from "./OtterWaits";
 
 /** Loads a run by the id in the URL, then hands it to the step coach. */
 export function RunScreen() {
@@ -19,6 +20,6 @@ export function RunScreen() {
   }, [load]);
 
   if (error) return <p className="p-6 text-center text-lg">{error}</p>;
-  if (!run) return <p className="p-6 text-center text-lg text-muted">Getting your task ready…</p>;
+  if (!run) return <OtterWaits says="Getting your task ready" />;
   return <StepCoach run={run} onStepsChanged={load} />;
 }

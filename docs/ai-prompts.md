@@ -48,6 +48,7 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Nov 5 | You can't tap Done with soapy hands, and students won't trust a camera they can't see. | Voice during tasks; Ayin notices a step is done when the student moves and then holds still; a "What Ayin sees" window is always on screen |
 | Nov 5 | Ayin should coach out loud like someone beside the student, looking at what they're holding. | Spoken questions answered from the step, the 3D model and the camera, in about 3 seconds |
 | Nov 5 | Our students are capable young adults; don't teach them to wash their hands. | Step planning and chat teach the job, not everyday life |
+| Nov 5 | Use the real voice we had before (Cartesia or Deepgram). While a 3D model takes time, show it being built and make small talk, not a loading screen. Nothing hardcoded. | Cartesia Sonic with a Deepgram backup; models stream in part by part as blueprint wireframes with the otter calling out each part; Claude makes small talk until the model is ready |
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
 
 ## Talking with Ayin

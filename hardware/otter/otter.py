@@ -3,7 +3,7 @@
 Ayin otter desk-buddy enclosure — parametric source.
 
     uv venv --python 3.12 .venv
-    uv pip install --python .venv/bin/python manifold3d trimesh numpy scipy scikit-image pillow
+    uv pip install --python .venv/bin/python manifold3d trimesh numpy scipy scikit-image pillow matplotlib
     .venv/bin/python otter.py                 # Pi Zero 2 WH (primary) -> stl/  + renders/
     .venv/bin/python otter.py --variant xiao  # XIAO ESP32S3 Sense variant -> stl/variant_xiao/
 

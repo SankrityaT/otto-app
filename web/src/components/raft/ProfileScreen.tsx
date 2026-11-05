@@ -11,6 +11,7 @@ import { AppShell } from "../AppShell";
 import { Button } from "../Button";
 import UprightOtter from "../otter/UprightOtter";
 import { RaftIcon } from "./Stickers";
+import { OtterWaits } from "../OtterWaits";
 
 /**
  * A raftmate's page: their otter, their own goal, how they work best, and what they can help
@@ -45,7 +46,7 @@ export function ProfileScreen() {
   if (!profile) {
     return (
       <AppShell>
-        <p className="page pt-10 text-center">{message ?? "Loading"}</p>
+        {message ? <p className="page pt-10 text-center">{message}</p> : <OtterWaits says="Finding them in the pond" />}
       </AppShell>
     );
   }

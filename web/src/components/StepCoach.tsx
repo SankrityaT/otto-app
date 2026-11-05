@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useEffectEvent, useState } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type { Run } from "@/lib/data/runs";
 import { api, type Summary } from "@/lib/client/api";
 import { useCameraChoice } from "@/lib/client/settings";
@@ -20,7 +21,8 @@ import { StepTimer } from "./StepTimer";
 import { TaskStart } from "./TaskStart";
 import { Composer } from "./raft/Composer";
 import { RaftIcon } from "./raft/Stickers";
-import type { Scene } from "@/lib/ai/scene";
+import type { Scene, SceneSoFar } from "@/lib/ai/scene";
+import type { ChatTurn } from "./AyinChat";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
 import { OtterView } from "./OtterView";
@@ -44,6 +46,9 @@ const WATCH_EVERY_MS = 6000;
 
 // three.js only runs in the browser, and only loads when a student asks to be shown.
 const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), {
+  ssr: false,
+});
+const BuildingModel = dynamic(() => import("./ShowMe3D").then((m) => m.BuildingModel), {
   ssr: false,
 });
 
@@ -81,6 +86,11 @@ export function StepCoach({
   );
   // Each step's 3D model, built once and then reused. The flat picture is the fallback.
   const [scenes, setScenes] = useState<Record<string, Scene>>({});
+  // Models being built right now, with the parts written so far, so the student sees them being built.
+  const [building, setBuilding] = useState<Record<string, SceneSoFar>>({});
+  const loading = useRef(new Map<string, Promise<Scene>>());
+  // Small talk while Ayin builds a model the student asked to see.
+  const [smallTalk, setSmallTalk] = useState<{ stepId: string; turns: ChatTurn[]; choices: string[] } | null>(null);
   const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
   const useBrowserEyes = cameraChoice !== "otter";
@@ -114,19 +124,54 @@ export function StepCoach({
 
   const stepScene = step ? scenes[step.id] : undefined;
 
+  /** A step's 3D model, built once. Asking again while it's being built waits for the same build. */
+  function loadScene(stepId: string, photo: string | null): Promise<Scene> {
+    const already = loading.current.get(stepId);
+    if (already) return already;
+    const pending = api
+      .scene(stepId, photo, (soFar) => setBuilding((all) => ({ ...all, [stepId]: soFar })))
+      .then((r) => {
+        setScenes((all) => ({ ...all, [stepId]: r.scene }));
+        return r.scene;
+      })
+      .finally(() => {
+        loading.current.delete(stepId);
+        setBuilding((all) => Object.fromEntries(Object.entries(all).filter(([id]) => id !== stepId)));
+      });
+    loading.current.set(stepId, pending);
+    return pending;
+  }
+
+  const getReady = useEffectEvent((ids: string[]) => {
+    for (const id of ids) {
+      new Image().src = `/api/steps/${id}/picture`;
+      loadScene(id, null).catch(() => {}); // the flat picture stays up instead
+    }
+  });
+
   // A new step: read it aloud, and get this step's 3D model and the next one's ready.
   useEffect(() => {
     if (!step || mode !== "steps") return;
     speak(step.text);
-    [step, nextStep].forEach((s) => {
-      if (!s) return;
-      new Image().src = `/api/steps/${s.id}/picture`;
-      api
-        .scene(s.id, null)
-        .then((r) => setScenes((all) => ({ ...all, [s.id]: r.scene })))
-        .catch(() => {}); // the flat picture stays up instead
-    });
+    getReady([step.id, ...(nextStep ? [nextStep.id] : [])]);
   }, [step, nextStep, mode]);
+
+  /**
+   * Keep the student company while a model is being built: Claude makes light small talk, out
+   * loud, and answers whatever the student says back until the model is ready.
+   */
+  async function keepCompany(stepId: string, stepText: string, said: string, before: ChatTurn[]) {
+    const turns: ChatTurn[] = said ? [...before, { who: "student", text: said }] : before;
+    if (said) setHeard(said);
+    try {
+      const reply = await api.talk(run.studentId, said, turns, `a 3D model of the step "${stepText}"`);
+      if (!loading.current.has(stepId)) return; // the model is ready; that comes first now
+      setSmallTalk({ stepId, turns: [...turns, { who: "ayin", text: reply.say }], choices: reply.choices });
+      tell(reply.say);
+    } catch {
+      // Small talk is a nicety; the model still arrives without it.
+    }
+  }
 
   /** One photo, only at the moment the student asks. Null means "let the server use the otter". */
   async function takePhoto(): Promise<string | null> {
@@ -202,10 +247,16 @@ export function StepCoach({
     });
     try {
       if (level === HELP_LEVELS.showMe) {
-        // "Show me" brings up the 3D model of the step and talks the student through it.
+        // "Show me" brings up the 3D model of the step and talks the student through it. A model
+        // that isn't ready yet is shown being built, and Ayin makes small talk until it is.
         setFlat(false);
-        const shown = stepScene ?? (await api.scene(step.id, await takePhoto())).scene;
-        setScenes((all) => ({ ...all, [step.id]: shown }));
+        let shown = stepScene;
+        if (!shown) {
+          const pending = loadScene(step.id, await takePhoto());
+          keepCompany(step.id, step.text, "", []);
+          shown = await pending;
+          setSmallTalk(null);
+        }
         tell(shown.say);
       } else {
         const result = await api.help(
@@ -263,6 +314,10 @@ export function StepCoach({
 
   // Voice, the on-screen buttons and the otter's buttons all end in the same three actions.
   const onQuestion = useEffectEvent((question: string) => {
+    if (step && smallTalk?.stepId === step.id && loading.current.has(step.id)) {
+      keepCompany(step.id, step.text, question, smallTalk.turns);
+      return;
+    }
     answer(question);
   });
 
@@ -447,10 +502,14 @@ export function StepCoach({
 
       <TogetherBar runId={run.id} />
 
-      {current.pictureShown && stepScene && !flat ? (
+      {current.pictureShown && !flat && (stepScene || building[step.id]) ? (
         <div className="flex h-[42dvh] flex-col gap-1">
           <div className="min-h-0 flex-1">
-            <ShowMe3D key={step.id} scene={stepScene} fill />
+            {stepScene ? (
+              <ShowMe3D key={step.id} scene={stepScene} fill />
+            ) : (
+              <BuildingModel key={step.id} soFar={building[step.id]} fill />
+            )}
           </div>
           <Button look="quiet" className="self-center py-1" onClick={() => setFlat(true)}>
             See the flat picture
@@ -489,6 +548,21 @@ export function StepCoach({
           <MessageCircle size={20} className="mt-0.5 shrink-0" />
           {say}
         </p>
+      )}
+
+      {smallTalk?.stepId === step.id && smallTalk.choices.length > 0 && (
+        <div className="flex flex-wrap gap-2" aria-label="Answers">
+          {smallTalk.choices.map((choice, i) => (
+            <button
+              key={choice}
+              onClick={() => keepCompany(step.id, step.text, choice, smallTalk.turns)}
+              className="chat__leaf"
+              style={{ "--tone": `var(--r-${["study", "errands", "care"][i % 3]})`, "--i": i } as CSSProperties}
+            >
+              {choice}
+            </button>
+          ))}
+        </div>
       )}
 
       {notSeen === step.id && (

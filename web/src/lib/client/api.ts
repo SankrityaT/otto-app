@@ -1,6 +1,6 @@
 // Typed calls from the screens to our API. Every call throws a readable Error on failure.
 
-import type { Scene } from "../ai/scene";
+import type { Scene, SceneSoFar } from "../ai/scene";
 import type { Together } from "../data/together";
 import type { CrewView, Student } from "../data/crew";
 import type { Post, PostKind, Profile, Reaction, Reply } from "../data/raft";
@@ -18,6 +18,41 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(body) });
+
+/**
+ * A step's 3D model. A saved one comes back at once; a new one streams in, and `onBuilding`
+ * gets the parts written so far each time another is ready, to show it being built.
+ */
+async function buildScene(
+  stepId: string,
+  photo: string | null,
+  onBuilding?: (soFar: SceneSoFar) => void,
+): Promise<{ scene: Scene }> {
+  const response = await fetch(`/api/steps/${stepId}/scene`, { ...post({ photo }), headers: { "Content-Type": "application/json" } });
+  if (!response.headers.get("Content-Type")?.includes("ndjson")) {
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error ?? "Something went wrong. Please try again.");
+    return body;
+  }
+  // A new model: Ayin starts planning it now, so show the empty blueprint straight away.
+  onBuilding?.({ title: null, parts: [] });
+  const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += value;
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines.filter(Boolean)) {
+      const message = JSON.parse(line) as { building?: SceneSoFar; scene?: Scene; error?: string };
+      if (message.building) onBuilding?.(message.building);
+      if (message.error) throw new Error(message.error);
+      if (message.scene) return { scene: message.scene };
+    }
+  }
+  throw new Error("The 3D model stopped before it was finished. Please try again.");
+}
 
 export type Summary = { total: number; onOwn: number };
 
@@ -55,7 +90,7 @@ export const api = {
   help: (runId: string, stepId: string, level: number, photo: string | null) =>
     call<{ say: string }>(`/api/runs/${runId}/help`, post({ stepId, level, photo })),
   splitStep: (stepId: string) => call(`/api/steps/${stepId}/split`, post({})),
-  scene: (stepId: string, photo: string | null) => call<{ scene: Scene }>(`/api/steps/${stepId}/scene`, post({ photo })),
+  scene: buildScene,
   crew: (studentId: string) => call<{ crew: CrewView }>(`/api/crew?studentId=${encodeURIComponent(studentId)}`),
   cheer: (fromId: string, runId: string, phrase: string) => call("/api/crew/cheers", post({ fromId, runId, phrase })),
   inviteTogether: (fromId: string, toId: string, routineId: string) =>
@@ -65,8 +100,8 @@ export const api = {
   together: (runId: string) => call<{ together: Together | null }>(`/api/runs/${runId}/together`),
   cheerPartner: (runId: string, phrase: string) => call(`/api/runs/${runId}/together`, post({ phrase })),
   askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),
-  talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[]) =>
-    call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history })),
+  talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[], busyWith: string | null = null) =>
+    call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history, busyWith })),
   feed: (studentId: string, kind: PostKind | null) =>
     call<{ posts: Post[] }>(`/api/raft/feed?studentId=${encodeURIComponent(studentId)}${kind ? `&kind=${kind}` : ""}`),
   post: (postId: string, studentId: string) =>

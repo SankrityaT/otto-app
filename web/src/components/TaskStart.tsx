@@ -2,8 +2,8 @@
 
 import { ChevronLeft, ChevronRight, Mic, MicOff, Pause, Play } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect, useEffectEvent, useState } from "react";
-import type { Scene } from "@/lib/ai/scene";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import type { Scene, SceneSoFar } from "@/lib/ai/scene";
 import type { Run } from "@/lib/data/runs";
 import { api } from "@/lib/client/api";
 import { canListen, hush, listen, speak, type VoiceCommand } from "@/lib/client/speech";
@@ -18,6 +18,7 @@ const MS_PER_WORD = 450;
 
 // three.js only runs in the browser, so the 3D view loads on its own.
 const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), { ssr: false });
+const BuildingModel = dynamic(() => import("./ShowMe3D").then((m) => m.BuildingModel), { ssr: false });
 
 /**
  * A pause before the task starts, like the doorway nooks at First Place: a moment to get
@@ -28,13 +29,6 @@ const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), { s
 export function TaskStart({ run, onStart }: { run: Run; onStart: (mode: "steps" | "alone") => void }) {
   const [watching, setWatching] = useState(run.stage === 1);
   const stage = STAGES[run.stage - 1];
-
-  // Start drawing every picture now, so the walkthrough doesn't wait on them.
-  useEffect(() => {
-    run.steps.forEach((step) => {
-      new Image().src = `/api/steps/${step.id}/picture`;
-    });
-  }, [run.steps]);
 
   return (
     <main className="mx-auto flex h-dvh w-full max-w-md flex-col gap-4 px-5 py-5">
@@ -113,21 +107,37 @@ function StepStory({ run }: { run: Run }) {
   const [playing, setPlaying] = useState(() => !window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const [listening, setListening] = useState(canListen);
   const [scenes, setScenes] = useState<Record<string, Scene>>({});
+  // Models still being built, with the parts written so far.
+  const [building, setBuilding] = useState<Record<string, SceneSoFar>>({});
   const [heard, setHeard] = useState<string | null>(null);
   const [say, setSay] = useState<string | null>(null);
   const step = run.steps[index];
   const scene = scenes[step.id];
   const last = run.steps.length - 1;
 
-  // Build every step's 3D model at once. Each is saved, so this is only slow the first time.
+  // Get each step's picture and 3D model ready one at a time, starting from the step on screen,
+  // so the one being watched comes first and the app never waits on a dozen at once.
+  // Each is saved, so this is only slow the first time.
+  const started = useRef(new Set<string>());
   useEffect(() => {
-    run.steps.forEach((s) => {
-      api
-        .scene(s.id, null)
-        .then((r) => setScenes((all) => ({ ...all, [s.id]: r.scene })))
-        .catch(() => {}); // the flat picture stays up instead
-    });
-  }, [run.steps]);
+    let moved = false;
+    (async () => {
+      for (const s of [...run.steps.slice(index), ...run.steps.slice(0, index)]) {
+        if (moved) return;
+        if (started.current.has(s.id)) continue;
+        started.current.add(s.id);
+        new Image().src = `/api/steps/${s.id}/picture`;
+        await api
+          .scene(s.id, null, (soFar) => setBuilding((all) => ({ ...all, [s.id]: soFar })))
+          .then((r) => setScenes((all) => ({ ...all, [s.id]: r.scene })))
+          .catch(() => {}) // the picture stays up instead
+          .finally(() => setBuilding((all) => Object.fromEntries(Object.entries(all).filter(([id]) => id !== s.id))));
+      }
+    })();
+    return () => {
+      moved = true;
+    };
+  }, [index, run.steps]);
 
   const narration = useEffectEvent(() => [`Step ${index + 1}. ${step.text}.`, scenes[step.id]?.say].filter(Boolean).join(" "));
 
@@ -144,12 +154,14 @@ function StepStory({ run }: { run: Run }) {
     };
   }, [index]);
 
-  // Once Ayin has finished a step, move on after a short pause, unless the student took over.
+  // Once Ayin has finished a step, move on after a short pause, unless the student took over,
+  // or this step's model is still being built (it's worth watching it come together).
+  const stillBuilding = Boolean(building[step.id]);
   useEffect(() => {
-    if (!playing || spoken !== index || index === last) return;
+    if (!playing || spoken !== index || index === last || stillBuilding) return;
     const next = setTimeout(() => setIndex(index + 1), STEP_PAUSE_MS);
     return () => clearTimeout(next);
-  }, [playing, spoken, index, last]);
+  }, [playing, spoken, index, last, stillBuilding]);
 
   function go(to: number) {
     setPlaying(false);
@@ -217,11 +229,12 @@ function StepStory({ run }: { run: Run }) {
       <div className="relative min-h-0 flex-1">
         {scene ? (
           <ShowMe3D key={step.id} scene={scene} fill onGrab={() => setPlaying(false)} />
+        ) : building[step.id] ? (
+          <BuildingModel key={step.id} soFar={building[step.id]} fill />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-line bg-[#fbf8f2] p-3">
             {/* eslint-disable-next-line @next/next/no-img-element -- the SVG drawn for this step */}
             <img key={step.id} src={`/api/steps/${step.id}/picture`} alt={step.detail} className="min-h-0 max-w-full flex-1 object-contain" />
-            <p className="font-hand text-[18px] text-[#69625a]">Building it in 3D…</p>
           </div>
         )}
       </div>

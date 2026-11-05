@@ -8,6 +8,7 @@ import { STAGES } from "@/lib/stages";
 import { tipsFor } from "@/lib/workCard";
 import { Button } from "./Button";
 import UprightOtter from "./otter/UprightOtter";
+import { OtterWaits } from "./OtterWaits";
 
 /**
  * "My work card": one page a student can choose to share with a job coach or supervisor.
@@ -21,7 +22,7 @@ export function WorkCard() {
     api.profile(id).then((r) => setProfile(r.profile));
   }, [id]);
 
-  if (!profile) return <p className="p-6 text-center">Loading</p>;
+  if (!profile) return <OtterWaits says="Getting the card" />;
   const tips = tipsFor(profile.workStyle);
 
   return (

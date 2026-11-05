@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { Routine } from "@/lib/data/routines";
 import { api } from "@/lib/client/api";
 import { Button } from "./Button";
+import { OtterWaits } from "./OtterWaits";
 
 /** A paper copy of a task's steps, to keep at the station. Low-tech backup for the app. */
 export function StepCard() {
@@ -15,7 +16,7 @@ export function StepCard() {
     api.routine(id).then((r) => setRoutine(r.routine));
   }, [id]);
 
-  if (!routine) return <p className="p-6 text-center">Loading</p>;
+  if (!routine) return <OtterWaits says="Getting the step card" />;
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-6 bg-white p-8 text-[#1f1c18] print:p-0">
