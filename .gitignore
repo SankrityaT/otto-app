@@ -1,0 +1,33 @@
+# Secrets: never commit these. Copy the matching .env.example instead.
+.env
+.env.*
+!.env.example
+
+# Local data
+*.db
+*.db-journal
+*.sqlite
+data/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Generated 3D files (rebuilt by hardware/otter/generate.py, shared as release downloads)
+*.stl
+*.glb
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/

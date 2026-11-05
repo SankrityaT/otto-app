@@ -1,0 +1,42 @@
+# Research behind Ayin
+
+What we learned from our partner visit and the literature, and how each finding shaped the product. Evidence is labelled by where it came from:
+
+- **[school]**: heard or seen at the AZACS main campus tour on Oct 29, 2026
+- **[partner]**: from First Place AZ's own materials
+- **[research]**: published studies and guidance
+
+## Who we build for
+
+Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They learn job skills at school-run work sites: a café, a shirt studio and a shipping store. There are about 3 students per staff member at school; at a first job there is no one prompting each step.
+
+## Findings and what we did about them
+
+| Finding | Source | What it changed |
+| --- | --- | --- |
+| Teachers keep word problems to "just one step"; sequencing is taught as its own skill | [school] | Ayin shows only one step at a time |
+| A student: "we learn from our mistakes visually" | [school] | Every step gets a picture, not just words |
+| The school's goal for its most supported students: "demonstrating the need for fewer prompts" | [school] goals poster | Help fades, and every step is logged as "on my own" or "with help" |
+| Video and visual prompting, task analysis and prompting are evidence-based practices for autistic learners | [research] [NCAEP 2020](https://ncaep.fpg.unc.edu/) | The step coach follows these practices |
+| Plain AI help cut exam scores by 17% once it was removed; a hint-only tutor did no harm | [research] Bastani et al., PNAS 2025 | Help comes in levels, only when asked |
+| Staff, unprompted: "anything that touches the body … there's a sensory challenge" | [school] | Nothing is worn: a phone or a desk otter |
+| No photos of students on campus; Arizona requires a parent's written consent to record a child (A.R.S. 1-602) | [school] [research] | Photos are taken only when asked, never stored |
+| About 40% of autistic young adults never got together with friends in a year; 28% had no social contact | [research] [NLTS2 via WashU](https://source.washu.edu/2013/05/new-study-examines-social-isolation-of-young-adults-with-autism-spectrum-disorder/) | The crew feature |
+| "Independent living takes practice … one first at a time"; support steps down as skills grow | [partner] [First Place AZ](https://firstplaceaz.org/transition-academy/) | Fading help, and crews that celebrate firsts |
+| Peer-based instruction is an evidence-based practice when an adult sets up the context | [research] [AFIRM / NCAEP](https://afirm.fpg.unc.edu/wp-content/uploads/Peer-Based-Instruction-Intervention-Brief-Packet-Sam-AFIRM-Team-2025.pdf) | Staff create crews |
+| Autistic-to-autistic information transfer works as well as between non-autistic people | [research] [Crompton et al. 2020](https://pure.qub.ac.uk/en/publications/autistic-peer-to-peer-information-transfer-is-highly-effective/) | "Ask a crewmate who has done it" |
+| Seeing a broken streak lowers later engagement | [research] [Silverman & Barasch 2023](https://www.colorado.edu/business/faculty-research/2023/04/19/or-track-how-broken-streaks-affect-consumer-decisions) | Weekly rings, never a broken streak |
+| A leaderboard and badges lowered motivation and exam scores | [research] [Hanus & Fox 2015](https://dblp.org/rec/journals/ce/HanusF15) | A shared crew goal, no ranking |
+| 44% of autistic people report being victimized | [research] [Trundle et al. 2023](https://pubmed.ncbi.nlm.nih.gov/35524162/) | Closed crews, no location, preset messages only |
+
+## What we chose not to build
+
+- **IEP paperwork tools.** Staff asked for a standard IEP format, but that is an educator tool, a crowded market and legally risky. Ayin's log can feed a teacher summary later, with the student's yes.
+- **Symptom reporting for non-speaking students.** The school nurse described real "detective work", but this is clinical and regulated. It needs the school's speech-language pathologist and is out of scope.
+- **Anything worn.** We prototyped camera glasses earlier; the sensory findings moved us to a phone and a desk otter.
+
+## Limits of our evidence
+
+- The tour sample skewed toward very verbal students who were chosen to present.
+- Peer-support evidence covers ages 3–18 and mostly non-autistic peers. Peer mentoring for ages 19–22 is barely studied.
+- No staff member told us "students get stuck on steps" in those words. We infer it from the one-step teaching and the school's "fewer prompts" goal.
