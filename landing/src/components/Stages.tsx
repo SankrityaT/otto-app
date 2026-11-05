@@ -15,13 +15,17 @@ const STAGES = [
 
 /** The sticky nav's height. The pinned card sits in the space below it. */
 const NAV_PX = 72;
-/** How far to scroll for each stage, as a share of the screen's height. */
-const STAGE_SCROLL_VH = 45;
+/** How far to scroll for each stage, as a share of the screen's height. Long enough to read each one. */
+const STAGE_SCROLL_VH = 70;
+/** Each stage stays on screen at least this long, so there is time to read it. */
+const MIN_STAGE_MS = 700;
 
 /**
  * The card pins in the middle of the screen while the page scrolls past a tall track, and
- * scrolling moves it through the five stages, one after another. After the last stage the
- * page carries on. Tapping a stage scrolls to it, so scrolling and tapping always agree.
+ * scrolling moves it through the five stages, one after another. Each stage stays up for a
+ * moment before the next, and a quick scroll still steps through every stage in order rather
+ * than skipping, so each one gets read. After the last stage the page carries on. Tapping a stage scrolls to it, so scrolling and
+ * tapping always agree.
  */
 export function Stages() {
   const [stage, setStage] = useState(0);
@@ -38,11 +42,32 @@ export function Stages() {
     return Math.min(1, Math.max(0, (NAV_PX - el.getBoundingClientRect().top) / travel));
   };
 
+  // The stage the scroll position asks for, the stage on screen, and when that last changed.
+  const want = useRef(0);
+  const shown = useRef(0);
+  const changedAt = useRef(0);
+
   useEffect(() => {
     let frame = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Step one stage at a time toward the scroll position, holding each for MIN_STAGE_MS.
+    const step = () => {
+      timer = undefined;
+      if (shown.current === want.current) return;
+      const wait = changedAt.current + MIN_STAGE_MS - performance.now();
+      if (wait > 0) {
+        timer = setTimeout(step, wait);
+        return;
+      }
+      shown.current += Math.sign(want.current - shown.current);
+      changedAt.current = performance.now();
+      setStage(shown.current);
+      if (shown.current !== want.current) timer = setTimeout(step, MIN_STAGE_MS);
+    };
     const update = () => {
       frame = 0;
-      setStage(Math.min(STAGES.length - 1, Math.floor(progress() * STAGES.length)));
+      want.current = Math.min(STAGES.length - 1, Math.floor(progress() * STAGES.length));
+      if (!timer) step();
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -52,15 +77,20 @@ export function Stages() {
     window.addEventListener("resize", onScroll);
     return () => {
       cancelAnimationFrame(frame);
+      clearTimeout(timer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
   }, []);
 
-  /** Scroll to the middle of a stage's stretch of the track. */
-  const goTo = (i: number) => {
+  /** Scroll to the middle of a stage's stretch of the track. `at` is the tap's event time. */
+  const goTo = (i: number, at: number) => {
     const el = track.current;
     if (!el) return;
+    // A tapped stage shows straight away; scrolling there then keeps it.
+    shown.current = want.current = i;
+    changedAt.current = at;
+    setStage(i);
     const pinned = window.innerHeight - NAV_PX;
     const travel = el.offsetHeight - pinned;
     const top = el.getBoundingClientRect().top + window.scrollY - NAV_PX + ((i + 0.5) / STAGES.length) * travel;
@@ -120,7 +150,7 @@ export function Stages() {
                       <li key={s.name}>
                         <button
                           type="button"
-                          onClick={() => goTo(i)}
+                          onClick={(e) => goTo(i, e.timeStamp)}
                           aria-pressed={stage === i}
                           className={`flex w-full flex-col items-start gap-2 rounded-2xl p-2 text-left transition-colors md:p-3 ${stage === i ? "bg-cel-wash" : "hover:bg-clay/60"}`}
                         >
