@@ -39,12 +39,8 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Ayin checks every post and reply** before anyone sees it: kind, no personal info, no faces. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff.
 - **Profiles:** each student's own goal, "how I work best", and "I can help with", which fills itself from tasks they've mastered.
 - **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
-
-- A shared weekly goal shown as one pond that every crewmate's otter sits in. Each step anyone does on their own raises the water. Never a ranking.
-- Weekly rings that quietly restart each week. There is no streak to break.
-- **Practice buddies:** Ayin pairs crewmates so each can show the other a step they've mastered. The help a student no longer needs from Ayin is exactly what they can now offer a friend.
-- **Practise together:** ask your buddy to practise a step with you; they answer "Yes, let's" or "Not today".
-- **Ask a crewmate** who has done the step on their own, and cheers with preset words that show up on the win.
+- **One shared pond:** every raftmate's otter floats in it, and each step anyone does on their own raises the water. A group total, never a ranking, and no streaks to break.
+- **Buddies:** Ayin pairs raftmates so each can show the other a step they've mastered, and they can ask each other to practise together. "Not today" is always one tap.
 
 **Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket.
 
