@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ringColor } from "@/lib/fur";
 import AyinOtter, { type AyinOtterHandle } from "./otter/AyinOtter";
 import { OtterSays } from "./OtterSays";
+import { RaftLeaves } from "./RaftLeaves";
 import { Ripples } from "./Pond";
 import UprightOtter from "./otter/UprightOtter";
 
@@ -20,9 +21,9 @@ export type RaftMember = {
  * neighbours cuddled up. The first two meet head to head, and the last two tail to tail.
  */
 const SPOTS = [
-  { x: 14, y: 24, flip: true, seed: 3 },
-  { x: 35, y: 2, flip: false, seed: 11 },
-  { x: 56, y: 24, flip: true, seed: 23 },
+  { x: 14, y: 16, flip: true, seed: 3 },
+  { x: 35, y: -5, flip: false, seed: 11 },
+  { x: 56, y: 16, flip: true, seed: 23 },
 ];
 /** Each otter's width, as % of the scene. */
 const OTTER_W = 30;
@@ -174,8 +175,8 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
     <div
       ref={scene}
       className="relative aspect-[2.3/1] w-full"
-      role="img"
-      aria-label={`${members.length} otters floating together in one pond, each in its own colour, bumping and cheering each other on.`}
+      role="group"
+      aria-label={`${members.length} otters floating together in one pond, each in its own colour, bumping and cheering each other on, with this week's tasks drifting by as leaves.`}
     >
       {/* The shared pond */}
       <svg className="absolute inset-x-[-3%] inset-y-[-4%] h-[108%] w-[106%]" viewBox="0 0 400 180" preserveAspectRatio="none" aria-hidden>
@@ -183,6 +184,8 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
         <ellipse cx="200" cy="91" rx="188" ry="81" fill="var(--water-edge)" />
         <ellipse cx="200" cy="92" rx="181" ry="76" fill="var(--water)" />
       </svg>
+
+      <RaftLeaves />
 
       {members.slice(0, SPOTS.length).map((m, i) => {
         const spot = SPOTS[i];
@@ -192,7 +195,7 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
           <div
             key={m.name}
             className="absolute transition-transform duration-500 ease-[cubic-bezier(0.3,0.7,0.3,1)]"
-            style={{ left: `${spot.x}%`, top: `${spot.y}%`, width: `${OTTER_W}%`, transform: `translateX(${lean(i)}%)`, zIndex: spot.y > 10 ? 2 : 1 }}
+            style={{ left: `${spot.x}%`, top: `${spot.y}%`, width: `${OTTER_W}%`, transform: `translateX(${lean(i)}%)`, zIndex: spot.y > 5 ? 2 : 1 }}
           >
             <div className="raft-float" style={{ animationDelay: `${i * -1.7}s`, animationDuration: `${7 + i * 0.6}s` }}>
               <div style={{ transform: spot.flip ? "scaleX(-1)" : undefined, filter: "var(--otter-dim, none)" }}>
