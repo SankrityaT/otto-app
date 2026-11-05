@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="status__right">
           <span className="pill">
             <span className="pill__dot pill__dot--off" aria-hidden />
-            {camera === "otter" ? "Using the otter's camera" : "Using this phone's camera"}
+            {camera === "otter" ? "Using the otter's camera" : camera === "screen" ? "Looking at a shared screen" : "Using this phone's camera"}
           </span>
         </span>
       </header>

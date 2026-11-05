@@ -41,8 +41,11 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
   const [scene, setScene] = useState<{ stepId: string; scene: Scene | null } | null>(null);
   const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
-  const useDeviceCamera = cameraChoice === "this-device";
-  const { videoRef, capture, error: cameraError } = useCamera(useDeviceCamera && !summary);
+  const useBrowserEyes = cameraChoice !== "otter";
+  const { videoRef, capture, error: cameraError, sharing, shareScreen } = useCamera(
+    useBrowserEyes && !summary,
+    cameraChoice === "screen" ? "screen" : "camera",
+  );
 
   const index = run.steps.findIndex((s) => !doneIds.includes(s.id));
   const step = index === -1 ? null : run.steps[index];
@@ -255,11 +258,19 @@ export function StepCoach({ run, onStepsChanged }: { run: Run; onStepsChanged: (
           </RoundAction>
         </div>
 
-        {useDeviceCamera ? (
+        {useBrowserEyes ? (
           <div className="flex items-center gap-3 rounded-full bg-card py-1.5 pl-1.5 pr-4 text-[15px] text-ink-3">
             <video ref={videoRef} autoPlay playsInline muted className="h-9 w-12 rounded-full bg-clay object-cover" />
             <span className={`h-2 w-2 rounded-full ${looking ? "bg-cel-deep" : "bg-clay-2"}`} />
-            {looking ? "Looking now" : (cameraError ?? "Looks only when you tap")}
+            {cameraChoice === "screen" && !sharing ? (
+              <button onClick={shareScreen} className="font-medium text-cel-deep underline-offset-4 hover:underline">
+                Share a screen with Ayin
+              </button>
+            ) : looking ? (
+              "Looking now"
+            ) : (
+              (cameraError ?? "Looks only when you tap")
+            )}
           </div>
         ) : (
           <p className="text-center text-[15px] text-ink-3">Using the otter&apos;s camera</p>

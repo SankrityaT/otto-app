@@ -2,26 +2,48 @@
 
 import { useEffect, useRef, useState } from "react";
 
+export type EyesSource = "camera" | "screen";
+
 /**
- * The device camera, for when the phone or tablet is Ayin's eyes.
+ * What Ayin looks at from the browser: the device camera, or a screen or tab the student
+ * shares (for students without a camera, or tasks that happen on a screen).
  * `capture()` returns one JPEG frame as a data URL. Nothing is recorded or saved.
  */
-export function useCamera(enabled: boolean) {
+export function useCamera(enabled: boolean, source: EyesSource = "camera") {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
 
+  function attach(stream: MediaStream) {
+    streamRef.current = stream;
+    if (videoRef.current) videoRef.current.srcObject = stream;
+    // If the student stops sharing from the browser's own bar, show the share button again.
+    stream.getVideoTracks()[0]?.addEventListener("ended", () => setSharing(false));
+  }
+
+  // The camera starts on its own; sharing a screen needs the student to choose it (see shareScreen).
   useEffect(() => {
-    if (!enabled) return;
-    let stream: MediaStream | null = null;
+    if (!enabled || source !== "camera") return;
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 } }, audio: false })
-      .then((s) => {
-        stream = s;
-        if (videoRef.current) videoRef.current.srcObject = s;
-      })
+      .then(attach)
       .catch(() => setError("Ayin can't use the camera. Check the browser's camera permission."));
-    return () => stream?.getTracks().forEach((track) => track.stop());
-  }, [enabled]);
+    return () => streamRef.current?.getTracks().forEach((track) => track.stop());
+  }, [enabled, source]);
+
+  useEffect(() => () => streamRef.current?.getTracks().forEach((track) => track.stop()), []);
+
+  /** Ask the browser to share a screen, window or tab. Must be called from a tap. */
+  async function shareScreen() {
+    try {
+      attach(await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }));
+      setSharing(true);
+      setError(null);
+    } catch {
+      setError("Screen sharing was cancelled.");
+    }
+  }
 
   function capture(): string | null {
     const video = videoRef.current;
@@ -33,5 +55,5 @@ export function useCamera(enabled: boolean) {
     return canvas.toDataURL("image/jpeg", 0.8);
   }
 
-  return { videoRef, capture, error };
+  return { videoRef, capture, error, sharing, shareScreen };
 }

@@ -57,6 +57,7 @@ export default function MePage() {
             {(
               [
                 ["this-device", "This phone"],
+                ["screen", "A shared screen"],
                 ["otter", "The otter"],
               ] as const
             ).map(([value, label]) => (
@@ -66,7 +67,7 @@ export default function MePage() {
               </label>
             ))}
           </div>
-          <p className="choice__help">Ayin takes one photo only when you tap Done, Help or Show me. Photos are never saved.</p>
+          <p className="choice__help">Ayin looks only when you tap Done, Help or Show me, and never saves what it sees. Share a screen when the task is on a computer, or when there is no camera.</p>
         </fieldset>
 
         <button className="btn btn--quiet self-start" onClick={() => setStudentId(null)}>
