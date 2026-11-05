@@ -35,8 +35,8 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
 
 - **Wins:** share what you made, with a photo of the work (never faces). Raftmates react with hand-drawn otter stickers that show who reacted, never a count.
-- **Help board:** ask about any step. Raftmates who've done that step on their own see "You know this one" and can answer; the asker marks "This helped". Stuck mid-task? "Ask my raft" posts the question with the step attached.
-- **Ayin checks every post and reply** before anyone sees it: kind, no personal info, no faces. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff.
+- **Help board:** ask about any step. Raftmates who've done that step on their own see "You know this one" and can answer with words, a photo of their own work, or **the same 3D model of the step** that Ayin builds for "show me", so both can turn it. The thread updates live; the asker marks "This helped". Stuck mid-task? "Ask my raft" posts the question with the step attached.
+- **Safe for kids:** a fast clean-language check blocks swear words (even disguised ones) before anything else. Then Ayin checks every post and reply: kind, no personal info, no faces in photos. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff, and one tap blocks someone so you stop seeing each other. No direct messages, no live video between students, no strangers.
 - **Profiles:** each student's own goal, "how I work best", and "I can help with", which fills itself from tasks they've mastered.
 - **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
 - **One shared pond:** every raftmate's otter floats in it, and each step anyone does on their own raises the water. A group total, never a ranking, and no streaks to break.
@@ -113,7 +113,7 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 
 - **Camera only when asked.** One photo when the student taps Done, Help or Show me. Photos go to Claude for that one answer and are never stored.
 - **Pictures can't run code.** Step drawings are checked against a strict list of allowed SVG features and shown as images.
-- **Crews are closed.** Staff add members from the same program. No strangers, no location, and cheers and asks use preset words, not free chat.
+- **Rafts are closed.** Staff add members from the same program. No strangers, no location, no direct messages and no live video between students. Shared photos are of the work, checked for faces first.
 - **No guilt.** No red, no "overdue", no streaks to break, no leaderboard.
 - **No secrets in the repo.** Keys live in `.env.local` and device secrets in `secrets.h`, both ignored by git.
 

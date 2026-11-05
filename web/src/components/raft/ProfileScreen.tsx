@@ -29,14 +29,14 @@ export function ProfileScreen() {
 
   const load = useCallback(() => {
     api
-      .profile(id)
+      .profile(id, viewerId ?? "")
       .then((r) => {
         setProfile(r.profile);
         setWorkStyles(r.workStyles);
         setGoal(r.profile.goal?.text ?? "");
       })
       .catch((e) => setMessage(e.message));
-  }, [id]);
+  }, [id, viewerId]);
 
   useEffect(() => {
     load();
@@ -171,6 +171,21 @@ export function ProfileScreen() {
               <span className="text-[15px] text-ink-3">A page you can choose to share with a job coach or supervisor</span>
             </span>
           </Link>
+        )}
+        {!isMe && viewerId && (
+          <section className="flex flex-col gap-2 pt-2">
+            <button
+              onClick={() => api.block(viewerId, id, !profile.blockedByViewer).then(load)}
+              className="btn btn--quiet self-start"
+            >
+              {profile.blockedByViewer ? `Unblock ${profile.name}` : `Block ${profile.name}`}
+            </button>
+            <p className="text-[14px] text-ink-3">
+              {profile.blockedByViewer
+                ? `You and ${profile.name} don't see each other's posts.`
+                : `Blocking hides each other's posts and replies. ${profile.name} isn't told.`}
+            </p>
+          </section>
         )}
         {message && <p className="text-ink-3">{message}</p>}
       </div>

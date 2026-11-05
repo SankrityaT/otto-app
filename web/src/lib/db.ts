@@ -105,6 +105,8 @@ const SCHEMA = `
     author_id  TEXT NOT NULL REFERENCES students(id),
     body       TEXT NOT NULL,
     helped     INTEGER NOT NULL,      -- the asker said "This helped"
+    photo      TEXT,                  -- a photo of the work, checked for faces before it's saved
+    scene_step_id TEXT,               -- a step whose 3D "show me" model is shared in the reply
     status     TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
@@ -115,6 +117,14 @@ const SCHEMA = `
     kind       TEXT NOT NULL,         -- clap, proud, me-too or wow
     created_at TEXT NOT NULL,
     PRIMARY KEY (post_id, from_id, kind)
+  );
+
+  -- A student who blocks someone stops seeing their posts and replies, and they can't reply back.
+  CREATE TABLE IF NOT EXISTS blocks (
+    blocker_id TEXT NOT NULL REFERENCES students(id),
+    blocked_id TEXT NOT NULL REFERENCES students(id),
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (blocker_id, blocked_id)
   );
 
   CREATE TABLE IF NOT EXISTS reports (
@@ -155,6 +165,8 @@ function addMissingColumns(db: DatabaseSync): void {
   if (!has("steps", "seconds")) db.exec("ALTER TABLE steps ADD COLUMN seconds INTEGER");
   if (!has("students", "fur_hue")) db.exec("ALTER TABLE students ADD COLUMN fur_hue INTEGER NOT NULL DEFAULT 0");
   if (!has("students", "goal")) db.exec("ALTER TABLE students ADD COLUMN goal TEXT");
+  if (!has("replies", "photo")) db.exec("ALTER TABLE replies ADD COLUMN photo TEXT");
+  if (!has("replies", "scene_step_id")) db.exec("ALTER TABLE replies ADD COLUMN scene_step_id TEXT");
   if (!has("students", "goal_routine_id")) db.exec("ALTER TABLE students ADD COLUMN goal_routine_id TEXT");
   if (!has("students", "work_style")) db.exec("ALTER TABLE students ADD COLUMN work_style TEXT");
 }

@@ -67,12 +67,15 @@ export const api = {
     call<{ post: Post; replies: Reply[] }>(`/api/raft/posts/${postId}?studentId=${encodeURIComponent(studentId)}`),
   share: (input: { authorId: string; kind: PostKind; body: string; photo: string | null; stepId: string | null }) =>
     call<{ shared: boolean; id?: string; review?: PostReview }>("/api/raft/posts", post(input)),
-  reply: (postId: string, authorId: string, body: string) =>
-    call<{ shared: boolean; review?: PostReview }>(`/api/raft/posts/${postId}/replies`, post({ authorId, body })),
+  reply: (postId: string, authorId: string, body: string, extras: { photo?: string | null; sceneStepId?: string | null } = {}) =>
+    call<{ shared: boolean; review?: PostReview }>(`/api/raft/posts/${postId}/replies`, post({ authorId, body, ...extras })),
   react: (postId: string, studentId: string, kind: Reaction) => call(`/api/raft/posts/${postId}/react`, post({ studentId, kind })),
   report: (postId: string, studentId: string) => call(`/api/raft/posts/${postId}/report`, post({ studentId })),
   markHelped: (replyId: string, studentId: string) => call(`/api/raft/replies/${replyId}/helped`, post({ studentId })),
-  profile: (studentId: string) => call<{ profile: Profile; workStyles: string[] }>(`/api/raft/people/${studentId}`),
+  profile: (studentId: string, viewerId = "") =>
+    call<{ profile: Profile; workStyles: string[] }>(`/api/raft/people/${studentId}?viewerId=${encodeURIComponent(viewerId)}`),
+  block: (studentId: string, blockedId: string, blocked: boolean) =>
+    call(`/api/raft/people/${blockedId}/block`, post({ studentId, blocked })),
   updateProfile: (studentId: string, change: { goal?: string | null; goalRoutineId?: string | null; workStyle?: string[] }) =>
     call(`/api/raft/people/${studentId}`, { method: "PATCH", body: JSON.stringify(change) }),
   otter: () => call<{ address: string | null }>("/api/otter"),

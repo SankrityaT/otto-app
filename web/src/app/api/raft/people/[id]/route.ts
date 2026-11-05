@@ -3,9 +3,9 @@ import { profile, updateProfile, WORK_STYLES } from "@/lib/data/raft";
 import { jsonError, readJson } from "@/lib/http";
 
 /** A student's profile: their otter, goal, how they work best, and what they can help with. */
-export async function GET(_request: NextRequest, ctx: RouteContext<"/api/raft/people/[id]">) {
+export async function GET(request: NextRequest, ctx: RouteContext<"/api/raft/people/[id]">) {
   const { id } = await ctx.params;
-  const found = profile(id);
+  const found = profile(id, request.nextUrl.searchParams.get("viewerId") ?? "");
   if (!found) return jsonError("Student not found.", 404);
   return Response.json({ profile: found, workStyles: WORK_STYLES });
 }
