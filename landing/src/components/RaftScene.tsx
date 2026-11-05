@@ -31,7 +31,7 @@ const headX = (i: number) => SPOTS[i].x + OTTER_W * (SPOTS[i].flip ? 1 - HEAD.x 
 const headY = (i: number) => SPOTS[i].y + OTTER_H * HEAD.y;
 
 type Bubble = { who: number; text: string; key: number };
-type Heart = { x: number; y: number; key: number };
+type Emoji = { x: number; y: number; char: string; key: number };
 
 /** Each beat is a little moment between the otters: [ms after the beat starts, what happens]. */
 type Api = {
@@ -40,19 +40,20 @@ type Api = {
   blink: (i: number) => void;
   say: (i: number, text: string) => void;
   nudge: (a: number, b: number) => void;
-  heart: (a: number, b: number) => void;
+  /** Float an emoji up from between two otters. (One otter's emoji goes in its speech bubble.) */
+  emoji: (between: [number, number], char: string) => void;
 };
 const BEATS: ((o: Api) => [number, () => void][])[] = [
-  // Two crewmates bump heads and a heart pops up.
-  (o) => [[0, () => o.nudge(0, 1)], [550, () => (o.heart(0, 1), o.blink(0), o.blink(1))], [900, () => o.say(1, "Hey, you!")]],
-  // A tail splash in the middle, and the neighbour turns to look.
-  (o) => [[0, () => o.swing(1)], [600, () => o.tilt(2)], [800, () => o.say(2, "Nice work!")]],
-  // A cheer passes down the raft.
-  (o) => [[0, () => o.say(3, "You got this!")], [350, () => o.tilt(2)], [1500, () => o.swing(3)]],
-  // The raft wave: tails swish one after another.
-  (o) => [[0, () => o.say(0, "Raft wave!")], [500, () => o.swing(0)], [900, () => o.swing(1)], [1300, () => o.swing(2)], [1700, () => o.swing(3)]],
-  // The other pair bumps heads too.
-  (o) => [[0, () => o.nudge(2, 3)], [550, () => (o.heart(2, 3), o.blink(2), o.blink(3))], [1000, () => o.say(3, "High five!")]],
+  // Two crewmates bump heads and grin.
+  (o) => [[0, () => o.nudge(0, 1)], [550, () => (o.emoji([0, 1], "😊"), o.blink(0), o.blink(1))], [900, () => o.say(1, "Hey, you!")]],
+  // A tail splash in the middle, and the neighbour turns to look and laughs.
+  (o) => [[0, () => o.swing(1)], [600, () => o.tilt(2)], [800, () => o.say(2, "Nice work! 😄")]],
+  // A cheer passes down the raft, with a clap.
+  (o) => [[0, () => o.say(3, "You got this! 👏")], [350, () => o.tilt(2)], [1500, () => o.swing(3)]],
+  // The raft wave: tails swish one after another, then a little party.
+  (o) => [[0, () => o.say(0, "Raft wave! 🌊")], [500, () => o.swing(0)], [900, () => o.swing(1)], [1300, () => o.swing(2)], [1700, () => o.swing(3)], [2100, () => o.emoji([1, 2], "🎉")]],
+  // The other pair bumps heads for a high five.
+  (o) => [[0, () => o.nudge(2, 3)], [550, () => (o.emoji([2, 3], "🙌"), o.blink(2), o.blink(3))], [1000, () => o.say(3, "High five!")]],
 ];
 /** A quiet pause after each beat, so it never feels busy. */
 const REST_MS = 2600;
@@ -78,7 +79,7 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
   const otters = useRef<(AyinOtterHandle | null)[]>([]);
   const [visible, setVisible] = useState(false);
   const [bubble, setBubble] = useState<Bubble | null>(null);
-  const [hearts, setHearts] = useState<Heart[]>([]);
+  const [emojis, setEmojis] = useState<Emoji[]>([]);
   const [nudged, setNudged] = useState<[number, number] | null>(null);
 
   // Only play while the raft is on screen.
@@ -109,13 +110,13 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
         setNudged([a, b]);
         later(NUDGE_MS, () => setNudged(null));
       },
-      heart(a, b) {
+      emoji([a, b], char) {
         const k = ++key;
         // Halfway between the two otters' heads, a little above them.
-        const x = (headX(a) + headX(b)) / 2 - 2.5;
-        const y = (headY(a) + headY(b)) / 2 - 16;
-        setHearts((h) => [...h, { x, y, key: k }]);
-        later(2200, () => setHearts((h) => h.filter((p) => p.key !== k)));
+        const x = (headX(a) + headX(b)) / 2;
+        const y = (headY(a) + headY(b)) / 2 - 18;
+        setEmojis((e) => [...e, { x, y, char, key: k }]);
+        later(2200, () => setEmojis((e) => e.filter((p) => p.key !== k)));
       },
     };
 
@@ -130,7 +131,7 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
     return () => {
       timers.forEach(clearTimeout);
       setBubble(null);
-      setHearts([]);
+      setEmojis([]);
       setNudged(null);
     };
   }, [still, visible]);
@@ -195,10 +196,15 @@ export function RaftScene({ members }: { members: RaftMember[] }) {
         );
       })}
 
-      {hearts.map((h) => (
-        <svg key={h.key} className="heart-rise absolute z-10 w-[5%]" style={{ left: `${h.x}%`, top: `${h.y}%` }} viewBox="0 0 24 22" aria-hidden>
-          <path d="M12 21s-9-5.6-9-12.2A5 5 0 0 1 12 6a5 5 0 0 1 9 2.8C21 15.4 12 21 12 21z" fill="#e39aa8" stroke="var(--ink)" strokeWidth="1.5" />
-        </svg>
+      {emojis.map((e) => (
+        <span
+          key={e.key}
+          className="emoji-pop absolute z-10 -translate-x-1/2 text-[clamp(24px,3.4vw,46px)] leading-none"
+          style={{ left: `${e.x}%`, top: `${e.y}%` }}
+          aria-hidden
+        >
+          {e.char}
+        </span>
       ))}
     </div>
   );
