@@ -6,7 +6,7 @@ import { speak } from "@/lib/client/speech";
 import { Ring } from "./Ring";
 
 /**
- * For steps that take a set time, like washing hands for 20 seconds. Time is hard to feel,
+ * For steps that take a set time, like steaming milk for 30 seconds. Time is hard to feel,
  * so the ring shows it draining away. It only counts when the student starts it, and it
  * never turns red or says "late".
  */

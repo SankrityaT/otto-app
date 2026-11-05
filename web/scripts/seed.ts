@@ -39,7 +39,7 @@ const students = Object.fromEntries(
 const latte = createRoutine({
   title: "Make an iced latte",
   steps: [
-    { text: "Wash your hands", detail: "Wash your hands with soap for 20 seconds, then dry them.", seconds: 20 },
+    { text: "Take a medium cup", detail: "Take one 16 oz clear cup from the stack by the register.", seconds: null },
     { text: "Fill a cup with ice", detail: "Scoop ice into a tall cup until it is full.", seconds: null },
     { text: "Pour milk to the line", detail: "Pour cold milk into the cup up to the line.", seconds: null },
     { text: "Pull one espresso shot", detail: "Press the one-shot button on the espresso machine.", seconds: null },

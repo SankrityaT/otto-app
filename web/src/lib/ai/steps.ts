@@ -12,7 +12,7 @@ const StepPlan = z.object({
           .number()
           .int()
           .nullable()
-          .describe("Only when the step itself takes a set time (wash hands for 20 seconds, steam for 30). Otherwise null"),
+          .describe("Only when the step itself takes a set time (steam milk for 30 seconds, let it set for 2 minutes). Otherwise null"),
       }),
     )
     .min(2)
@@ -30,7 +30,9 @@ export function planSteps(task: string, photo?: Photo | null): Promise<StepPlan>
     instructions: `A student wants to do this task: "${task}".
 ${photo ? "The photo shows the task, a recipe card or the instructions they were given." : ""}
 Break it into the smallest steps a student can see and check, in order.
-Each step is one physical action. Include safety steps (gloves, hot surfaces) where they apply.`,
+Each step is one physical action. Include safety steps (gloves, hot surfaces) where they apply.
+The students are capable young adults learning a job. Teach the job, not everyday life: leave out things
+anyone already does (washing hands, walking over, picking things up) unless the task itself is about them.`,
   });
 }
 

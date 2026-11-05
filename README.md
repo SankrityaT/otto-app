@@ -20,16 +20,19 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 **Five stages, like First Place AZ.** First Place teaches a skill in five stages: watch, first tries, with help, with a check-in, on your own. Ayin follows the same path for each student and each task, works out the stage from the student's own log, and shows it before every task. A new task starts by watching every step; a mastered one is done alone, with Ayin checking only at the end.
 
-**One step at a time.** The student says, types or shows a task ("make an iced latte"). Claude breaks it into small physical steps. Ayin shows one step at a time: a picture drawn for that step, 8 words or fewer, read aloud, with progress dots.
+**One step at a time.** The student says, types or shows a task ("make an iced latte"). Claude breaks it into small physical steps. Ayin shows one step at a time: a 3D model of that step the student can turn (a drawn picture while it builds), 8 words or fewer, read aloud, with progress dots.
 
+- **Watch first:** at the first stage, Ayin walks through every step in 3D on one screen and talks it through. The student can say "next", "back", or ask about what they're looking at.
 - **Done:** Ayin takes one photo and checks the step, then moves on or says what's missing.
 - **Help:** one level at a time, and only when asked: a nudge, then a hint, then "show me".
 - **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing.
 - **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
-- **Time you can see:** a step that takes a set time (wash hands for 20 seconds) gets a calm ring timer. It never turns red.
+- **Time you can see:** a step that takes a set time (steam milk for 30 seconds) gets a calm ring timer. It never turns red.
 - **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.
-- **Hands-free:** voice is on during a task, so "done" works with wet hands. "Watch for me" lets Ayin check every few seconds until each step is done, and "I did it" moves on when the camera can't see the step.
+- **Hands-free:** voice is on during a task, so "done" works with wet hands. Ayin also notices when a step is done: the browser compares tiny frames on the device, and only when the student moves and then holds still does it send one photo to check. With the otter's camera it checks every few seconds. "I did it" moves on when the camera can't see the step.
+- **See what Ayin sees:** a live camera window is always on screen and lights up when Ayin looks, so nobody has to trust a camera they can't see.
 - **Talk to Ayin:** students can just ask out loud ("is this the right way up?"). Ayin looks through the camera and answers in a sentence or two, like a coach beside them.
+- **Chat with Ayin:** on the home screen, saying hi gets a real answer. The otter shrinks into a small pond avatar, each word lights up as Ayin says it, any line can be heard again, and there are always 2–3 ready answers to tap. Ayin offers a task; the student taps Start.
 - **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Ayin can look at a shared screen or tab instead.
 
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.

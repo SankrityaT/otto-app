@@ -35,6 +35,20 @@ Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They le
 | Seeing a broken streak lowers later engagement | [research] [Silverman & Barasch 2023](https://www.colorado.edu/business/faculty-research/2023/04/19/or-track-how-broken-streaks-affect-consumer-decisions) | Weekly rings, never a broken streak |
 | A leaderboard and badges lowered motivation and exam scores | [research] [Hanus & Fox 2015](https://dblp.org/rec/journals/ce/HanusF15) | A shared crew goal, no ranking |
 | 44% of autistic people report being victimized | [research] [Trundle et al. 2023](https://pubmed.ncbi.nlm.nih.gov/35524162/) | Closed crews, no location, preset messages only |
+| Autistic workers trusted GPT-4's workplace advice over a human's, yet a job coach flagged some of it as questionable | [research] [Jang et al., CHI 2024](https://arxiv.org/abs/2403.03297) | Ayin coaches from the site's own task steps and checks real work, and staff stay in the loop |
+| Autistic adults found LLM answers wordy, vague and overwhelming | [research] [Carik et al., CHI 2025](https://arxiv.org/abs/2503.17504) | One or two short, literal sentences per reply |
+| Figurative language, open multi-part questions and dense formatting are the main barriers for autistic LLM users | [research] [Muniganti et al., IEEE SMC 2026](https://repository.essex.ac.uk/43775/) | One question at a time, with 2–3 ready answers to tap |
+| Autistic adults spend more time on written than spoken communication | [research] [Turna et al., npj Digital Medicine 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC11897150/) | Every spoken line is also on screen, words light up as they are said, and any line can be heard again |
+| Parents preferred an openly non-human chatbot; teens who preferred a "relational" one were more stressed | [research] [Kim et al. 2025, preprint](https://arxiv.org/abs/2512.15117) | Ayin is an otter coach, not a friend; social connection goes to real peers in the raft |
+| 71% of vulnerable UK children use chatbots, 23% because they have no one else to talk to | [research] [Internet Matters 2025](https://www.internetmatters.org/wp-content/uploads/2025/07/Me-Myself-AI-Report.pdf) | Help fades on purpose, and the raft points students to each other |
+| Coaches are "essential" for many autistic workers, but there aren't enough good ones | [research] [Buckland Review 2024](https://www.gov.uk/government/publications/the-buckland-review-of-autism-employment-report-and-recommendations/the-buckland-review-of-autism-employment-report-and-recommendations); [ANCOR 2024](https://www.ancor.org/resources/the-state-of-americas-direct-support-workforce-crisis-2024/) | Ayin extends job coaches between visits; it doesn't replace them |
+
+## How we position Ayin
+
+- **It extends job coaches, it doesn't replace them.** Coaches are scarce, and AI advice alone can be wrong, so Ayin works from the site's task steps and keeps staff in the loop.
+- **It covers the transition years at real work sites.** Ama covers ages 3–17 on a screen. Ayin covers ages 16–22 doing physical tasks at work, which is where the employment gap opens.
+- **It's a transparent tool, not an AI friend.** Ayin shows what its camera sees and says it only looks when needed. Friendship goes to real peers in the raft.
+- **It builds independence on purpose.** Help fades as skills grow, which answers parents' fear of over-reliance.
 
 ## Still to build (from the First Place tour)
 
