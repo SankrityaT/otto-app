@@ -165,7 +165,10 @@ export function StepCoach({
         setWatching(false);
       }
     } catch (error) {
-      if (!auto) tell((error as Error).message);
+      if (!auto) {
+        tell((error as Error).message);
+        setNotSeen(step.id); // no camera, or it failed: the student can still say they did it
+      }
     } finally {
       setBusy(false);
     }

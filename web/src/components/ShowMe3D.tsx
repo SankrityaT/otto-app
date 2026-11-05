@@ -1,9 +1,10 @@
 "use client";
 
-import { Bounds, Center, Html, Line, OrbitControls } from "@react-three/drei";
+import { Bounds, Center, Line, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
+import type { RefObject } from "react";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Euler, Mesh, MeshStandardMaterial, Quaternion, Vector3 } from "three";
+import { Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
 import type { Scene } from "@/lib/ai/scene";
 
 // Renders a "show me" scene: simple shapes from Claude, sticky-note labels on lines,
@@ -64,7 +65,12 @@ function Part({ part, still }: { part: Scene["parts"][number]; still: boolean })
   );
 }
 
-function StickyLabel({ label, anchor }: { label: Scene["labels"][number]; anchor: Vector3 }) {
+/** Where on-screen words should sit: a point in the 3D scene that the overlay follows. */
+type Pins = RefObject<(Object3D | null)[]>;
+
+type OnPin = (pin: Object3D | null) => void;
+
+function StickyLabel({ label, anchor, onPin }: { label: Scene["labels"][number]; anchor: Vector3; onPin: OnPin }) {
   const end = new Vector3(anchor.x, label.side === "top" ? LABEL_HEIGHT : -LABEL_HEIGHT, anchor.z);
   return (
     <group>
@@ -73,18 +79,32 @@ function StickyLabel({ label, anchor }: { label: Scene["labels"][number]; anchor
         <sphereGeometry args={[0.05, 16, 8]} />
         <meshBasicMaterial color="#ffffff" />
       </mesh>
-      <Html position={end} center zIndexRange={[10, 0]}>
-        <span
-          className={`whitespace-nowrap rounded-sm border-l-4 px-2.5 py-1 font-hand text-[18px] text-[#23201c] shadow-sm ${NOTE_TONES[label.tone]}`}
-        >
-          {label.text}
-        </span>
-      </Html>
+      <object3D position={end} ref={onPin} />
     </group>
   );
 }
 
-function Arrow({ arrow, still }: { arrow: Scene["arrows"][number]; still: boolean }) {
+/**
+ * Moves the HTML words (sticky notes, arrow names) to where their 3D points appear on
+ * screen, every frame. Plain HTML over the canvas, so there are no extra React roots.
+ */
+function PinTracker({ pins, words }: { pins: Pins; words: RefObject<(HTMLElement | null)[]> }) {
+  const point = useMemo(() => new Vector3(), []);
+  useFrame(({ camera, size }) => {
+    pins.current.forEach((pin, i) => {
+      const word = words.current[i];
+      if (!pin || !word) return;
+      pin.getWorldPosition(point).project(camera);
+      const x = ((point.x + 1) / 2) * size.width;
+      const y = ((1 - point.y) / 2) * size.height;
+      word.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+      word.style.opacity = point.z < 1 ? "1" : "0";
+    });
+  });
+  return null;
+}
+
+function Arrow({ arrow, still, onPin }: { arrow: Scene["arrows"][number]; still: boolean; onPin: OnPin }) {
   const tip = useRef<Mesh>(null);
   const from = toVector(arrow.from);
   const to = toVector(arrow.to);
@@ -105,9 +125,7 @@ function Arrow({ arrow, still }: { arrow: Scene["arrows"][number]; still: boolea
         <coneGeometry args={[0.12, 0.3, 24]} />
         <meshStandardMaterial color="#2b6652" />
       </mesh>
-      <Html position={from} center>
-        <span className="whitespace-nowrap font-hand text-[16px] text-cel-deep">{arrow.meaning}</span>
-      </Html>
+      <object3D position={from} ref={onPin} />
     </group>
   );
 }
@@ -116,11 +134,14 @@ export function ShowMe3D({ scene }: { scene: Scene }) {
   const still = usePrefersReducedMotion();
   const [grabbed, setGrabbed] = useState(false);
   const partsById = useMemo(() => new Map(scene.parts.map((part) => [part.id, part])), [scene]);
+  const labels = scene.labels.filter((label) => partsById.has(label.partId));
+  const pins = useRef<(Object3D | null)[]>([]);
+  const words = useRef<(HTMLElement | null)[]>([]);
 
   return (
     <figure className="graph-paper flex w-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line">
       <figcaption className="px-5 pt-4 font-hand text-[26px] leading-tight text-ink">{scene.title}</figcaption>
-      <div className="aspect-square w-full touch-none" aria-label={`3D model: ${scene.title}`} role="img">
+      <div className="relative aspect-square w-full touch-none overflow-hidden" aria-label={`3D model: ${scene.title}`} role="img">
         <Canvas camera={{ position: [4, 2.6, 4.8], fov: 45 }}>
           <ambientLight intensity={0.8} />
           <directionalLight position={[5, 8, 5]} intensity={1.4} />
@@ -131,12 +152,25 @@ export function ShowMe3D({ scene }: { scene: Scene }) {
               {scene.parts.map((part) => (
                 <Part key={part.id} part={part} still={still} />
               ))}
-              {scene.labels.map((label) => {
-                const part = partsById.get(label.partId);
-                return part ? <StickyLabel key={label.text} label={label} anchor={toVector(part.position)} /> : null;
-              })}
-              {scene.arrows.map((arrow) => (
-                <Arrow key={arrow.meaning} arrow={arrow} still={still} />
+              {labels.map((label, i) => (
+                <StickyLabel
+                  key={label.text}
+                  label={label}
+                  anchor={toVector(partsById.get(label.partId)!.position)}
+                  onPin={(pin) => {
+                    pins.current[i] = pin;
+                  }}
+                />
+              ))}
+              {scene.arrows.map((arrow, i) => (
+                <Arrow
+                  key={arrow.meaning}
+                  arrow={arrow}
+                  still={still}
+                  onPin={(pin) => {
+                    pins.current[labels.length + i] = pin;
+                  }}
+                />
               ))}
             </Center>
           </Bounds>
@@ -147,7 +181,28 @@ export function ShowMe3D({ scene }: { scene: Scene }) {
             autoRotateSpeed={0.8}
             onStart={() => setGrabbed(true)}
           />
+          <PinTracker pins={pins} words={words} />
         </Canvas>
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          {labels.map((label, i) => (
+            <span
+              key={label.text}
+              ref={(word) => void (words.current[i] = word)}
+              className={`absolute left-0 top-0 whitespace-nowrap rounded-sm border-l-4 px-2.5 py-1 font-hand text-[18px] text-[#23201c] opacity-0 shadow-sm ${NOTE_TONES[label.tone]}`}
+            >
+              {label.text}
+            </span>
+          ))}
+          {scene.arrows.map((arrow, i) => (
+            <span
+              key={arrow.meaning}
+              ref={(word) => void (words.current[labels.length + i] = word)}
+              className="absolute left-0 top-0 whitespace-nowrap font-hand text-[16px] text-cel-deep opacity-0"
+            >
+              {arrow.meaning}
+            </span>
+          ))}
+        </div>
       </div>
       <p className="px-5 pb-4 text-[15px] text-ink-3">Drag to turn it</p>
     </figure>
