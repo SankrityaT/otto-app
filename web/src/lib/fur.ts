@@ -1,4 +1,4 @@
-// The colour maths is Havi's, from web/src/components/pond/FurSlider.tsx, shared by the
+// The colour maths is Havi's, from components/pond/FurSlider.tsx, shared by the
 // colour picker and the raft so an otter's fur and its ring always match.
 
 /** The painted fur, as HSV: hue 30°, a soft brown. Hue shifts rotate from here. */

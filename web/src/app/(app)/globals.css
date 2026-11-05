@@ -95,3 +95,44 @@
   .pond { transition: none; }
   .chat__bubble, .chat__leaf, .chat__dots span { animation: none !important; }
 }
+
+/* The raft, from Havi's landing page: otters bob on their own beat, speech bubbles pop up in the
+   otter's handwriting, and emoji float away. Every one of these is set off by something a
+   raftmate really did. Reduce Motion stills them all. */
+.says {
+  position: relative; display: inline-block; padding: 6px 12px; border-radius: 16px;
+  background: var(--surface); border: 1.5px solid var(--ink); font: clamp(14px, 3.6vw, 18px)/1.15 var(--font-hand);
+  color: var(--ink); box-shadow: 3px 3px 0 var(--ink); white-space: nowrap;
+}
+.says::after {
+  content: ""; position: absolute; width: 12px; height: 12px; background: var(--surface);
+  border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);
+  left: calc(50% - 6px); bottom: -7.5px; transform: rotate(45deg);
+}
+.drift { animation: drift 9s ease-in-out infinite; }
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) rotate(var(--r, 0deg)); }
+  50% { transform: translate(4px, -6px) rotate(calc(var(--r, 0deg) + 6deg)); }
+}
+.raft-float { animation: raft-float 7s ease-in-out infinite; }
+@keyframes raft-float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(1.2%, -2.5%) rotate(1.2deg); }
+  66% { transform: translate(-1%, 1.5%) rotate(-1deg); }
+}
+.bubble-pop { animation: bubble-pop 380ms cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+@keyframes bubble-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+.emoji-pop { animation: emoji-pop 2.2s ease-out both; }
+@keyframes emoji-pop {
+  0% { opacity: 0; transform: translateY(12px) scale(0.4); }
+  15% { opacity: 1; transform: translateY(0) scale(1.15); }
+  25% { transform: translateY(-4px) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-56px) scale(0.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drift, .raft-float, .bubble-pop, .emoji-pop { animation: none; }
+}

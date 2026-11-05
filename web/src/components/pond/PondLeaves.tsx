@@ -8,6 +8,12 @@
 export const LEAF_TONES = ['home', 'study', 'errands', 'health', 'care', 'people', 'work', 'money'] as const;
 export type LeafTone = (typeof LEAF_TONES)[number];
 
+/** Each task keeps the same leaf colour every time, picked from its id. */
+export function toneFor(id: string): LeafTone {
+  const sum = [...id].reduce((total, char) => total + char.charCodeAt(0), 0);
+  return LEAF_TONES[sum % LEAF_TONES.length];
+}
+
 /** A wavy ellipse line, like the ripples under the otter but small. */
 function wavyRing(rx: number, ry: number, waves: number, amp: number, phase: number) {
   const pts: string[] = [];

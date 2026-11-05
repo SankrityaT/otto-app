@@ -37,7 +37,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
 
-- **One shared pond:** every raftmate's otter floats in it, with a bubble showing who's doing a task right now ("Step 3/6") or who asked for help. Below it, the raft's weekly total of steps done on their own: a group total, never a ranking, and no streaks to break.
+- **One shared pond, live:** Havi's raft, where every raftmate's otter floats together and acts out what they really do. Someone who asked for help sits up and says so; a step done on your own splashes a tail; a cheer is said out loud with a head bump; a finished task pops a party; the task someone is on drifts beside them as a leaf. Tap an otter to help them, work with them, or see how they work best. Below it, the raft's weekly total fills a bar together. Only your own ring shows a number, so nobody is ranked, and there are no streaks to break.
 - **Do it together:** like body doubling on Focusmate, but made for our students. Tap a raftmate's otter, pick a task, and you both do it at the same time, each in your own step coach. Your partner's otter sits above your step, moving as they finish real steps, and one tap sends a preset cheer. No video and no free chat. "Not today" is always one tap.
 
 - **Wins:** share what you made, with a photo of the work (never faces). Raftmates react with hand-drawn otter stickers that show who reacted, never a count.

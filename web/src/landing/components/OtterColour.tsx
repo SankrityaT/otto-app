@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FUR_STOPS, furColor, furName } from "@/landing/lib/fur";
+import { FUR_STOPS, furColor, furName } from "@/lib/fur";
 import { OtterSays } from "./OtterSays";
 import { Pond } from "./Pond";
 import { Reveal } from "./Reveal";

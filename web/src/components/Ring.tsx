@@ -1,5 +1,18 @@
 /** A weekly ring, from 0 (empty) to 1 (full). It only ever fills; it never shows a loss. */
-export function Ring({ fill, size = 64, stroke = 6, label }: { fill: number; size?: number; stroke?: number; label?: string }) {
+export function Ring({
+  fill,
+  size = 64,
+  stroke = 6,
+  label,
+  color = "var(--color-cel-deep)",
+}: {
+  fill: number;
+  size?: number;
+  stroke?: number;
+  label?: string;
+  /** The ring's colour; a student's ring matches their otter's fur. */
+  color?: string;
+}) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   return (
@@ -11,7 +24,7 @@ export function Ring({ fill, size = 64, stroke = 6, label }: { fill: number; siz
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-cel-deep)"
+          stroke={color}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={`${circumference * fill} ${circumference}`}

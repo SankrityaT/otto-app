@@ -7,7 +7,7 @@ import { AyinChat, type ChatTurn, type Voice } from "@/components/AyinChat";
 import { StudentPicker } from "@/components/StudentPicker";
 import { TaskLeaves } from "@/components/TaskLeaves";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
-import { LEAF_TONES, type LeafTone } from "@/components/pond/PondLeaves";
+import { toneFor } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
 import type { Student } from "@/lib/data/crew";
 import { api } from "@/lib/client/api";
@@ -16,12 +16,6 @@ import { useStudentId } from "@/lib/client/settings";
 
 type Routine = { id: string; title: string; stepCount: number };
 type Started = { runId: string; title: string; done: number; total: number };
-
-/** Each task keeps the same leaf colour every time, picked from its id. */
-function toneFor(id: string): LeafTone {
-  const sum = [...id].reduce((total, char) => total + char.charCodeAt(0), 0);
-  return LEAF_TONES[sum % LEAF_TONES.length];
-}
 
 function readPhoto(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

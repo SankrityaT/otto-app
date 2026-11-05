@@ -65,6 +65,7 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Nov 5 | Make the raft a safe social space where students share wins and help each other, with custom stickers, not stock emoji. | Wins and a help board with replies and "This helped", otter-themed stickers, profiles with goals and "how I work best" |
 | Nov 5 | The raft needs kid safety: no profanity and blocking. Students should help each other with the same 3D models as the coach. | A clean-language filter, Ayin's kindness check on every post, one-tap blocking and reporting, and 3D models in help replies |
 | Nov 5 | Make the raft about working alongside each other, like Focusmate, but safe for our students. | "Do it together": two raftmates each see the other's otter and progress during a task, with preset cheers and no video |
+| Nov 5 | Use Havi's raft design and make it live, so you can see a friend needs help without reading a feed. | Havi's pond of otters acts out real events: asking for help, steps done alone, cheers, finished tasks and working together; one card says what you can do |
 
 ## Setup
 

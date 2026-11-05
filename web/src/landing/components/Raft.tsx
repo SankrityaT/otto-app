@@ -1,5 +1,5 @@
 import { HandHeart, Heart, Repeat, Users } from "lucide-react";
-import { ringColor } from "@/landing/lib/fur";
+import { ringColor } from "@/lib/fur";
 import { RaftScene } from "./RaftScene";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
