@@ -25,7 +25,7 @@ import type { Scene, SceneSoFar } from "@/lib/ai/scene";
 import type { ChatTurn } from "./AyinChat";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
-import { AyinSees } from "./AyinSees";
+import { AyinSees, WithEyes } from "./AyinSees";
 import { HandsFree } from "./HandsFree";
 import { TogetherBar } from "./TogetherBar";
 import {
@@ -47,9 +47,12 @@ const WATCH_EVERY_MS = 6000;
 const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), {
   ssr: false,
 });
-const BuildingModel = dynamic(() => import("./ShowMe3D").then((m) => m.BuildingModel), {
-  ssr: false,
-});
+const BuildingModel = dynamic(
+  () => import("./ShowMe3D").then((m) => m.BuildingModel),
+  {
+    ssr: false,
+  },
+);
 
 /** How much help the student has asked for on the step in front of them. */
 interface StepHelp {
@@ -89,7 +92,11 @@ export function StepCoach({
   const [building, setBuilding] = useState<Record<string, SceneSoFar>>({});
   const loading = useRef(new Map<string, Promise<Scene>>());
   // Small talk while Ayin builds a model the student asked to see.
-  const [smallTalk, setSmallTalk] = useState<{ stepId: string; turns: ChatTurn[]; choices: string[] } | null>(null);
+  const [smallTalk, setSmallTalk] = useState<{
+    stepId: string;
+    turns: ChatTurn[];
+    choices: string[];
+  } | null>(null);
   const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
   const useBrowserEyes = cameraChoice !== "otter";
@@ -128,14 +135,20 @@ export function StepCoach({
     const already = loading.current.get(stepId);
     if (already) return already;
     const pending = api
-      .scene(stepId, photo, (soFar) => setBuilding((all) => ({ ...all, [stepId]: soFar })))
+      .scene(stepId, photo, (soFar) =>
+        setBuilding((all) => ({ ...all, [stepId]: soFar })),
+      )
       .then((r) => {
         setScenes((all) => ({ ...all, [stepId]: r.scene }));
         return r.scene;
       })
       .finally(() => {
         loading.current.delete(stepId);
-        setBuilding((all) => Object.fromEntries(Object.entries(all).filter(([id]) => id !== stepId)));
+        setBuilding((all) =>
+          Object.fromEntries(
+            Object.entries(all).filter(([id]) => id !== stepId),
+          ),
+        );
       });
     loading.current.set(stepId, pending);
     return pending;
@@ -159,13 +172,29 @@ export function StepCoach({
    * Keep the student company while a model is being built: Claude makes light small talk, out
    * loud, and answers whatever the student says back until the model is ready.
    */
-  async function keepCompany(stepId: string, stepText: string, said: string, before: ChatTurn[]) {
-    const turns: ChatTurn[] = said ? [...before, { who: "student", text: said }] : before;
+  async function keepCompany(
+    stepId: string,
+    stepText: string,
+    said: string,
+    before: ChatTurn[],
+  ) {
+    const turns: ChatTurn[] = said
+      ? [...before, { who: "student", text: said }]
+      : before;
     if (said) setHeard(said);
     try {
-      const reply = await api.talk(run.studentId, said, turns, `a 3D model of the step "${stepText}"`);
+      const reply = await api.talk(
+        run.studentId,
+        said,
+        turns,
+        `a 3D model of the step "${stepText}"`,
+      );
       if (!loading.current.has(stepId)) return; // the model is ready; that comes first now
-      setSmallTalk({ stepId, turns: [...turns, { who: "ayin", text: reply.say }], choices: reply.choices });
+      setSmallTalk({
+        stepId,
+        turns: [...turns, { who: "ayin", text: reply.say }],
+        choices: reply.choices,
+      });
       tell(reply.say);
     } catch {
       // Small talk is a nicety; the model still arrives without it.
@@ -212,7 +241,13 @@ export function StepCoach({
     if (!step || !current || busy) return;
     setBusy(true);
     try {
-      const result = await api.check(run.id, step.id, current.level, trust ? null : await takePhoto(), trust);
+      const result = await api.check(
+        run.id,
+        step.id,
+        current.level,
+        trust ? null : await takePhoto(),
+        trust,
+      );
       if (result.done || !auto) tell(result.say);
       setNotSeen(result.done || auto ? null : step.id);
       if (result.done) setDoneIds((ids) => [...ids, step.id]);
@@ -308,7 +343,8 @@ export function StepCoach({
     if (!step) return;
     setComposing("ask");
     const { helperName } = await api.helperFor(run.studentId, step.id);
-    if (helperName) tell(`${helperName} has done this step on their own and can help.`);
+    if (helperName)
+      tell(`${helperName} has done this step on their own and can help.`);
   }
 
   // Voice, the on-screen buttons and the otter's buttons all end in the same three actions.
@@ -359,65 +395,79 @@ export function StepCoach({
   }, []);
 
   // What Ayin sees, always on screen, so the student never has to trust a camera they can't see.
-  const eyes = (
-    <div className="flex items-center gap-3 rounded-2xl bg-card p-2 pr-3 text-[15px] text-ink-2">
-      <AyinSees videoRef={videoRef} otter={!useBrowserEyes} looking={looking} className="h-20 w-28 shrink-0" />
-      <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-        <span className="font-semibold text-ink">{looking ? "Ayin is looking" : "What Ayin sees"}</span>
-        {cameraChoice === "screen" && !sharing ? (
-          <button onClick={shareScreen} className="font-medium text-cel-deep underline-offset-4 hover:underline">
+  // What Ayin sees, big and always on screen, so the student never has to trust a camera they can't see.
+  const eyes = (className: string) => (
+    <AyinSees
+      videoRef={videoRef}
+      otter={!useBrowserEyes}
+      looking={looking}
+      className={className}
+      note={
+        cameraChoice === "screen" && !sharing ? (
+          <button onClick={shareScreen} className="font-semibold text-cel-deep">
             Share a screen with Ayin
           </button>
         ) : cameraError ? (
-          <span>{cameraError}</span>
+          cameraError
+        ) : mode === null ? (
+          "Looks when you ask a question"
+        ) : mode === "steps" && watching ? (
+          useBrowserEyes ? (
+            "Looks when your hands stop"
+          ) : (
+            "Looks every few seconds"
+          )
         ) : (
-          <span className="leading-snug">
-            {mode === "steps" && watching
-              ? useBrowserEyes
-                ? "Looks when your hands stop"
-                : "Looks every few seconds"
-              : "Looks when you say or tap Done"}
-          </span>
-        )}
-      </div>
-    </div>
+          "Looks when you say or tap Done"
+        )
+      }
+    />
   );
 
-  if (mode === null) return <TaskStart run={run} onStart={start} />;
+  if (mode === null)
+    return (
+      <TaskStart
+        run={run}
+        onStart={start}
+        eyes={eyes("aspect-video md:aspect-[4/3]")}
+        look={takePhoto}
+      />
+    );
 
   if (mode === "alone" && !summary) {
     return (
-      <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center gap-6 px-5 py-8 text-center">
-        <UprightOtter className="h-44 w-44" furHue={run.furHue} />
-        <h1 className="font-display text-[38px] leading-[1.05]">
-          {run.title}, on your own
-        </h1>
-        <p className="text-[18px] text-ink-2">
-          Take your time. Tap Done when the whole task is finished.
-        </p>
-        {say && (
-          <p
-            className="rounded-2xl bg-cel-wash px-4 py-3 text-[17px] text-cel-deep"
-            aria-live="polite"
-          >
-            {say}
+      <WithEyes eyes={eyes("aspect-[4/3]")}>
+        <main className="flex w-full flex-1 flex-col items-center gap-6 px-5 py-8 text-center md:py-0">
+          <UprightOtter className="h-44 w-44" furHue={run.furHue} />
+          <h1 className="font-display text-[38px] leading-[1.05]">
+            {run.title}, on your own
+          </h1>
+          <p className="text-[18px] text-ink-2">
+            Take your time. Tap Done when the whole task is finished.
           </p>
-        )}
-        <div className="mt-auto flex w-full flex-col gap-3">
-          <Button
-            look="main"
-            className="h-16 text-[19px]"
-            disabled={busy}
-            onClick={doneAlone}
-          >
-            <Check size={22} /> {busy ? "Looking" : "Done"}
-          </Button>
-          <Button look="quiet" onClick={() => setMode("steps")}>
-            I&apos;d like the steps
-          </Button>
-          {eyes}
-        </div>
-      </main>
+          {say && (
+            <p
+              className="rounded-2xl bg-cel-wash px-4 py-3 text-[17px] text-cel-deep"
+              aria-live="polite"
+            >
+              {say}
+            </p>
+          )}
+          <div className="mt-auto flex w-full flex-col gap-3">
+            <Button
+              look="main"
+              className="h-16 text-[19px]"
+              disabled={busy}
+              onClick={doneAlone}
+            >
+              <Check size={22} /> {busy ? "Looking" : "Done"}
+            </Button>
+            <Button look="quiet" onClick={() => setMode("steps")}>
+              I&apos;d like the steps
+            </Button>
+          </div>
+        </main>
+      </WithEyes>
     );
   }
 
@@ -425,11 +475,17 @@ export function StepCoach({
     <Composer
       authorId={run.studentId}
       startKind={composing}
-      step={composing === "ask" && step ? { id: step.id, text: step.text } : null}
+      step={
+        composing === "ask" && step ? { id: step.id, text: step.text } : null
+      }
       onClose={() => setComposing(null)}
       onShared={() => {
         setComposing(null);
-        tell(composing === "ask" ? "Asked your raft. Someone who knows this step can answer." : "Shared with your raft.");
+        tell(
+          composing === "ask"
+            ? "Asked your raft. Someone who knows this step can answer."
+            : "Shared with your raft.",
+        );
       }}
     />
   );
@@ -449,158 +505,182 @@ export function StepCoach({
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 px-5 pb-6 pt-5">
-      {composer}
-      <header className="flex items-center justify-between gap-3">
-        <Link
-          href="/"
-          aria-label="Stop this task"
-          className="grid h-11 w-11 place-items-center rounded-full bg-card text-ink-2"
-        >
-          <X size={20} />
-        </Link>
-        <div className="flex flex-1 flex-col gap-2">
-          <p className="text-center text-[15px] font-medium text-ink-3">
-            {run.title}, step {index + 1} of {run.steps.length}
-          </p>
-          <ol
-            className="flex gap-1"
-            aria-label={`Step ${index + 1} of ${run.steps.length}`}
+    <WithEyes eyes={eyes("aspect-[4/3]")}>
+      <main className="flex w-full flex-1 flex-col gap-5 px-5 pb-6 pt-5 md:px-0 md:pt-0">
+        {composer}
+        <header className="flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            aria-label="Stop this task"
+            className="grid h-11 w-11 place-items-center rounded-full bg-card text-ink-2"
           >
-            {run.steps.map((s, i) => (
-              <li
-                key={s.id}
-                className={`h-1.5 flex-1 rounded-full ${i < index ? "bg-cel-deep" : i === index ? "bg-cel" : "bg-clay"}`}
-              />
-            ))}
-          </ol>
-        </div>
-        <HandsFree
-          on={listening || watching}
-          onChange={(on) => {
-            setListening(on && canListen());
-            setWatching(on);
-          }}
-        />
-      </header>
+            <X size={20} />
+          </Link>
+          <div className="flex flex-1 flex-col gap-2">
+            <p className="text-center text-[15px] font-medium text-ink-3">
+              {run.title}, step {index + 1} of {run.steps.length}
+            </p>
+            <ol
+              className="flex gap-1"
+              aria-label={`Step ${index + 1} of ${run.steps.length}`}
+            >
+              {run.steps.map((s, i) => (
+                <li
+                  key={s.id}
+                  className={`h-1.5 flex-1 rounded-full ${i < index ? "bg-cel-deep" : i === index ? "bg-cel" : "bg-clay"}`}
+                />
+              ))}
+            </ol>
+          </div>
+          <HandsFree
+            on={listening || watching}
+            onChange={(on) => {
+              setListening(on && canListen());
+              setWatching(on);
+            }}
+          />
+        </header>
 
-      <TogetherBar runId={run.id} />
+        <TogetherBar runId={run.id} />
 
-      {current.pictureShown && !flat && (stepScene || building[step.id]) ? (
-        <div className="flex h-[42dvh] flex-col gap-1">
-          <div className="min-h-0 flex-1">
-            {stepScene ? (
-              <ShowMe3D key={step.id} scene={stepScene} fill />
-            ) : (
-              <BuildingModel key={step.id} soFar={building[step.id]} fill />
+        {current.pictureShown && !flat && (stepScene || building[step.id]) ? (
+          <div className="flex h-[42dvh] flex-col gap-1">
+            <div className="min-h-0 flex-1">
+              {stepScene ? (
+                <ShowMe3D key={step.id} scene={stepScene} fill />
+              ) : (
+                <BuildingModel key={step.id} soFar={building[step.id]} fill />
+              )}
+            </div>
+            <Button
+              look="quiet"
+              className="self-center py-1"
+              onClick={() => setFlat(true)}
+            >
+              See the flat picture
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <StepPicture
+              stepId={step.id}
+              alt={step.detail}
+              shown={current.pictureShown}
+              furHue={run.furHue}
+            />
+            {current.pictureShown && stepScene && (
+              <Button
+                look="quiet"
+                className="self-center py-1"
+                onClick={() => setFlat(false)}
+              >
+                See it in 3D
+              </Button>
             )}
           </div>
-          <Button look="quiet" className="self-center py-1" onClick={() => setFlat(true)}>
-            See the flat picture
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-1">
-          <StepPicture stepId={step.id} alt={step.detail} shown={current.pictureShown} furHue={run.furHue} />
-          {current.pictureShown && stepScene && (
-            <Button look="quiet" className="self-center py-1" onClick={() => setFlat(false)}>
-              See it in 3D
-            </Button>
-          )}
-        </div>
-      )}
+        )}
 
-      <h1 className="font-display text-[38px] leading-[1.05]">{step.text}</h1>
+        <h1 className="font-display text-[38px] leading-[1.05]">{step.text}</h1>
 
-      {step.seconds && <StepTimer key={step.id} seconds={step.seconds} />}
+        {step.seconds && <StepTimer key={step.id} seconds={step.seconds} />}
 
-      {listening && (
-        <p className="text-[15px] text-ink-3" aria-live="polite">
-          {heard ? (
-            <>You said: &ldquo;{heard}&rdquo;</>
-          ) : (
-            "Ayin is listening. Ask anything, or say done, help or show me."
-          )}
-        </p>
-      )}
+        {listening && (
+          <p className="text-[15px] text-ink-3" aria-live="polite">
+            {heard ? (
+              <>You said: &ldquo;{heard}&rdquo;</>
+            ) : (
+              "Ayin is listening. Ask anything, or say done, help or show me."
+            )}
+          </p>
+        )}
 
-      {say && (
-        <p
-          className="flex items-start gap-3 rounded-2xl bg-cel-wash px-4 py-3 text-[17px] leading-snug text-cel-deep"
-          aria-live="polite"
-        >
-          <MessageCircle size={20} className="mt-0.5 shrink-0" />
-          {say}
-        </p>
-      )}
-
-      {smallTalk?.stepId === step.id && smallTalk.choices.length > 0 && (
-        <div className="flex flex-wrap gap-2" aria-label="Answers">
-          {smallTalk.choices.map((choice, i) => (
-            <button
-              key={choice}
-              onClick={() => keepCompany(step.id, step.text, choice, smallTalk.turns)}
-              className="chat__leaf"
-              style={{ "--tone": `var(--r-${["study", "errands", "care"][i % 3]})`, "--i": i } as CSSProperties}
-            >
-              {choice}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {notSeen === step.id && (
-        <Button className="self-start" disabled={busy} onClick={() => done({ trust: true })}>
-          <Check size={18} /> I did it, next step
-        </Button>
-      )}
-
-      {current.level >= HELP_LEVELS.nudge && (
-        <Button
-          look="quiet"
-          className="self-start px-0"
-          disabled={busy}
-          onClick={makeSmaller}
-        >
-          <ListTree size={18} /> Too big? Smaller steps
-        </Button>
-      )}
-
-      {current.level === HELP_LEVELS.showMe && (
-        <Button look="quiet" className="self-start px-0" onClick={askRaft}>
-          <Users size={18} /> Still stuck? Ask someone in your raft
-        </Button>
-      )}
-
-      <div className="mt-auto flex flex-col gap-4">
-        <div className="flex items-end justify-between gap-3">
-          <RoundAction
-            label="Help"
-            disabled={busy}
-            onClick={() => askForHelp(nextHelpLevel(current.level))}
+        {say && (
+          <p
+            className="flex items-start gap-3 rounded-2xl bg-cel-wash px-4 py-3 text-[17px] leading-snug text-cel-deep"
+            aria-live="polite"
           >
-            <Lightbulb size={22} />
-          </RoundAction>
+            <MessageCircle size={20} className="mt-0.5 shrink-0" />
+            {say}
+          </p>
+        )}
+
+        {smallTalk?.stepId === step.id && smallTalk.choices.length > 0 && (
+          <div className="flex flex-wrap gap-2" aria-label="Answers">
+            {smallTalk.choices.map((choice, i) => (
+              <button
+                key={choice}
+                onClick={() =>
+                  keepCompany(step.id, step.text, choice, smallTalk.turns)
+                }
+                className="chat__leaf"
+                style={
+                  {
+                    "--tone": `var(--r-${["study", "errands", "care"][i % 3]})`,
+                    "--i": i,
+                  } as CSSProperties
+                }
+              >
+                {choice}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {notSeen === step.id && (
           <Button
-            look="main"
-            className="h-16 flex-1 text-[19px]"
+            className="self-start"
             disabled={busy}
-            onClick={() => done()}
+            onClick={() => done({ trust: true })}
           >
-            <Check size={22} /> {busy ? "Looking" : "Done"}
+            <Check size={18} /> I did it, next step
           </Button>
-          <RoundAction
-            label="Show me"
-            disabled={busy}
-            onClick={() => askForHelp(HELP_LEVELS.showMe)}
-          >
-            <Eye size={22} />
-          </RoundAction>
-        </div>
+        )}
 
-        {eyes}
-      </div>
-    </main>
+        {current.level >= HELP_LEVELS.nudge && (
+          <Button
+            look="quiet"
+            className="self-start px-0"
+            disabled={busy}
+            onClick={makeSmaller}
+          >
+            <ListTree size={18} /> Too big? Smaller steps
+          </Button>
+        )}
+
+        {current.level === HELP_LEVELS.showMe && (
+          <Button look="quiet" className="self-start px-0" onClick={askRaft}>
+            <Users size={18} /> Still stuck? Ask someone in your raft
+          </Button>
+        )}
+
+        <div className="mt-auto flex flex-col gap-4">
+          <div className="flex items-end justify-between gap-3">
+            <RoundAction
+              label="Help"
+              disabled={busy}
+              onClick={() => askForHelp(nextHelpLevel(current.level))}
+            >
+              <Lightbulb size={22} />
+            </RoundAction>
+            <Button
+              look="main"
+              className="h-16 flex-1 text-[19px]"
+              disabled={busy}
+              onClick={() => done()}
+            >
+              <Check size={22} /> {busy ? "Looking" : "Done"}
+            </Button>
+            <RoundAction
+              label="Show me"
+              disabled={busy}
+              onClick={() => askForHelp(HELP_LEVELS.showMe)}
+            >
+              <Eye size={22} />
+            </RoundAction>
+          </div>
+        </div>
+      </main>
+    </WithEyes>
   );
 }
 
