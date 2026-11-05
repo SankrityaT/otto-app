@@ -3,8 +3,8 @@ import { config } from "./config";
 import { getSetting } from "./data/settings";
 
 /** Where the otter is: the address saved during "Connect your otter", or else AYIN_CAMERA_URL. */
-export function otterAddress(): string | null {
-  return getSetting("otter_url") ?? config.cameraUrl;
+export async function otterAddress(): Promise<string | null> {
+  return (await getSetting("otter_url")) ?? config.cameraUrl;
 }
 
 // Ayin doesn't care which camera a photo comes from: the phone sends one with the
@@ -21,7 +21,8 @@ export function photoFromDataUrl(dataUrl: string): Photo | null {
 }
 
 /** Take a photo from the otter's camera (XIAO or Raspberry Pi), which serves GET /capture. */
-export async function photoFromOtter(address = otterAddress()): Promise<Photo | null> {
+export async function photoFromOtter(at?: string): Promise<Photo | null> {
+  const address = at ?? (await otterAddress());
   if (!address) return null;
   const response = await fetch(`${address.replace(/\/$/, "")}/capture`, {
     cache: "no-store",

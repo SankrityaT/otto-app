@@ -31,7 +31,7 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/raft/po
   try {
     const review = await reviewPost(text, photoUrl ? photoFromDataUrl(photoUrl) : null);
     if (!review.ok) return Response.json({ shared: false, review });
-    const saved = addReply(id, authorId, text, {
+    const saved = await addReply(id, authorId, text, {
       photo: photoUrl,
       sceneStepId: typeof sceneStepId === "string" ? sceneStepId : null,
     });

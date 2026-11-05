@@ -1,5 +1,5 @@
 import type { StepPlan } from "../ai/steps";
-import { db, newId, now } from "../db";
+import { all, newId, now, one, run } from "../db";
 
 // A routine is a task that has been broken into steps once and can be practised again.
 // Keeping the same steps across runs is what lets help fade step by step.
@@ -20,85 +20,86 @@ export interface Routine {
   steps: Step[];
 }
 
-export function listRoutines(): { id: string; title: string; stepCount: number }[] {
-  return db
-    .prepare(
-      `SELECT r.id, r.title, COUNT(s.id) AS stepCount
-       FROM routines r JOIN steps s ON s.routine_id = r.id
-       GROUP BY r.id ORDER BY r.created_at DESC`,
-    )
-    .all() as { id: string; title: string; stepCount: number }[];
+export function listRoutines(): Promise<{ id: string; title: string; stepCount: number }[]> {
+  return all(
+    `SELECT r.id, r.title, COUNT(s.id) AS "stepCount"
+     FROM routines r JOIN steps s ON s.routine_id = r.id
+     GROUP BY r.id ORDER BY r.created_at DESC`,
+  );
 }
 
-export function createRoutine(plan: StepPlan): Routine {
+export async function createRoutine(plan: StepPlan): Promise<Routine> {
   const routineId = newId();
-  db.prepare("INSERT INTO routines (id, title, created_at) VALUES (?, ?, ?)").run(routineId, plan.title, now());
-  const insertStep = db.prepare(
-    "INSERT INTO steps (id, routine_id, position, text, detail, seconds) VALUES (?, ?, ?, ?, ?, ?)",
-  );
-  plan.steps.forEach((step, index) =>
-    insertStep.run(newId(), routineId, index, step.text, step.detail, step.seconds ?? null),
-  );
-  return getRoutine(routineId)!;
+  await run("INSERT INTO routines (id, title, created_at) VALUES (?, ?, ?)", routineId, plan.title, now());
+  for (const [index, step] of plan.steps.entries()) {
+    await run(
+      "INSERT INTO steps (id, routine_id, position, text, detail, seconds) VALUES (?, ?, ?, ?, ?, ?)",
+      newId(),
+      routineId,
+      index,
+      step.text,
+      step.detail,
+      step.seconds ?? null,
+    );
+  }
+  return (await getRoutine(routineId))!;
 }
 
-export function getRoutine(id: string): Routine | null {
-  const routine = db.prepare("SELECT id, title FROM routines WHERE id = ?").get(id) as
-    | { id: string; title: string }
-    | undefined;
+export async function getRoutine(id: string): Promise<Routine | null> {
+  const routine = await one<{ id: string; title: string }>("SELECT id, title FROM routines WHERE id = ?", id);
   if (!routine) return null;
-  const rows = db
-    .prepare(
-      `SELECT id, position, text, detail, seconds, picture_svg IS NOT NULL AS hasPicture
-       FROM steps WHERE routine_id = ? ORDER BY position`,
-    )
-    .all(id) as { id: string; position: number; text: string; detail: string; seconds: number | null; hasPicture: number }[];
-  return { ...routine, steps: rows.map((row) => ({ ...row, hasPicture: Boolean(row.hasPicture) })) };
+  const steps = await all<Step>(
+    `SELECT id, position, text, detail, seconds, picture_svg IS NOT NULL AS "hasPicture"
+     FROM steps WHERE routine_id = ? ORDER BY position`,
+    id,
+  );
+  return { ...routine, steps };
 }
 
 export function getStep(id: string) {
-  return db
-    .prepare(
-      `SELECT s.id, s.text, s.detail, s.picture_svg AS pictureSvg, s.scene_json AS sceneJson, r.title AS routineTitle
-       FROM steps s JOIN routines r ON r.id = s.routine_id WHERE s.id = ?`,
-    )
-    .get(id) as
-    | { id: string; text: string; detail: string; pictureSvg: string | null; sceneJson: string | null; routineTitle: string }
-    | undefined;
+  return one<{ id: string; text: string; detail: string; pictureSvg: string | null; sceneJson: string | null; routineTitle: string }>(
+    `SELECT s.id, s.text, s.detail, s.picture_svg AS "pictureSvg", s.scene_json AS "sceneJson", r.title AS "routineTitle"
+     FROM steps s JOIN routines r ON r.id = s.routine_id WHERE s.id = ?`,
+    id,
+  );
 }
 
-export function savePicture(stepId: string, svg: string): void {
-  db.prepare("UPDATE steps SET picture_svg = ? WHERE id = ?").run(svg, stepId);
+export async function savePicture(stepId: string, svg: string): Promise<void> {
+  await run("UPDATE steps SET picture_svg = ? WHERE id = ?", svg, stepId);
 }
 
-export function saveScene(stepId: string, sceneJson: string): void {
-  db.prepare("UPDATE steps SET scene_json = ? WHERE id = ?").run(sceneJson, stepId);
+export async function saveScene(stepId: string, sceneJson: string): Promise<void> {
+  await run("UPDATE steps SET scene_json = ? WHERE id = ?", sceneJson, stepId);
 }
 
 /**
  * Replace one step with smaller ones, in the same place. The first smaller step keeps the
  * old step's id, so anything already logged against it still points somewhere sensible.
  */
-export function replaceStep(stepId: string, smaller: StepPlan["steps"]): void {
-  const step = db.prepare("SELECT routine_id AS routineId, position FROM steps WHERE id = ?").get(stepId) as
-    | { routineId: string; position: number }
-    | undefined;
-  if (!step || smaller.length === 0) return;
-  const extra = smaller.length - 1;
-  db.prepare("UPDATE steps SET position = position + ? WHERE routine_id = ? AND position > ?").run(
-    extra,
-    step.routineId,
-    step.position,
+export async function replaceStep(stepId: string, smaller: StepPlan["steps"]): Promise<void> {
+  const step = await one<{ routineId: string; position: number }>(
+    `SELECT routine_id AS "routineId", position FROM steps WHERE id = ?`,
+    stepId,
   );
+  if (!step || smaller.length === 0) return;
+  await run("UPDATE steps SET position = position + ? WHERE routine_id = ? AND position > ?", smaller.length - 1, step.routineId, step.position);
   const [first, ...rest] = smaller;
-  db.prepare("UPDATE steps SET text = ?, detail = ?, seconds = ?, picture_svg = NULL, scene_json = NULL WHERE id = ?").run(
+  await run(
+    "UPDATE steps SET text = ?, detail = ?, seconds = ?, picture_svg = NULL, scene_json = NULL WHERE id = ?",
     first.text,
     first.detail,
     first.seconds ?? null,
     stepId,
   );
-  const insert = db.prepare(
-    "INSERT INTO steps (id, routine_id, position, text, detail, seconds) VALUES (?, ?, ?, ?, ?, ?)",
-  );
-  rest.forEach((s, i) => insert.run(newId(), step.routineId, step.position + 1 + i, s.text, s.detail, s.seconds ?? null));
+  for (const [i, s] of rest.entries()) {
+    await run(
+      "INSERT INTO steps (id, routine_id, position, text, detail, seconds) VALUES (?, ?, ?, ?, ?, ?)",
+      newId(),
+      step.routineId,
+      step.position + 1 + i,
+      s.text,
+      s.detail,
+      s.seconds ?? null,
+    );
+  }
 }

@@ -6,6 +6,6 @@ import { jsonError, readJson } from "@/lib/http";
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/raft/posts/[id]/report">) {
   const { id } = await ctx.params;
   const { studentId } = await readJson(request);
-  if (typeof studentId !== "string" || !reportPost(id, studentId)) return jsonError("That post can't be reported.", 400);
+  if (typeof studentId !== "string" || !await reportPost(id, studentId)) return jsonError("That post can't be reported.", 400);
   return Response.json({ ok: true });
 }

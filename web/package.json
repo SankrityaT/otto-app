@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:phone": "next dev --experimental-https -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "seed": "tsx scripts/seed.ts",
-    "dev:phone": "next dev --experimental-https -H 0.0.0.0"
+    "db:setup": "tsx --env-file=.env.local scripts/setup-db.ts",
+    "seed": "tsx --env-file=.env.local scripts/seed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",
@@ -17,6 +18,7 @@
     "@react-three/fiber": "^9.8.2",
     "lucide-react": "^1.68.0",
     "next": "16.4.5",
+    "postgres": "^4.0.0",
     "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",

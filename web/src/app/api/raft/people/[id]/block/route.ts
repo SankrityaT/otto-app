@@ -6,7 +6,7 @@ import { jsonError, readJson } from "@/lib/http";
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/raft/people/[id]/block">) {
   const { id } = await ctx.params;
   const { studentId, blocked } = await readJson(request);
-  if (typeof studentId !== "string" || typeof blocked !== "boolean" || !setBlocked(studentId, id, blocked)) {
+  if (typeof studentId !== "string" || typeof blocked !== "boolean" || !await setBlocked(studentId, id, blocked)) {
     return jsonError("That can't be changed.", 400);
   }
   return Response.json({ ok: true });

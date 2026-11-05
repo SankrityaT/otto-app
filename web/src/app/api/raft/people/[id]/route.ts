@@ -5,7 +5,7 @@ import { jsonError, readJson } from "@/lib/http";
 /** A student's profile: their otter, goal, how they work best, and what they can help with. */
 export async function GET(request: NextRequest, ctx: RouteContext<"/api/raft/people/[id]">) {
   const { id } = await ctx.params;
-  const found = profile(id, request.nextUrl.searchParams.get("viewerId") ?? "");
+  const found = await profile(id, request.nextUrl.searchParams.get("viewerId") ?? "");
   if (!found) return jsonError("Student not found.", 404);
   return Response.json({ profile: found, workStyles: WORK_STYLES });
 }
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/raft/peo
 export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/raft/people/[id]">) {
   const { id } = await ctx.params;
   const { goal, goalRoutineId, workStyle } = await readJson(request);
-  const ok = updateProfile(id, {
+  const ok = await updateProfile(id, {
     goal: typeof goal === "string" || goal === null ? goal : undefined,
     goalRoutineId: typeof goalRoutineId === "string" ? goalRoutineId : null,
     workStyle: Array.isArray(workStyle) ? workStyle.filter((w): w is string => typeof w === "string") : undefined,

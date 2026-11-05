@@ -7,7 +7,7 @@
 *.db
 *.db-journal
 *.sqlite
-# The app's database folder only (not src/lib/data, which is code)
+# Old local SQLite data from before the move to Postgres (not src/lib/data, which is code)
 /web/data/
 
 # Node / Next.js

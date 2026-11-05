@@ -1,5 +1,5 @@
 import { matchBuddies, type StepHistory } from "../buddies";
-import { db, newId, now } from "../db";
+import { all, newId, now, one, run } from "../db";
 import { RUNS_TO_FADE } from "../help";
 import { daysPractised, ringFill, startOfWeek, stepsOnOwn, type StepLog } from "../week";
 
@@ -71,144 +71,156 @@ const DAY_MS = 24 * HOUR_MS;
 /** A task started longer ago than this counts as put down, not "doing it now". */
 const NOW_MS = 3 * HOUR_MS;
 
+type Member = CrewView["members"][number];
+
 /** The task a student is in the middle of right now, if any. */
-function workingOn(studentId: string): CrewView["members"][number]["now"] {
-  return (
-    (db
-      .prepare(
-        `SELECT rt.id AS routineId, rt.title,
-                (SELECT COUNT(*) FROM step_logs l WHERE l.run_id = r.id) AS done,
-                (SELECT COUNT(*) FROM steps s WHERE s.routine_id = r.routine_id) AS total
-         FROM runs r JOIN routines rt ON rt.id = r.routine_id
-         WHERE r.student_id = ? AND r.finished_at IS NULL AND r.started_at >= ?
-         ORDER BY r.started_at DESC LIMIT 1`,
-      )
-      .get(studentId, new Date(Date.now() - NOW_MS).toISOString()) as CrewView["members"][number]["now"] | undefined) ?? null
+function workingOn(studentId: string): Promise<Member["now"]> {
+  return one(
+    `SELECT rt.id AS "routineId", rt.title,
+            (SELECT COUNT(*) FROM step_logs l WHERE l.run_id = r.id) AS done,
+            (SELECT COUNT(*) FROM steps s WHERE s.routine_id = r.routine_id) AS total
+     FROM runs r JOIN routines rt ON rt.id = r.routine_id
+     WHERE r.student_id = ? AND r.finished_at IS NULL AND r.started_at >= ?
+     ORDER BY r.started_at DESC LIMIT 1`,
+    studentId,
+    new Date(Date.now() - NOW_MS).toISOString(),
   );
 }
 
-export function listStudents(): Student[] {
-  return db
-    .prepare("SELECT id, name, crew_id AS crewId, fur_hue AS furHue FROM students ORDER BY name")
-    .all() as unknown as Student[];
+/** Their open question to the raft from the last day, if nobody has helped yet. */
+function openAsk(studentId: string): Promise<Member["asking"]> {
+  return one(
+    `SELECT p.id AS "postId", p.body FROM posts p
+     WHERE p.author_id = ? AND p.kind = 'ask' AND p.status = 'shown' AND p.created_at >= ?
+       AND NOT EXISTS (SELECT 1 FROM replies r WHERE r.post_id = p.id AND r.helped = 1)
+     ORDER BY p.created_at DESC LIMIT 1`,
+    studentId,
+    new Date(Date.now() - DAY_MS).toISOString(),
+  );
 }
 
-export function getStudent(id: string): Student | null {
-  return (
-    (db.prepare("SELECT id, name, crew_id AS crewId, fur_hue AS furHue FROM students WHERE id = ?").get(id) as
-      | Student
-      | undefined) ?? null
+/** A task they finished in the last hour. */
+async function finishedJustNow(studentId: string): Promise<string | null> {
+  const row = await one<{ title: string }>(
+    `SELECT rt.title FROM runs r JOIN routines rt ON rt.id = r.routine_id
+     WHERE r.student_id = ? AND r.finished_at >= ? ORDER BY r.finished_at DESC LIMIT 1`,
+    studentId,
+    new Date(Date.now() - HOUR_MS).toISOString(),
   );
+  return row?.title ?? null;
+}
+
+const STUDENT = `SELECT id, name, crew_id AS "crewId", fur_hue AS "furHue" FROM students`;
+
+export function listStudents(): Promise<Student[]> {
+  return all(`${STUDENT} ORDER BY name`);
+}
+
+export function getStudent(id: string): Promise<Student | null> {
+  return one(`${STUDENT} WHERE id = ?`, id);
 }
 
 /** Change the colour of a student's otter. */
-export function setFurHue(studentId: string, furHue: number): boolean {
+export async function setFurHue(studentId: string, furHue: number): Promise<boolean> {
   const hue = Math.round(furHue);
   if (!Number.isFinite(hue) || hue < 0 || hue > 359) return false;
-  return db.prepare("UPDATE students SET fur_hue = ? WHERE id = ?").run(hue, studentId).changes > 0;
+  return (await run("UPDATE students SET fur_hue = ? WHERE id = ?", hue, studentId)) > 0;
 }
 
-export function crewView(studentId: string): CrewView | null {
-  const student = getStudent(studentId);
+export async function crewView(studentId: string): Promise<CrewView | null> {
+  const student = await getStudent(studentId);
   if (!student?.crewId) return null;
-
-  const crew = db.prepare("SELECT name, weekly_goal AS weeklyGoal, cheers FROM crews WHERE id = ?").get(student.crewId) as {
-    name: string;
-    weeklyGoal: number;
-    cheers: string;
-  };
-  const members = db
-    .prepare("SELECT id, name, fur_hue AS furHue, weekly_target AS weeklyTarget FROM students WHERE crew_id = ? ORDER BY name")
-    .all(student.crewId) as { id: string; name: string; furHue: number; weeklyTarget: number }[];
-
+  const crewId = student.crewId;
   const weekStart = startOfWeek(new Date()).toISOString();
-  const logs = db
-    .prepare(
-      `SELECT l.student_id AS studentId, l.help_level AS helpLevel, l.done_at AS doneAt
+
+  const [crew, members, logs, wins, asksForMe, invites] = await Promise.all([
+    one<{ name: string; weeklyGoal: number; cheers: string }>(
+      `SELECT name, weekly_goal AS "weeklyGoal", cheers FROM crews WHERE id = ?`,
+      crewId,
+    ),
+    all<{ id: string; name: string; furHue: number; weeklyTarget: number }>(
+      `SELECT id, name, fur_hue AS "furHue", weekly_target AS "weeklyTarget" FROM students WHERE crew_id = ? ORDER BY name`,
+      crewId,
+    ),
+    all<StepLog>(
+      `SELECT l.student_id AS "studentId", l.help_level AS "helpLevel", l.done_at AS "doneAt"
        FROM step_logs l JOIN students s ON s.id = l.student_id
        WHERE s.crew_id = ? AND l.done_at >= ?`,
-    )
-    .all(student.crewId, weekStart) as unknown as StepLog[];
-
-  const wins = db
-    .prepare(
-      `SELECT r.id AS runId, s.id AS studentId, s.name, s.fur_hue AS furHue, rt.title, r.finished_at AS finishedAt,
-              SUM(l.help_level = 0) AS onOwn, COUNT(l.id) AS total,
+      crewId,
+      weekStart,
+    ),
+    all<Omit<CrewView["wins"][number], "cheers" | "stepHelp">>(
+      `SELECT r.id AS "runId", s.id AS "studentId", s.name, s.fur_hue AS "furHue", rt.title, r.finished_at AS "finishedAt",
+              COUNT(*) FILTER (WHERE l.help_level = 0) AS "onOwn", COUNT(l.id) AS total,
               EXISTS (SELECT 1 FROM cheers c WHERE c.run_id = r.id AND c.from_id = ?) AS cheered
        FROM runs r
        JOIN students s ON s.id = r.student_id
        JOIN routines rt ON rt.id = r.routine_id
        JOIN step_logs l ON l.run_id = r.id
        WHERE s.crew_id = ? AND r.finished_at >= ?
-       GROUP BY r.id ORDER BY r.finished_at DESC LIMIT 8`,
-    )
-    .all(studentId, student.crewId, weekStart) as unknown as CrewView["wins"];
-
-  const asksForMe = db
-    .prepare(
-      `SELECT a.id, f.name AS fromName, st.text AS stepText
+       GROUP BY r.id, s.id, rt.id ORDER BY r.finished_at DESC LIMIT 8`,
+      studentId,
+      crewId,
+      weekStart,
+    ),
+    all<CrewView["asksForMe"][number]>(
+      `SELECT a.id, f.name AS "fromName", st.text AS "stepText"
        FROM asks a JOIN students f ON f.id = a.from_id JOIN steps st ON st.id = a.step_id
        WHERE a.to_id = ? AND a.created_at >= ? ORDER BY a.created_at DESC`,
-    )
-    .all(studentId, weekStart) as unknown as CrewView["asksForMe"];
+      studentId,
+      weekStart,
+    ),
+    all<CrewView["invites"][number]>(
+      `SELECT i.id, i.from_id AS "fromId", f.name AS "fromName", t.name AS "toName", i.about, i.status,
+              i.from_run_id AS "fromRunId", i.to_run_id AS "toRunId"
+       FROM invites i JOIN students f ON f.id = i.from_id JOIN students t ON t.id = i.to_id
+       WHERE (i.from_id = ? OR i.to_id = ?) AND i.created_at >= ? ORDER BY i.created_at DESC`,
+      studentId,
+      studentId,
+      new Date(Date.now() - DAY_MS).toISOString(),
+    ),
+  ]);
 
-  const memberStats = members.map((member) => {
-    const onOwn = stepsOnOwn(logs, member.id);
-    return {
-      id: member.id,
-      name: member.name,
-      furHue: member.furHue,
-      onOwn,
-      ring: ringFill(onOwn, member.weeklyTarget),
-      days: daysPractised(logs, member.id),
-      now: workingOn(member.id),
-      asking:
-        (db
-          .prepare(
-            `SELECT p.id AS postId, p.body FROM posts p
-             WHERE p.author_id = ? AND p.kind = 'ask' AND p.created_at >= ?
-               AND NOT EXISTS (SELECT 1 FROM replies r WHERE r.post_id = p.id AND r.helped = 1)
-             ORDER BY p.created_at DESC LIMIT 1`,
-          )
-          .get(member.id, new Date(Date.now() - DAY_MS).toISOString()) as { postId: string; body: string } | undefined) ?? null,
-      justFinished:
-        (
-          db
-            .prepare(
-              `SELECT rt.title FROM runs r JOIN routines rt ON rt.id = r.routine_id
-               WHERE r.student_id = ? AND r.finished_at >= ? ORDER BY r.finished_at DESC LIMIT 1`,
-            )
-            .get(member.id, new Date(Date.now() - HOUR_MS).toISOString()) as { title: string } | undefined
-        )?.title ?? null,
-    };
-  });
+  const memberStats = await Promise.all(
+    members.map(async (member) => {
+      const onOwn = stepsOnOwn(logs, member.id);
+      const [doing, asking, justFinished] = await Promise.all([workingOn(member.id), openAsk(member.id), finishedJustNow(member.id)]);
+      return {
+        id: member.id,
+        name: member.name,
+        furHue: member.furHue,
+        onOwn,
+        ring: ringFill(onOwn, member.weeklyTarget),
+        days: daysPractised(logs, member.id),
+        now: doing,
+        asking,
+        justFinished,
+      };
+    }),
+  );
 
   return {
-    name: crew.name,
-    weeklyGoal: crew.weeklyGoal,
+    name: crew!.name,
+    weeklyGoal: crew!.weeklyGoal,
     onOwnTogether: memberStats.reduce((sum, member) => sum + member.onOwn, 0),
-    cheers: JSON.parse(crew.cheers) as string[],
+    cheers: JSON.parse(crew!.cheers) as string[],
     members: memberStats,
-    wins: wins.map((win) => ({ ...win, cheered: Boolean(win.cheered), cheers: cheersFor(win.runId), stepHelp: stepHelp(win.runId) })),
+    wins: await Promise.all(
+      wins.map(async (win) => ({ ...win, cheers: await cheersFor(win.runId), stepHelp: await stepHelp(win.runId) })),
+    ),
     asksForMe,
-    buddy: findBuddy(studentId, members),
-    invites: db
-      .prepare(
-        `SELECT i.id, i.from_id AS fromId, f.name AS fromName, t.name AS toName, i.about, i.status,
-                i.from_run_id AS fromRunId, i.to_run_id AS toRunId
-         FROM invites i JOIN students f ON f.id = i.from_id JOIN students t ON t.id = i.to_id
-         WHERE (i.from_id = ? OR i.to_id = ?) AND i.created_at >= ? ORDER BY i.created_at DESC`,
-      )
-      .all(studentId, studentId, new Date(Date.now() - DAY_MS).toISOString()) as unknown as CrewView["invites"],
+    buddy: await findBuddy(studentId, members),
+    invites,
   };
 }
 
 /** Cheer a crewmate's finished task. Only the crew's preset phrases are allowed. */
-export function addCheer(fromId: string, runId: string, phrase: string): boolean {
-  const view = crewView(fromId);
+export async function addCheer(fromId: string, runId: string, phrase: string): Promise<boolean> {
+  const view = await crewView(fromId);
   const win = view?.wins.find((w) => w.runId === runId);
   if (!view || !win || win.studentId === fromId || !view.cheers.includes(phrase)) return false;
-  db.prepare("INSERT INTO cheers (id, from_id, to_id, run_id, phrase, created_at) VALUES (?, ?, ?, ?, ?, ?)").run(
+  await run(
+    "INSERT INTO cheers (id, from_id, to_id, run_id, phrase, created_at) VALUES (?, ?, ?, ?, ?, ?)",
     newId(),
     fromId,
     win.studentId,
@@ -223,37 +235,31 @@ export function addCheer(fromId: string, runId: string, phrase: string): boolean
  * Find the crewmate who has done this step on their own most often, and let them know
  * someone would like help. Returns their name, or null if nobody has done it yet.
  */
-export function askCrewmate(fromId: string, stepId: string): string | null {
-  const student = getStudent(fromId);
+export async function askCrewmate(fromId: string, stepId: string): Promise<string | null> {
+  const student = await getStudent(fromId);
   if (!student?.crewId) return null;
-  const helper = db
-    .prepare(
-      `SELECT s.id, s.name, COUNT(*) AS times
-       FROM step_logs l JOIN students s ON s.id = l.student_id
-       WHERE l.step_id = ? AND l.help_level = 0 AND s.crew_id = ? AND s.id != ?
-       GROUP BY s.id ORDER BY times DESC LIMIT 1`,
-    )
-    .get(stepId, student.crewId, fromId) as { id: string; name: string } | undefined;
-  if (!helper) return null;
-  db.prepare("INSERT INTO asks (id, from_id, to_id, step_id, created_at) VALUES (?, ?, ?, ?, ?)").run(
-    newId(),
-    fromId,
-    helper.id,
+  const helper = await one<{ id: string; name: string }>(
+    `SELECT s.id, s.name, COUNT(*) AS times
+     FROM step_logs l JOIN students s ON s.id = l.student_id
+     WHERE l.step_id = ? AND l.help_level = 0 AND s.crew_id = ? AND s.id != ?
+     GROUP BY s.id ORDER BY times DESC LIMIT 1`,
     stepId,
-    now(),
+    student.crewId,
+    fromId,
   );
+  if (!helper) return null;
+  await run("INSERT INTO asks (id, from_id, to_id, step_id, created_at) VALUES (?, ?, ?, ?, ?)", newId(), fromId, helper.id, stepId, now());
   return helper.name;
 }
 
 /** Pair the crew into practice buddies and return this student's buddy. */
-function findBuddy(studentId: string, members: { id: string; name: string; furHue: number }[]): CrewView["buddy"] {
-  const rows = db
-    .prepare(
-      `SELECT student_id AS studentId, step_id AS stepId, help_level AS level
-       FROM step_logs WHERE student_id IN (${members.map(() => "?").join(", ")})
-       ORDER BY done_at DESC`,
-    )
-    .all(...members.map((m) => m.id)) as { studentId: string; stepId: string; level: number }[];
+async function findBuddy(studentId: string, members: { id: string; name: string; furHue: number }[]): Promise<CrewView["buddy"]> {
+  const rows = await all<{ studentId: string; stepId: string; level: number }>(
+    `SELECT student_id AS "studentId", step_id AS "stepId", help_level AS level
+     FROM step_logs WHERE student_id IN (${members.map(() => "?").join(", ")})
+     ORDER BY done_at DESC`,
+    ...members.map((m) => m.id),
+  );
 
   // Newest-first help levels per student and step, enough runs to tell mastery.
   const byKey = new Map<string, StepHistory>();
@@ -272,33 +278,30 @@ function findBuddy(studentId: string, members: { id: string; name: string; furHu
 
   const isA = pairing.a === studentId;
   const buddyId = isA ? pairing.b : pairing.a;
-  const stepText = (id: string) =>
-    (db.prepare("SELECT text FROM steps WHERE id = ?").get(id) as { text: string } | undefined)?.text ?? "";
+  const stepText = async (id: string) => (await one<{ text: string }>("SELECT text FROM steps WHERE id = ?", id))?.text ?? "";
   const buddy = members.find((m) => m.id === buddyId);
   return {
     id: buddyId,
     name: buddy?.name ?? "",
     furHue: buddy?.furHue ?? 0,
-    theyCanShowYou: (isA ? pairing.bCanShowA : pairing.aCanShowB).map(stepText),
-    youCanShowThem: (isA ? pairing.aCanShowB : pairing.bCanShowA).map(stepText),
+    theyCanShowYou: await Promise.all((isA ? pairing.bCanShowA : pairing.aCanShowB).map(stepText)),
+    youCanShowThem: await Promise.all((isA ? pairing.aCanShowB : pairing.bCanShowA).map(stepText)),
   };
 }
 
-function cheersFor(runId: string): { fromName: string; phrase: string }[] {
-  return db
-    .prepare(
-      `SELECT s.name AS fromName, c.phrase FROM cheers c JOIN students s ON s.id = c.from_id
-       WHERE c.run_id = ? ORDER BY c.created_at`,
-    )
-    .all(runId) as { fromName: string; phrase: string }[];
+function cheersFor(runId: string): Promise<{ fromName: string; phrase: string }[]> {
+  return all(
+    `SELECT s.name AS "fromName", c.phrase FROM cheers c JOIN students s ON s.id = c.from_id
+     WHERE c.run_id = ? ORDER BY c.created_at`,
+    runId,
+  );
 }
 
-function stepHelp(runId: string): number[] {
-  const rows = db
-    .prepare(
-      `SELECT l.help_level AS level FROM step_logs l JOIN steps s ON s.id = l.step_id
-       WHERE l.run_id = ? ORDER BY s.position`,
-    )
-    .all(runId) as { level: number }[];
+async function stepHelp(runId: string): Promise<number[]> {
+  const rows = await all<{ level: number }>(
+    `SELECT l.help_level AS level FROM step_logs l JOIN steps s ON s.id = l.step_id
+     WHERE l.run_id = ? ORDER BY s.position`,
+    runId,
+  );
   return rows.map((row) => row.level);
 }

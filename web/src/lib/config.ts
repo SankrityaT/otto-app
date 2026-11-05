@@ -4,8 +4,8 @@ export const config = {
   /** Claude model used for steps, checks, hints and pictures. */
   model: process.env.AYIN_MODEL ?? "claude-opus-5-5",
 
-  /** Where the SQLite file lives. */
-  databasePath: process.env.AYIN_DB_PATH ?? "data/ayin.db",
+  /** The Postgres database (Supabase): its connection string, from the project's pooler settings. */
+  databaseUrl: process.env.DATABASE_URL || null,
 
   /**
    * Optional network camera (the otter). When set, the server takes a photo from

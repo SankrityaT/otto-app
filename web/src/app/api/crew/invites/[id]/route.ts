@@ -9,7 +9,7 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/crew/in
   if (typeof studentId !== "string" || (answer !== "yes" && answer !== "not-today")) {
     return jsonError("Answer yes or not today.", 400);
   }
-  const runId = answerTogether(id, studentId, answer);
+  const runId = await answerTogether(id, studentId, answer);
   if (runId === false) return jsonError("That invite can't be answered.", 400);
   return Response.json({ runId });
 }

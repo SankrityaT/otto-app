@@ -1,4 +1,4 @@
-import { db, newId, now } from "../db";
+import { all, newId, now, one, run } from "../db";
 import { RUNS_TO_FADE } from "../help";
 import { REACTIONS, WORK_STYLES, type Reaction } from "../raftWords";
 import { getStudent } from "./crew";
@@ -68,52 +68,55 @@ type PostRow = {
   taskTitle: string | null;
   createdAt: string;
   replyCount: number;
-  helped: number;
+  helped: boolean;
 };
 
 const POST_SELECT = `
-  SELECT p.id, p.crew_id AS crewId, p.kind, p.author_id AS authorId, s.name, s.fur_hue AS furHue, p.body, p.photo,
-         p.step_id AS stepId, st.text AS stepText, p.task_title AS taskTitle, p.created_at AS createdAt,
-         (SELECT COUNT(*) FROM replies r WHERE r.post_id = p.id AND r.status = 'shown') AS replyCount,
+  SELECT p.id, p.crew_id AS "crewId", p.kind, p.author_id AS "authorId", s.name, s.fur_hue AS "furHue", p.body, p.photo,
+         p.step_id AS "stepId", st.text AS "stepText", p.task_title AS "taskTitle", p.created_at AS "createdAt",
+         (SELECT COUNT(*) FROM replies r WHERE r.post_id = p.id AND r.status = 'shown') AS "replyCount",
          EXISTS (SELECT 1 FROM replies r WHERE r.post_id = p.id AND r.helped = 1) AS helped
   FROM posts p JOIN students s ON s.id = p.author_id LEFT JOIN steps st ON st.id = p.step_id`;
 
 /** Students hidden from this viewer: people they blocked, and people who blocked them. */
-export function hiddenFrom(viewerId: string): Set<string> {
-  const rows = db
-    .prepare(
-      `SELECT blocked_id AS id FROM blocks WHERE blocker_id = ?
-       UNION SELECT blocker_id AS id FROM blocks WHERE blocked_id = ?`,
-    )
-    .all(viewerId, viewerId) as { id: string }[];
+export async function hiddenFrom(viewerId: string): Promise<Set<string>> {
+  const rows = await all<{ id: string }>(
+    `SELECT blocked_id AS id FROM blocks WHERE blocker_id = ?
+     UNION SELECT blocker_id AS id FROM blocks WHERE blocked_id = ?`,
+    viewerId,
+    viewerId,
+  );
   return new Set(rows.map((r) => r.id));
 }
 
-export function setBlocked(blockerId: string, blockedId: string, blocked: boolean): boolean {
-  if (blockerId === blockedId || !getStudent(blockerId) || !getStudent(blockedId)) return false;
+export async function setBlocked(blockerId: string, blockedId: string, blocked: boolean): Promise<boolean> {
+  if (blockerId === blockedId || !(await getStudent(blockerId)) || !(await getStudent(blockedId))) return false;
   if (blocked) {
-    db.prepare("INSERT OR IGNORE INTO blocks (blocker_id, blocked_id, created_at) VALUES (?, ?, ?)").run(blockerId, blockedId, now());
+    await run("INSERT INTO blocks (blocker_id, blocked_id, created_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING", blockerId, blockedId, now());
   } else {
-    db.prepare("DELETE FROM blocks WHERE blocker_id = ? AND blocked_id = ?").run(blockerId, blockedId);
+    await run("DELETE FROM blocks WHERE blocker_id = ? AND blocked_id = ?", blockerId, blockedId);
   }
   return true;
 }
 
 /** Times a student has done a step with no help. */
-function timesOnOwn(studentId: string, stepId: string): number {
-  const row = db
-    .prepare("SELECT COUNT(*) AS n FROM step_logs WHERE student_id = ? AND step_id = ? AND help_level = 0")
-    .get(studentId, stepId) as { n: number };
-  return row.n;
+async function timesOnOwn(studentId: string, stepId: string): Promise<number> {
+  const row = await one<{ n: number }>(
+    "SELECT COUNT(*) AS n FROM step_logs WHERE student_id = ? AND step_id = ? AND help_level = 0",
+    studentId,
+    stepId,
+  );
+  return row?.n ?? 0;
 }
 
-function toPost(row: PostRow, viewerId: string): Post {
-  const reactions = db
-    .prepare(
-      `SELECT x.kind, s.name, x.from_id AS fromId FROM reactions x JOIN students s ON s.id = x.from_id
-       WHERE x.post_id = ? ORDER BY x.created_at`,
-    )
-    .all(row.id) as { kind: Reaction; name: string; fromId: string }[];
+async function toPost(row: PostRow, viewerId: string): Promise<Post> {
+  const reactions = await all<{ kind: Reaction; name: string; fromId: string }>(
+    `SELECT x.kind, s.name, x.from_id AS "fromId" FROM reactions x JOIN students s ON s.id = x.from_id
+     WHERE x.post_id = ? ORDER BY x.created_at`,
+    row.id,
+  );
+  const canHelp =
+    row.kind === "ask" && row.stepId !== null && row.authorId !== viewerId && (await timesOnOwn(viewerId, row.stepId)) >= RUNS_TO_FADE;
   return {
     id: row.id,
     kind: row.kind,
@@ -128,41 +131,34 @@ function toPost(row: PostRow, viewerId: string): Post {
       return { kind, names: of.map((r) => r.name), mine: of.some((r) => r.fromId === viewerId) };
     }).filter((r) => r.names.length > 0),
     replyCount: row.replyCount,
-    youKnowThis:
-      row.kind === "ask" && row.stepId !== null && row.authorId !== viewerId && timesOnOwn(viewerId, row.stepId) >= RUNS_TO_FADE,
-    helped: Boolean(row.helped),
+    youKnowThis: canHelp,
+    helped: row.helped,
   };
 }
 
 /** The raft's posts, newest first. Only shown posts, only this student's raft. */
-export function feed(viewerId: string, kind: PostKind | null): Post[] {
-  const viewer = getStudent(viewerId);
+export async function feed(viewerId: string, kind: PostKind | null): Promise<Post[]> {
+  const viewer = await getStudent(viewerId);
   if (!viewer?.crewId) return [];
-  const rows = db
-    .prepare(
+  const [rows, hidden] = await Promise.all([
+    all<PostRow>(
       `${POST_SELECT} WHERE p.crew_id = ? AND p.status = 'shown' ${kind ? "AND p.kind = ?" : ""}
        ORDER BY p.created_at DESC LIMIT 50`,
-    )
-    .all(...(kind ? [viewer.crewId, kind] : [viewer.crewId])) as unknown as PostRow[];
-  const hidden = hiddenFrom(viewerId);
-  return rows.filter((row) => !hidden.has(row.authorId)).map((row) => toPost(row, viewerId));
+      ...(kind ? [viewer.crewId, kind] : [viewer.crewId]),
+    ),
+    hiddenFrom(viewerId),
+  ]);
+  return Promise.all(rows.filter((row) => !hidden.has(row.authorId)).map((row) => toPost(row, viewerId)));
 }
 
-export function getPost(postId: string, viewerId: string): { post: Post; replies: Reply[] } | null {
-  const viewer = getStudent(viewerId);
-  const row = db.prepare(`${POST_SELECT} WHERE p.id = ? AND p.status = 'shown'`).get(postId) as unknown as
-    | PostRow
-    | undefined;
-  const hidden = hiddenFrom(viewerId);
+export async function getPost(postId: string, viewerId: string): Promise<{ post: Post; replies: Reply[] } | null> {
+  const [viewer, row, hidden] = await Promise.all([
+    getStudent(viewerId),
+    one<PostRow>(`${POST_SELECT} WHERE p.id = ? AND p.status = 'shown'`, postId),
+    hiddenFrom(viewerId),
+  ]);
   if (!row || !viewer || row.crewId !== viewer.crewId || hidden.has(row.authorId)) return null;
-  const replies = db
-    .prepare(
-      `SELECT r.id, r.author_id AS authorId, s.name, s.fur_hue AS furHue, r.body, r.photo, r.helped, r.created_at AS createdAt,
-              r.scene_step_id AS sceneStepId, st.text AS sceneStepText
-       FROM replies r JOIN students s ON s.id = r.author_id LEFT JOIN steps st ON st.id = r.scene_step_id
-       WHERE r.post_id = ? AND r.status = 'shown' ORDER BY r.created_at`,
-    )
-    .all(postId) as {
+  const replies = await all<{
     id: string;
     authorId: string;
     name: string;
@@ -173,119 +169,151 @@ export function getPost(postId: string, viewerId: string): { post: Post; replies
     createdAt: string;
     sceneStepId: string | null;
     sceneStepText: string | null;
-  }[];
+  }>(
+    `SELECT r.id, r.author_id AS "authorId", s.name, s.fur_hue AS "furHue", r.body, r.photo, r.helped, r.created_at AS "createdAt",
+            r.scene_step_id AS "sceneStepId", st.text AS "sceneStepText"
+     FROM replies r JOIN students s ON s.id = r.author_id LEFT JOIN steps st ON st.id = r.scene_step_id
+     WHERE r.post_id = ? AND r.status = 'shown' ORDER BY r.created_at`,
+    postId,
+  );
   return {
-    post: toPost(row, viewerId),
-    replies: replies.filter((r) => !hidden.has(r.authorId)).map((r) => ({
-      id: r.id,
-      author: { id: r.authorId, name: r.name, furHue: r.furHue },
-      body: r.body,
-      photo: r.photo,
-      sceneStep: r.sceneStepId ? { id: r.sceneStepId, text: r.sceneStepText ?? "" } : null,
-      helped: Boolean(r.helped),
-      timesOnOwn: row.stepId ? timesOnOwn(r.authorId, row.stepId) : 0,
-      createdAt: r.createdAt,
-    })),
+    post: await toPost(row, viewerId),
+    replies: await Promise.all(
+      replies
+        .filter((r) => !hidden.has(r.authorId))
+        .map(async (r) => ({
+          id: r.id,
+          author: { id: r.authorId, name: r.name, furHue: r.furHue },
+          body: r.body,
+          photo: r.photo,
+          sceneStep: r.sceneStepId ? { id: r.sceneStepId, text: r.sceneStepText ?? "" } : null,
+          helped: Boolean(r.helped),
+          timesOnOwn: row.stepId ? await timesOnOwn(r.authorId, row.stepId) : 0,
+          createdAt: r.createdAt,
+        })),
+    ),
   };
 }
 
-export function createPost(input: {
+export async function createPost(input: {
   authorId: string;
   kind: PostKind;
   body: string;
   photo: string | null;
   stepId: string | null;
-}): string | null {
-  const author = getStudent(input.authorId);
+}): Promise<string | null> {
+  const author = await getStudent(input.authorId);
   if (!author?.crewId) return null;
   const step = input.stepId
-    ? (db
-        .prepare("SELECT s.id, r.title FROM steps s JOIN routines r ON r.id = s.routine_id WHERE s.id = ?")
-        .get(input.stepId) as { id: string; title: string } | undefined)
-    : undefined;
+    ? await one<{ id: string; title: string }>(
+        "SELECT s.id, r.title FROM steps s JOIN routines r ON r.id = s.routine_id WHERE s.id = ?",
+        input.stepId,
+      )
+    : null;
   const id = newId();
-  db.prepare(
+  await run(
     `INSERT INTO posts (id, crew_id, author_id, kind, body, photo, step_id, task_title, status, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'shown', ?)`,
-  ).run(id, author.crewId, author.id, input.kind, input.body, input.photo, step?.id ?? null, step?.title ?? null, now());
+    id,
+    author.crewId,
+    author.id,
+    input.kind,
+    input.body,
+    input.photo,
+    step?.id ?? null,
+    step?.title ?? null,
+    now(),
+  );
   return id;
 }
 
-export function addReply(
+export async function addReply(
   postId: string,
   authorId: string,
   body: string,
   extras: { photo?: string | null; sceneStepId?: string | null } = {},
-): boolean {
+): Promise<boolean> {
   // getPost is null when the post is gone, in another raft, or either person blocked the other.
-  if (!getPost(postId, authorId)) return false;
-  db.prepare(
+  if (!(await getPost(postId, authorId))) return false;
+  await run(
     `INSERT INTO replies (id, post_id, author_id, body, photo, scene_step_id, helped, status, created_at)
      VALUES (?, ?, ?, ?, ?, ?, 0, 'shown', ?)`,
-  ).run(newId(), postId, authorId, body, extras.photo ?? null, extras.sceneStepId ?? null, now());
+    newId(),
+    postId,
+    authorId,
+    body,
+    extras.photo ?? null,
+    extras.sceneStepId ?? null,
+    now(),
+  );
   return true;
 }
 
 /** Only the person who asked can say an answer helped. */
-export function markHelped(replyId: string, studentId: string): boolean {
-  return (
-    db
-      .prepare(
-        `UPDATE replies SET helped = 1 WHERE id = ?
-         AND post_id IN (SELECT id FROM posts WHERE author_id = ? AND kind = 'ask')`,
-      )
-      .run(replyId, studentId).changes > 0
+export async function markHelped(replyId: string, studentId: string): Promise<boolean> {
+  const changed = await run(
+    `UPDATE replies SET helped = 1 WHERE id = ?
+     AND post_id IN (SELECT id FROM posts WHERE author_id = ? AND kind = 'ask')`,
+    replyId,
+    studentId,
   );
+  return changed > 0;
 }
 
 /** Add or take back a reaction. */
-export function toggleReaction(postId: string, studentId: string, kind: Reaction): boolean {
-  if (!REACTIONS.includes(kind) || !getPost(postId, studentId)) return false;
-  const removed = db.prepare("DELETE FROM reactions WHERE post_id = ? AND from_id = ? AND kind = ?").run(postId, studentId, kind);
-  if (removed.changes === 0) {
-    db.prepare("INSERT INTO reactions (post_id, from_id, kind, created_at) VALUES (?, ?, ?, ?)").run(postId, studentId, kind, now());
+export async function toggleReaction(postId: string, studentId: string, kind: Reaction): Promise<boolean> {
+  if (!REACTIONS.includes(kind) || !(await getPost(postId, studentId))) return false;
+  const removed = await run("DELETE FROM reactions WHERE post_id = ? AND from_id = ? AND kind = ?", postId, studentId, kind);
+  if (removed === 0) {
+    await run("INSERT INTO reactions (post_id, from_id, kind, created_at) VALUES (?, ?, ?, ?)", postId, studentId, kind, now());
   }
   return true;
 }
 
 /** A report hides the post right away and leaves it for staff to review. */
-export function reportPost(postId: string, studentId: string): boolean {
-  if (!getPost(postId, studentId)) return false;
-  db.prepare("UPDATE posts SET status = 'reported' WHERE id = ?").run(postId);
-  db.prepare("INSERT INTO reports (id, post_id, from_id, created_at) VALUES (?, ?, ?, ?)").run(newId(), postId, studentId, now());
+export async function reportPost(postId: string, studentId: string): Promise<boolean> {
+  if (!(await getPost(postId, studentId))) return false;
+  await run("UPDATE posts SET status = 'reported' WHERE id = ?", postId);
+  await run("INSERT INTO reports (id, post_id, from_id, created_at) VALUES (?, ?, ?, ?)", newId(), postId, studentId, now());
   return true;
 }
 
-export function profile(studentId: string, viewerId = ""): Profile | null {
-  const row = db
-    .prepare(
-      `SELECT s.id, s.name, s.fur_hue AS furHue, s.goal, s.work_style AS workStyle, c.name AS raftName,
-              r.title AS goalTask
-       FROM students s LEFT JOIN crews c ON c.id = s.crew_id LEFT JOIN routines r ON r.id = s.goal_routine_id
-       WHERE s.id = ?`,
-    )
-    .get(studentId) as
-    | { id: string; name: string; furHue: number; goal: string | null; workStyle: string | null; raftName: string | null; goalTask: string | null }
-    | undefined;
+export async function profile(studentId: string, viewerId = ""): Promise<Profile | null> {
+  const row = await one<{
+    id: string;
+    name: string;
+    furHue: number;
+    goal: string | null;
+    workStyle: string | null;
+    raftName: string | null;
+    goalTask: string | null;
+  }>(
+    `SELECT s.id, s.name, s.fur_hue AS "furHue", s.goal, s.work_style AS "workStyle", c.name AS "raftName",
+            r.title AS "goalTask"
+     FROM students s LEFT JOIN crews c ON c.id = s.crew_id LEFT JOIN routines r ON r.id = s.goal_routine_id
+     WHERE s.id = ?`,
+    studentId,
+  );
   if (!row) return null;
 
-  // Tasks done fully on their own in recent runs are things they can help with; the rest they're learning.
-  const tasks = db
-    .prepare(
+  const [tasks, helped, blocked] = await Promise.all([
+    // Tasks done fully on their own in recent runs are things they can help with; the rest they're learning.
+    all<{ title: string; aloneRuns: number; runs: number }>(
       `SELECT rt.title,
-              SUM(CASE WHEN x.onOwn = x.total THEN 1 ELSE 0 END) AS aloneRuns, COUNT(*) AS runs
-       FROM (SELECT r.routine_id, COUNT(l.id) AS total, SUM(l.help_level = 0) AS onOwn
+              COUNT(*) FILTER (WHERE x.on_own = x.total) AS "aloneRuns", COUNT(*) AS runs
+       FROM (SELECT r.routine_id, COUNT(l.id) AS total, COUNT(*) FILTER (WHERE l.help_level = 0) AS on_own
              FROM runs r JOIN step_logs l ON l.run_id = r.id
              WHERE r.student_id = ? AND r.finished_at IS NOT NULL GROUP BY r.id) x
        JOIN routines rt ON rt.id = x.routine_id GROUP BY rt.id ORDER BY rt.title`,
-    )
-    .all(studentId) as { title: string; aloneRuns: number; runs: number }[];
-
-  const helped = db
-    .prepare(
-      `SELECT COUNT(*) AS n FROM replies r WHERE r.author_id = ? AND r.helped = 1 AND r.created_at >= ?`,
-    )
-    .get(studentId, new Date(Date.now() - 30 * 86_400_000).toISOString()) as { n: number };
+      studentId,
+    ),
+    one<{ n: number }>(
+      "SELECT COUNT(*) AS n FROM replies r WHERE r.author_id = ? AND r.helped = 1 AND r.created_at >= ?",
+      studentId,
+      new Date(Date.now() - 30 * 86_400_000).toISOString(),
+    ),
+    one("SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?", viewerId, studentId),
+  ]);
 
   return {
     id: row.id,
@@ -296,23 +324,24 @@ export function profile(studentId: string, viewerId = ""): Profile | null {
     workStyle: row.workStyle ? (JSON.parse(row.workStyle) as string[]) : [],
     canHelpWith: tasks.filter((t) => t.aloneRuns >= 1).map((t) => t.title),
     learning: tasks.filter((t) => t.aloneRuns === 0).map((t) => ({ title: t.title, stage: Math.min(t.runs + 1, 4) })),
-    helpedCount: helped.n,
-    blockedByViewer: Boolean(
-      db.prepare("SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = ?").get(viewerId, studentId),
-    ),
+    helpedCount: helped?.n ?? 0,
+    blockedByViewer: blocked !== null,
   };
 }
 
 /** Students set their own goal and how they work best. Only listed phrases are allowed. */
-export function updateProfile(studentId: string, change: { goal?: string | null; goalRoutineId?: string | null; workStyle?: string[] }): boolean {
-  if (!getStudent(studentId)) return false;
+export async function updateProfile(
+  studentId: string,
+  change: { goal?: string | null; goalRoutineId?: string | null; workStyle?: string[] },
+): Promise<boolean> {
+  if (!(await getStudent(studentId))) return false;
   if (change.goal !== undefined) {
     const goal = change.goal?.trim().slice(0, 120) || null;
-    db.prepare("UPDATE students SET goal = ?, goal_routine_id = ? WHERE id = ?").run(goal, change.goalRoutineId ?? null, studentId);
+    await run("UPDATE students SET goal = ?, goal_routine_id = ? WHERE id = ?", goal, change.goalRoutineId ?? null, studentId);
   }
   if (change.workStyle) {
     const allowed = change.workStyle.filter((w) => (WORK_STYLES as readonly string[]).includes(w));
-    db.prepare("UPDATE students SET work_style = ? WHERE id = ?").run(JSON.stringify(allowed), studentId);
+    await run("UPDATE students SET work_style = ? WHERE id = ?", JSON.stringify(allowed), studentId);
   }
   return true;
 }

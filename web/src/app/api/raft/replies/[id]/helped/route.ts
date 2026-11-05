@@ -6,6 +6,6 @@ import { jsonError, readJson } from "@/lib/http";
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/raft/replies/[id]/helped">) {
   const { id } = await ctx.params;
   const { studentId } = await readJson(request);
-  if (typeof studentId !== "string" || !markHelped(id, studentId)) return jsonError("Only the person who asked can say that.", 400);
+  if (typeof studentId !== "string" || !await markHelped(id, studentId)) return jsonError("Only the person who asked can say that.", 400);
   return Response.json({ ok: true });
 }

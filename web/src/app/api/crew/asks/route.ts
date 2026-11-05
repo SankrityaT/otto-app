@@ -5,5 +5,5 @@ import { jsonError, readJson } from "@/lib/http";
 export async function POST(request: Request) {
   const { fromId, stepId } = await readJson(request);
   if (typeof fromId !== "string" || typeof stepId !== "string") return jsonError("Missing ask details.", 400);
-  return Response.json({ helperName: askCrewmate(fromId, stepId) });
+  return Response.json({ helperName: await askCrewmate(fromId, stepId) });
 }

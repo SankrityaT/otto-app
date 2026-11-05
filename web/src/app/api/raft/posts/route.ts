@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   try {
     const review = await reviewPost(text, photoUrl ? photoFromDataUrl(photoUrl) : null);
     if (!review.ok) return Response.json({ shared: false, review });
-    const id = createPost({ authorId, kind, body: text, photo: photoUrl, stepId: typeof stepId === "string" ? stepId : null });
+    const id = await createPost({ authorId, kind, body: text, photo: photoUrl, stepId: typeof stepId === "string" ? stepId : null });
     if (!id) return jsonError("You're not in a raft yet.", 400);
     return Response.json({ shared: true, id }, { status: 201 });
   } catch (error) {

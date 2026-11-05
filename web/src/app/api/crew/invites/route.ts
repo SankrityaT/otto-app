@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const { fromId, toId, routineId } = await readJson(request);
   const runId =
     typeof fromId === "string" && typeof toId === "string" && typeof routineId === "string"
-      ? inviteTogether(fromId, toId, routineId)
+      ? await inviteTogether(fromId, toId, routineId)
       : null;
   if (!runId) return jsonError("You can only do a task with someone in your raft.", 400);
   return Response.json({ runId }, { status: 201 });

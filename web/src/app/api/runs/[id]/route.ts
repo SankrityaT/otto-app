@@ -4,7 +4,7 @@ import { jsonError } from "@/lib/http";
 
 export async function GET(_request: NextRequest, ctx: RouteContext<"/api/runs/[id]">) {
   const { id } = await ctx.params;
-  const run = getRun(id);
+  const run = await getRun(id);
   if (!run) return jsonError("Run not found.", 404);
-  return Response.json({ run, summary: runSummary(id) });
+  return Response.json({ run, summary: await runSummary(id) });
 }

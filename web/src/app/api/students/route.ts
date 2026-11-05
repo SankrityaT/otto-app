@@ -1,5 +1,5 @@
 import { listStudents } from "@/lib/data/crew";
 
-export function GET() {
-  return Response.json({ students: listStudents() });
+export async function GET() {
+  return Response.json({ students: await listStudents() });
 }

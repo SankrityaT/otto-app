@@ -10,12 +10,12 @@ export async function POST(request: NextRequest) {
   }
   const { button } = await readJson(request);
   if (!isButton(button)) return jsonError("Unknown button.", 400);
-  recordPress(button);
+  await recordPress(button);
   return Response.json({ ok: true }, { status: 201 });
 }
 
 /** The screen asks for presses it hasn't seen yet. */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const after = Number(request.nextUrl.searchParams.get("after") ?? 0);
-  return Response.json({ presses: pressesAfter(Number.isFinite(after) ? after : 0) });
+  return Response.json({ presses: await pressesAfter(Number.isFinite(after) ? after : 0) });
 }

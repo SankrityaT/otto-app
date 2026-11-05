@@ -9,7 +9,7 @@ import { aiFailure, jsonError, readJson } from "@/lib/http";
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[id]/help">) {
   const { id } = await ctx.params;
   const body = await readJson(request);
-  const step = getRun(id)?.steps.find((s) => s.id === body.stepId);
+  const step = (await getRun(id))?.steps.find((s) => s.id === body.stepId);
   if (!step) return jsonError("Step not found.", 404);
 
   const level = Number(body.level);

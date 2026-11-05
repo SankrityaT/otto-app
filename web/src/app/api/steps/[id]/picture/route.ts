@@ -6,7 +6,7 @@ import { aiFailure, jsonError } from "@/lib/http";
 /** The step's picture as an SVG image. Drawn the first time, then reused. */
 export async function GET(_request: NextRequest, ctx: RouteContext<"/api/steps/[id]/picture">) {
   const { id } = await ctx.params;
-  const step = getStep(id);
+  const step = await getStep(id);
   if (!step) return jsonError("Step not found.", 404);
 
   let svg = step.pictureSvg;
@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest, ctx: RouteContext<"/api/steps/[
       return aiFailure(error);
     }
     if (!svg) return jsonError("No picture for this step.", 404);
-    savePicture(id, svg);
+    await savePicture(id, svg);
   }
 
   return new Response(svg, {

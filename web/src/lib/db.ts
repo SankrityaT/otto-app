@@ -1,187 +1,65 @@
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import postgres from "postgres";
 import { config } from "./config";
 
-// One SQLite file holds everything. No photos are ever stored here.
-const SCHEMA = `
-  CREATE TABLE IF NOT EXISTS crews (
-    id          TEXT PRIMARY KEY,
-    name        TEXT NOT NULL,
-    weekly_goal INTEGER NOT NULL,     -- steps done on our own, together, per week
-    cheers      TEXT NOT NULL         -- JSON array of preset cheer phrases staff chose
-  );
+// Ayin's data lives in Postgres (Supabase). The tables are in db/schema.sql.
+// Queries are written with ? for each value, in order; they're numbered for Postgres here.
 
-  CREATE TABLE IF NOT EXISTS students (
-    id            TEXT PRIMARY KEY,
-    name          TEXT NOT NULL,
-    crew_id       TEXT REFERENCES crews(id),
-    weekly_target INTEGER NOT NULL,   -- steps on my own that fill this student's ring
-    fur_hue       INTEGER NOT NULL DEFAULT 0, -- the student's own otter colour (a hue shift)
-    goal          TEXT,                       -- the student's own goal, in their words
-    goal_routine_id TEXT,                     -- the task the goal is about, if any
-    work_style    TEXT                        -- JSON list of "how I work best" phrases
-  );
+type Sql = ReturnType<typeof postgres>;
 
-  CREATE TABLE IF NOT EXISTS routines (
-    id         TEXT PRIMARY KEY,
-    title      TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  );
+/** Counts and sums come back from Postgres as big integers; ours are small, so read them as numbers. */
+const COUNT_TYPES = [20, 1700]; // bigint, numeric
 
-  CREATE TABLE IF NOT EXISTS steps (
-    id          TEXT PRIMARY KEY,
-    routine_id  TEXT NOT NULL REFERENCES routines(id),
-    position    INTEGER NOT NULL,
-    text        TEXT NOT NULL,        -- 8 words or fewer
-    detail      TEXT NOT NULL,        -- one plain sentence for "show me"
-    seconds     INTEGER,              -- only for steps that take a set time
-    picture_svg TEXT,                 -- drawn once, then reused
-    scene_json  TEXT                  -- the 3D "show me" model, built once, then reused
-  );
-
-  CREATE TABLE IF NOT EXISTS runs (
-    id          TEXT PRIMARY KEY,
-    routine_id  TEXT NOT NULL REFERENCES routines(id),
-    student_id  TEXT NOT NULL REFERENCES students(id),
-    started_at  TEXT NOT NULL,
-    finished_at TEXT
-  );
-
-  -- help_level: 0 = on my own, 1 = nudge, 2 = hint, 3 = show me
-  CREATE TABLE IF NOT EXISTS step_logs (
-    id         TEXT PRIMARY KEY,
-    run_id     TEXT NOT NULL REFERENCES runs(id),
-    step_id    TEXT NOT NULL REFERENCES steps(id),
-    student_id TEXT NOT NULL REFERENCES students(id),
-    help_level INTEGER NOT NULL,
-    done_at    TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS cheers (
-    id         TEXT PRIMARY KEY,
-    from_id    TEXT NOT NULL REFERENCES students(id),
-    to_id      TEXT NOT NULL REFERENCES students(id),
-    run_id     TEXT NOT NULL REFERENCES runs(id),
-    phrase     TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS asks (
-    id         TEXT PRIMARY KEY,
-    from_id    TEXT NOT NULL REFERENCES students(id),
-    to_id      TEXT NOT NULL REFERENCES students(id),
-    step_id    TEXT NOT NULL REFERENCES steps(id),
-    created_at TEXT NOT NULL
-  );
-
-  -- "Do it together": one student invites a raftmate to do the same task at the same time.
-  -- Each works in their own step coach; the two runs are linked so they see each other's progress.
-  CREATE TABLE IF NOT EXISTS invites (
-    id          TEXT PRIMARY KEY,
-    from_id     TEXT NOT NULL REFERENCES students(id),
-    to_id       TEXT NOT NULL REFERENCES students(id),
-    about       TEXT NOT NULL,        -- the task's title
-    status      TEXT NOT NULL,        -- waiting, yes or not-today
-    created_at  TEXT NOT NULL,
-    routine_id  TEXT REFERENCES routines(id),
-    from_run_id TEXT REFERENCES runs(id),
-    to_run_id   TEXT REFERENCES runs(id)  -- set when the raftmate joins
-  );
-
-  -- The raft's social side. Posts are wins or help asks; everything stays inside one raft.
-  CREATE TABLE IF NOT EXISTS posts (
-    id         TEXT PRIMARY KEY,
-    crew_id    TEXT NOT NULL REFERENCES crews(id),
-    author_id  TEXT NOT NULL REFERENCES students(id),
-    kind       TEXT NOT NULL,         -- win or ask
-    body       TEXT NOT NULL,
-    photo      TEXT,                  -- a photo of the work the student chose to share (checked: no faces)
-    step_id    TEXT REFERENCES steps(id),
-    task_title TEXT,
-    status     TEXT NOT NULL,         -- shown or reported
-    created_at TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS replies (
-    id         TEXT PRIMARY KEY,
-    post_id    TEXT NOT NULL REFERENCES posts(id),
-    author_id  TEXT NOT NULL REFERENCES students(id),
-    body       TEXT NOT NULL,
-    helped     INTEGER NOT NULL,      -- the asker said "This helped"
-    photo      TEXT,                  -- a photo of the work, checked for faces before it's saved
-    scene_step_id TEXT,               -- a step whose 3D "show me" model is shared in the reply
-    status     TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS reactions (
-    post_id    TEXT NOT NULL REFERENCES posts(id),
-    from_id    TEXT NOT NULL REFERENCES students(id),
-    kind       TEXT NOT NULL,         -- clap, proud, me-too or wow
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (post_id, from_id, kind)
-  );
-
-  -- A student who blocks someone stops seeing their posts and replies, and they can't reply back.
-  CREATE TABLE IF NOT EXISTS blocks (
-    blocker_id TEXT NOT NULL REFERENCES students(id),
-    blocked_id TEXT NOT NULL REFERENCES students(id),
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (blocker_id, blocked_id)
-  );
-
-  CREATE TABLE IF NOT EXISTS reports (
-    id         TEXT PRIMARY KEY,
-    post_id    TEXT NOT NULL REFERENCES posts(id),
-    from_id    TEXT NOT NULL REFERENCES students(id),
-    created_at TEXT NOT NULL
-  );
-
-  -- Small settings saved from the app, like the otter's address
-  CREATE TABLE IF NOT EXISTS settings (
-    key   TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-  );
-
-  -- Button presses from the otter, picked up by the screen at the same station
-  CREATE TABLE IF NOT EXISTS button_presses (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    button     TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  );
-`;
-
-function open(): DatabaseSync {
-  mkdirSync(dirname(config.databasePath), { recursive: true });
-  const db = new DatabaseSync(config.databasePath);
-  db.exec("PRAGMA foreign_keys = ON;");
-  db.exec(SCHEMA);
-  addMissingColumns(db);
-  return db;
+function connect(): Sql {
+  if (!config.databaseUrl) throw new Error("DATABASE_URL isn't set. See .env.example.");
+  return postgres(config.databaseUrl, {
+    // Supabase's pooler (transaction mode) doesn't keep prepared statements between queries,
+    // and stalls when several queries are sent down one connection at once.
+    prepare: false,
+    max_pipeline: 1,
+    types: { count: { to: 20, from: COUNT_TYPES, serialize: String, parse: Number } },
+  });
 }
 
-/** Columns added after the first version, for databases created before them. */
-function addMissingColumns(db: DatabaseSync): void {
-  const has = (table: string, column: string) =>
-    (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).some((c) => c.name === column);
-  if (!has("steps", "scene_json")) db.exec("ALTER TABLE steps ADD COLUMN scene_json TEXT");
-  if (!has("steps", "seconds")) db.exec("ALTER TABLE steps ADD COLUMN seconds INTEGER");
-  if (!has("students", "fur_hue")) db.exec("ALTER TABLE students ADD COLUMN fur_hue INTEGER NOT NULL DEFAULT 0");
-  if (!has("students", "goal")) db.exec("ALTER TABLE students ADD COLUMN goal TEXT");
-  if (!has("replies", "photo")) db.exec("ALTER TABLE replies ADD COLUMN photo TEXT");
-  if (!has("replies", "scene_step_id")) db.exec("ALTER TABLE replies ADD COLUMN scene_step_id TEXT");
-  if (!has("students", "goal_routine_id")) db.exec("ALTER TABLE students ADD COLUMN goal_routine_id TEXT");
-  if (!has("students", "work_style")) db.exec("ALTER TABLE students ADD COLUMN work_style TEXT");
-  if (!has("invites", "routine_id")) db.exec("ALTER TABLE invites ADD COLUMN routine_id TEXT");
-  if (!has("invites", "from_run_id")) db.exec("ALTER TABLE invites ADD COLUMN from_run_id TEXT");
-  if (!has("invites", "to_run_id")) db.exec("ALTER TABLE invites ADD COLUMN to_run_id TEXT");
+// One connection pool, opened on first use and reused across hot reloads in development.
+const globalForDb = globalThis as unknown as { ayinSql?: Sql };
+function sql(): Sql {
+  globalForDb.ayinSql ??= connect();
+  return globalForDb.ayinSql;
 }
 
-// Reuse one connection across hot reloads in development.
-const globalForDb = globalThis as unknown as { ayinDb?: DatabaseSync };
-export const db = globalForDb.ayinDb ?? open();
-globalForDb.ayinDb = db;
+/** Turn `?` placeholders into Postgres's `$1, $2, …`. */
+function numbered(query: string): string {
+  let n = 0;
+  return query.replace(/\?/g, () => `$${++n}`);
+}
+
+type Value = string | number | boolean | null;
+
+/** All rows a query returns. */
+export async function all<T>(query: string, ...values: Value[]): Promise<T[]> {
+  return (await sql().unsafe(numbered(query), values)) as unknown as T[];
+}
+
+/** The first row a query returns, or null. */
+export async function one<T>(query: string, ...values: Value[]): Promise<T | null> {
+  return (await all<T>(query, ...values))[0] ?? null;
+}
+
+/** Run an insert, update or delete. Returns how many rows it changed. */
+export async function run(query: string, ...values: Value[]): Promise<number> {
+  return (await sql().unsafe(numbered(query), values)).count;
+}
+
+/** Run SQL with no values, such as the schema file (several statements at once). */
+export async function exec(text: string): Promise<void> {
+  await sql().unsafe(text);
+}
+
+/** Close the connections, so a script can exit. */
+export async function close(): Promise<void> {
+  await globalForDb.ayinSql?.end();
+  globalForDb.ayinSql = undefined;
+}
 
 export function newId(): string {
   return crypto.randomUUID();

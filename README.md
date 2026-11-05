@@ -61,13 +61,13 @@ flowchart LR
     web -->|photo, only when asked| api[Next.js API routes]
     otter[Otter<br/>XIAO or Raspberry Pi] -->|photo when asked, button presses| api
     api -->|steps, checks, hints, pictures, 3D| claude[Claude API]
-    api --> db[(SQLite)]
+    api --> db[(Postgres<br/>on Supabase)]
 ```
 
 - **One server, many doors.** The phone and the otter call the same API and get the same answers. The camera is just a different way in.
 - **Claude** breaks tasks into steps, checks a step from a photo, writes hints, draws an SVG picture per step and builds 3D models from simple shapes. Pictures and models are made once per step and reused.
 - **One log drives everything.** Every finished step is logged as "on my own" or with the help it took. That log fades the help, fills the rings and matches the buddies.
-- **SQLite** stores tasks, steps, the log and crews. No photos are ever stored.
+- **Postgres on Supabase** stores tasks, steps, the log and rafts (tables in `web/db/schema.sql`). The app's server is the only thing that can read it: row-level security is on, with no public access. Camera photos are never stored; the only photos saved are of work a student chooses to share with their raft, checked for faces first.
 
 ## Repository layout
 
@@ -89,15 +89,18 @@ ayin-app/
 
 ## Run it locally
 
-You need Node.js 22.13 or newer and an [Anthropic API key](https://console.anthropic.com/).
+You need Node.js 22 or newer, an [Anthropic API key](https://console.anthropic.com/) and a Postgres database (a free [Supabase](https://supabase.com/) project works).
 
 ```bash
 cd web
-cp .env.example .env.local     # then paste your API key into .env.local
+cp .env.example .env.local     # then add your API key and DATABASE_URL
 npm install
+npm run db:setup               # creates the tables
 npm run seed                   # a demo raft so the Raft screen has data
 npm run dev                    # open http://localhost:3000
 ```
+
+On Supabase, `DATABASE_URL` is the **transaction pooler** connection string (port 6543) from the project's Connect settings.
 
 **The landing page** for students and parents is at http://localhost:3000/landing, part of the same app.
 
