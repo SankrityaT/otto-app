@@ -12,6 +12,7 @@ Built for the 2026 North American AI Challenge for Neurodiverse Learning, with r
 - **Complex things made simple.** Every task becomes one step at a time, and every step a 3D model built live for that task, talked through with a natural voice. The student can ask out loud at any point.
 - **Real peers, not a chatbot.** The Raft routes help back to classmates who've mastered the step, lets students work side by side, and celebrates wins, with no video, no strangers and no rankings.
 - **Built to be needed less.** Help steps down through First Place AZ's five stages, from watching every step to doing it alone.
+- **A layer for hardware.** Any camera or button can plug in through two small endpoints (see [`device/`](device/README.md)): our 3D-printed otter, a document camera, a big accessibility switch. The app gives the same help whichever one the student uses.
 - **Next: the Ayin lamp.** A desk lamp with a camera looking down at the work that talks the student through it and points at the real part with light. The 3D-printed desk otter in this repo is a first step toward it.
 
 ## The problem

@@ -41,7 +41,7 @@ Autistic students aged 16–22 in transition programs, learning real job tasks a
 | **Complex things made simple** | Text answers, or videos someone recorded in advance | A 3D model of *your* step, built live from the task, that you turn in your hand, plus one step at a time out loud |
 | **Peers** | An AI that becomes the friend | Help is routed back to **real raftmates who've mastered that step**. Peer-based instruction is an evidence-based practice (AFIRM/NCAEP), and autistic-to-autistic information transfer works as well as between non-autistic people (Crompton et al. 2020) |
 | **Independence** | More use = more dependence | Help **fades by design**. Success is measured the way the school measures it: fewer prompts |
-| **Hardware** | Headsets, glasses, new devices | Any device's camera. AR/VR *"can cause sensory overload"* for autistic students (Paykamian, 2021), and AZACS staff told us anything worn is a sensory problem |
+| **Hardware** | Headsets, glasses, new devices | Any device's camera, and a layer other hardware plugs into: any camera or big button that speaks two small endpoints (the otter, a document camera, an accessibility switch) gets the same coaching. AR/VR *"can cause sensory overload"* for autistic students (Paykamian, 2021), and AZACS staff told us anything worn is a sensory problem |
 
 What to say out loud: **"Other AI tools answer the student. Ayin makes the student need it less, and connects them to each other."**
 

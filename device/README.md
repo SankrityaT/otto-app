@@ -4,6 +4,17 @@ The otter is a desk buddy that sits at a work station. It is Ayin's camera and, 
 
 The server doesn't care which camera a photo comes from. In the app, open **Me → Connect your otter** and tap **Find my otter**: Ayin searches the Wi-Fi for it (each otter answers `/hello` and the name `ayin-otter.local`), shows a live photo through it, and tests its buttons. Staff can still type an address, or set `AYIN_CAMERA_URL` in `web/.env.local`. The server then takes its photo from `<AYIN_CAMERA_URL>/capture` and gives exactly the same answer it would give for a phone photo.
 
+## Plug in your own hardware
+
+Ayin is a layer other hardware can plug into. The otter is one example, not the only one: a document camera, a webcam on a stand, a big accessibility switch or the future Ayin lamp can all work with the same app. A device needs to do one or both of these:
+
+| To be Ayin's… | The device | Ayin then |
+| --- | --- | --- |
+| **Eyes** | Serves `GET /capture` (one JPEG, taken right then) and `GET /hello` (`{"ayin":"otter","buttons":false}`) on the local Wi-Fi | Finds it by itself, asks it for a photo only when a step is checked or the student asks, and answers exactly as for a phone photo |
+| **Buttons** | Sends `POST <server>/api/buttons` with `{"button":"done"}`, `"help"` or `"show-me"` (plus the `x-device-token` header if the server sets `AYIN_DEVICE_TOKEN`) | Acts within a second, exactly as if the student had tapped that button on screen |
+
+Both devices below are under 120 lines each and are good starting points.
+
 | Folder | Hardware | Status |
 | --- | --- | --- |
 | [`xiao/`](xiao/) | Seeed XIAO ESP32-S3 Sense + OV5640 camera | Working prototype (camera only) |
