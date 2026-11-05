@@ -1,0 +1,16 @@
+# Starts the otter when the Pi boots. Install:
+#   sudo cp ayin-otter.service /etc/systemd/system/ && sudo systemctl enable --now ayin-otter
+[Unit]
+Description=Ayin otter (camera and buttons)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/ayin-app/device/pi
+EnvironmentFile=/home/pi/ayin-app/device/pi/.env
+ExecStart=/usr/bin/python3 ayin_otter.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
