@@ -1,4 +1,4 @@
-import { asset, NAV, site } from "@/lib/site";
+import { asset, NAV, site } from "@/landing/lib/site";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Nav() {

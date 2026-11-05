@@ -74,12 +74,14 @@ flowchart LR
 ```
 ayin-app/
 ├── web/                 Next.js app: screens and API
-│   ├── src/app/         pages (Today, a task, Crew, Me) and API routes
+│   ├── src/app/(app)/   the app's pages (Today, a task, Raft, Me)
+│   ├── src/app/(landing)/  Havi's landing page for students and parents, at /landing
+│   ├── src/app/api/     API routes
 │   ├── src/components/  screens, the 3D viewer, Havi's pond and otter
+│   ├── src/landing/     the landing page's sections and its own copy of Havi's otter
 │   ├── src/lib/         data, Claude prompts (lib/ai), fading, buddies, weekly rings
 │   ├── scripts/seed.ts  demo crew
 │   └── tests/           unit tests
-├── landing/             Havi's landing page for students and parents, served at /landing
 ├── device/              the otter: XIAO camera sketch, Raspberry Pi camera and buttons
 ├── hardware/            3D-printable otter enclosure, built from code
 └── docs/                our plan, research notes and AI prompts
@@ -97,13 +99,7 @@ npm run seed                   # a demo crew so the crew screen has data
 npm run dev                    # open http://localhost:3000
 ```
 
-**The landing page** is its own small app in `landing/`. The app serves it at `/landing`, so run it alongside:
-
-```bash
-cd landing && npm install && npm run dev   # then open http://localhost:3000/landing
-```
-
-In production, set `LANDING_URL` in `web/.env.local` to wherever the landing app is deployed.
+**The landing page** for students and parents is at http://localhost:3000/landing, part of the same app.
 
 **On a phone:** start with `npm run dev:phone` instead (it serves Ayin over https on your Wi-Fi, which phones need before they allow the camera). Then open **Me** on the computer and scan the **Use Ayin on your phone** QR code with the phone's camera. Ayin opens on the phone, already set to that student. The first time, the phone may ask you to trust the development certificate.
 

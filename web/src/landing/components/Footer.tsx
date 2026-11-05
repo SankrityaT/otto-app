@@ -1,4 +1,4 @@
-import { NAV, site } from "@/lib/site";
+import { NAV, site } from "@/landing/lib/site";
 
 export function Footer() {
   return (

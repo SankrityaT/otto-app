@@ -5,7 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Mesh, MeshStandardMaterial } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { asset } from "@/lib/site";
+import { asset } from "@/landing/lib/site";
 
 // The 3D-printed otter, painted the way it will look on the counter. Built by
 // hardware/otter/otter.py and slimmed down for the web by hardware/otter/web_model.py.

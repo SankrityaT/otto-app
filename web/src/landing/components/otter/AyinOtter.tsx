@@ -21,7 +21,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type CSSProperties } from 'react';
 import { createOtterMotion, createOtterRenderer, SRC, type OtterMotion, type OtterPose, type OtterRenderer } from './ayin-otter-engine';
-import { asset } from '@/lib/site';
+import { asset } from '@/landing/lib/site';
 
 export { createOtterMotion } from './ayin-otter-engine';
 export type { OtterPose } from './ayin-otter-engine';

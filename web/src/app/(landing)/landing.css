@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../..");
 
 /*
  * Havi's pond palette, from web/src/app/pond.css, so the landing page and the app feel like one place.

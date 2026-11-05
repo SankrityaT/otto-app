@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ringColor } from "@/lib/fur";
+import { ringColor } from "@/landing/lib/fur";
 import AyinOtter, { type AyinOtterHandle } from "./otter/AyinOtter";
 import { OtterSays } from "./OtterSays";
 import { RaftLeaves } from "./RaftLeaves";

@@ -1,5 +1,5 @@
 import { Play } from "lucide-react";
-import { site } from "@/lib/site";
+import { site } from "@/landing/lib/site";
 import { OtterSays } from "./OtterSays";
 import { Reveal } from "./Reveal";
 

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
 import { Atkinson_Hyperlegible_Next, Gochi_Hand, Instrument_Serif } from "next/font/google";
-import "./globals.css";
+import "./landing.css";
 
+// The landing page has its own root layout and stylesheet, so its styles never mix with the app's.
 // The same faces as the app: Atkinson Hyperlegible is built to be easy to read,
 // Instrument Serif is for the big lines, and Gochi Hand is the otter's handwriting.
 const sans = Atkinson_Hyperlegible_Next({ variable: "--font-atkinson", subsets: ["latin"] });
@@ -29,7 +31,7 @@ export const viewport: Viewport = {
 // otherwise follow the device. Light is Ayin's home look and the fallback without JavaScript.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("ayin-theme");if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}`;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function LandingLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} ${hand.variable}`} suppressHydrationWarning>
       <head>

@@ -1,8 +1,8 @@
 // Everything that changes between deployments comes from the environment (see .env.example).
 
 export const site = {
-  /** The running Ayin app, for "Try Ayin". */
-  appUrl: process.env.NEXT_PUBLIC_APP_URL || "/",
+  /** The Ayin app, for "Try Ayin": the same site, one level up from /landing. */
+  appUrl: "/",
   /** The demo video. Until it's set, the demo section shows a "coming soon" card. */
   demoVideoUrl: process.env.NEXT_PUBLIC_DEMO_VIDEO_URL || null,
   /** Where "Get in touch" emails go. Hidden when empty. */
@@ -10,8 +10,8 @@ export const site = {
   githubUrl: "https://github.com/SankrityaT/ayin-app",
 };
 
-/** A file from /public, under the base path the landing page is served from. */
-export const asset = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
+/** One of the landing page's own files, kept in public/landing. */
+export const asset = (path: string) => `/landing${path}`;
 
 /** The section links in the nav, in page order. */
 export const NAV = [

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { site } from "@/lib/site";
+import { site } from "@/landing/lib/site";
 import { Leaf } from "./Leaf";
 import { OtterSays } from "./OtterSays";
 import { Pond } from "./Pond";

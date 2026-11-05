@@ -24,7 +24,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { asset } from '@/lib/site';
+import { asset } from '@/landing/lib/site';
 
 export type UprightSources = { body: string; tail: string; eyes: string; lash: string };
 
