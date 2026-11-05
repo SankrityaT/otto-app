@@ -24,6 +24,7 @@ import type { Scene } from "@/lib/ai/scene";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
 import { OtterView } from "./OtterView";
+import { TogetherBar } from "./TogetherBar";
 import {
   Check,
   Eye,
@@ -443,6 +444,8 @@ export function StepCoach({
           <span className="h-11 w-11" />
         )}
       </header>
+
+      <TogetherBar runId={run.id} />
 
       {current.pictureShown && stepScene && !flat ? (
         <div className="flex h-[42dvh] flex-col gap-1">

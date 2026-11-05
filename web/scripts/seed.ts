@@ -83,7 +83,7 @@ const samToday = pastRun("Sam", 0, [0, 0, 0, 0, 0, 0]);
 pastRun("Ava", 0, [0, 0, 1, 0, 0, 0]);
 pastRun("Leo", earlierThisWeek, [0, 2, 3, 1, 0, 0]);
 
-// A little crew life: a cheer on Sam's win, and Leo asking Jordan to practise together.
+// A little crew life: a cheer on Sam's win, and Leo asking Jordan to make a latte together.
 const at = new Date().toISOString();
 db.prepare("INSERT INTO cheers (id, from_id, to_id, run_id, phrase, created_at) VALUES (?, ?, ?, ?, ?, ?)").run(
   newId(),
@@ -93,13 +93,18 @@ db.prepare("INSERT INTO cheers (id, from_id, to_id, run_id, phrase, created_at) 
   "Proud of you",
   at,
 );
-db.prepare("INSERT INTO invites (id, from_id, to_id, about, status, created_at) VALUES (?, ?, ?, ?, 'waiting', ?)").run(
-  newId(),
-  students.Leo,
-  students.Jordan,
-  "Put on a lid",
-  at,
-);
+// Leo started an iced latte a few minutes ago and asked Jordan to make one at the same time.
+const leoNow = newId();
+db.prepare("INSERT INTO runs (id, routine_id, student_id, started_at) VALUES (?, ?, ?, ?)").run(leoNow, latte.id, students.Leo, at);
+latte.steps.slice(0, 2).forEach((step) => {
+  db.prepare(
+    "INSERT INTO step_logs (id, run_id, step_id, student_id, help_level, done_at) VALUES (?, ?, ?, ?, ?, ?)",
+  ).run(newId(), leoNow, step.id, students.Leo, 0, at);
+});
+db.prepare(
+  `INSERT INTO invites (id, from_id, to_id, about, status, created_at, routine_id, from_run_id)
+   VALUES (?, ?, ?, ?, 'waiting', ?, ?, ?)`,
+).run(newId(), students.Leo, students.Jordan, latte.title, at, latte.id, leoNow);
 
 // What each student chose for "how I work best", and Jordan's own goal.
 const styles: Record<string, string[]> = {

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AyinChat, type ChatTurn, type Voice } from "@/components/AyinChat";
 import { StudentPicker } from "@/components/StudentPicker";
-import Fold from "@/components/pond/Fold";
+import { TaskLeaves } from "@/components/TaskLeaves";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
 import { LEAF_TONES, type LeafItem } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
@@ -49,7 +49,8 @@ export default function Today() {
   const [choices, setChoices] = useState<string[]>([]);
   const [offer, setOffer] = useState<{ title: string; routineId: string | null } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [binSignal, setBinSignal] = useState(0);
+  // Tapping the basket in the pond shows what's been done this week.
+  const [showDone, setShowDone] = useState(false);
 
   // Opened from the "Use Ayin on your phone" QR code: remember who this is, then tidy the address.
   useEffect(() => {
@@ -150,7 +151,7 @@ export default function Today() {
             open={chatting ? [] : leaves}
             done={finished}
             onLeafSelect={start}
-            onBin={() => setBinSignal((n) => n + 1)}
+            onBin={() => setShowDone((on) => !on)}
             upright={status !== "idle" || chatting}
             mood={status !== "idle" ? status : voice ? "talking" : "idle"}
             beat={voice?.char}
@@ -192,61 +193,32 @@ export default function Today() {
             />
           </label>
           {message && <p className="mt-2 text-center text-ink-2">{message}</p>}
+          {showDone && (
+            <section className="mt-2 flex flex-col items-center gap-1 text-center" aria-label="Done this week">
+              <p className="font-semibold text-ink">Done this week</p>
+              {done.length === 0 ? (
+                <p className="text-ink-3">Nothing yet. Every task you finish lands in the basket.</p>
+              ) : (
+                done.map((d) => (
+                  <p key={d.runId} className="text-ink-2">
+                    {d.title}: {d.onOwn} of {d.total} steps on your own
+                  </p>
+                ))
+              )}
+            </section>
+          )}
+          {!chatting && (
+            <div className="mt-5 w-full">
+              <TaskLeaves
+                started={started.map((s) => ({ ...s, id: s.runId, tone: toneFor(routines.find((r) => r.title === s.title)?.id ?? s.runId) }))}
+                tasks={routines.map((r) => ({ ...r, tone: toneFor(r.id) }))}
+                onCarryOn={(runId) => router.push(`/run/${runId}`)}
+                onStart={start}
+              />
+            </div>
+          )}
         </div>
 
-        <aside className="today__left" aria-label="Now">
-          <Fold id="now" title="Now" summary={started.length === 0 ? "Nothing started" : `${started.length} started`}>
-            {started.length === 0 ? (
-              <p className="text-ink-2">Nothing in progress. Tap a leaf in the pond to start a task.</p>
-            ) : (
-              <ul className="flex flex-col gap-3">
-                {started.map((s) => (
-                  <li key={s.runId} className="card flex flex-col gap-2">
-                    <p className="card__title">{s.title}</p>
-                    <p className="card__line">
-                      {s.done} of {s.total} steps done
-                    </p>
-                    <button className="btn btn--primary self-start" onClick={() => router.push(`/run/${s.runId}`)}>
-                      Carry on
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Fold>
-        </aside>
-
-        <aside className="today__right" aria-label="Your tasks">
-          <Fold id="practise" title="Practise again" summary={`${routines.length} ${routines.length === 1 ? "task" : "tasks"}`}>
-            <ul className="flex flex-col">
-              {routines.map((r) => (
-                <li key={r.id} className="border-b border-line last:border-0">
-                  <button onClick={() => start(r.id)} className="flex w-full items-center justify-between py-3 text-left">
-                    <span className="font-semibold">{r.title}</span>
-                    <span className="text-ink-3">{r.stepCount} steps</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </Fold>
-          <Fold
-            id="done"
-            toggleSignal={binSignal}
-            title="Done this week"
-            summary={done.length === 0 ? "Nothing yet" : `${done.length} ${done.length === 1 ? "task" : "tasks"}`}
-          >
-            <ul className="flex flex-col">
-              {done.map((d) => (
-                <li key={d.runId} className="flex justify-between border-b border-line py-3 last:border-0">
-                  <span className="font-semibold">{d.title}</span>
-                  <span className="text-ink-3">
-                    {d.onOwn} of {d.total} on your own
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Fold>
-        </aside>
       </div>
     </AppShell>
   );

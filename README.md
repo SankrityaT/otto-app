@@ -37,15 +37,17 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
 
+- **One shared pond:** every raftmate's otter floats in it, with a bubble showing who's doing a task right now ("Step 3/6") or who asked for help. Below it, the raft's weekly total of steps done on their own: a group total, never a ranking, and no streaks to break.
+- **Do it together:** like body doubling on Focusmate, but made for our students. Tap a raftmate's otter, pick a task, and you both do it at the same time, each in your own step coach. Your partner's otter sits above your step, moving as they finish real steps, and one tap sends a preset cheer. No video and no free chat. "Not today" is always one tap.
+
 - **Wins:** share what you made, with a photo of the work (never faces). Raftmates react with hand-drawn otter stickers that show who reacted, never a count.
 - **Help board:** ask about any step. Raftmates who've done that step on their own see "You know this one" and can answer with words, a photo of their own work, or **the same 3D model of the step** that Ayin builds for "show me", so both can turn it. The thread updates live; the asker marks "This helped". Stuck mid-task? "Ask my raft" posts the question with the step attached.
 - **Safe for kids:** a fast clean-language check blocks swear words (even disguised ones) before anything else. Then Ayin checks every post and reply: kind, no personal info, no faces in photos. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff, and one tap blocks someone so you stop seeing each other. No direct messages, no live video between students, no strangers.
 - **Profiles:** each student's own goal, "how I work best", and "I can help with", which fills itself from tasks they've mastered.
 - **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
-- **One shared pond:** every raftmate's otter floats in it, and each step anyone does on their own raises the water. A group total, never a ranking, and no streaks to break.
-- **Buddies:** Ayin pairs raftmates so each can show the other a step they've mastered, and they can ask each other to practise together. "Not today" is always one tap.
+- **Buddies:** Ayin pairs raftmates so each can show the other a step they've mastered, and suggests your buddy when you pick someone to work with.
 
-**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket.
+**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, where their tasks drift as leaves and finished tasks collect in a basket. Under the pond, the same tasks are leaves you can read and tap, and a task already started shows a ring for how far along it is.
 
 **The otter on the counter.** A 3D-printed otter holds the camera in its pebble, with a privacy shutter. The Raspberry Pi version adds Done, Help and Show me buttons for students who don't speak. "Connect your otter" in the Me tab finds it on the Wi-Fi, shows a live photo through it and tests its buttons, with no files to edit.
 

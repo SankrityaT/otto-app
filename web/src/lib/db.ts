@@ -75,14 +75,18 @@ const SCHEMA = `
     created_at TEXT NOT NULL
   );
 
-  -- "Practise together" invites between buddies, in preset words
+  -- "Do it together": one student invites a raftmate to do the same task at the same time.
+  -- Each works in their own step coach; the two runs are linked so they see each other's progress.
   CREATE TABLE IF NOT EXISTS invites (
     id          TEXT PRIMARY KEY,
     from_id     TEXT NOT NULL REFERENCES students(id),
     to_id       TEXT NOT NULL REFERENCES students(id),
-    about       TEXT NOT NULL,        -- the step they'll practise
+    about       TEXT NOT NULL,        -- the task's title
     status      TEXT NOT NULL,        -- waiting, yes or not-today
-    created_at  TEXT NOT NULL
+    created_at  TEXT NOT NULL,
+    routine_id  TEXT REFERENCES routines(id),
+    from_run_id TEXT REFERENCES runs(id),
+    to_run_id   TEXT REFERENCES runs(id)  -- set when the raftmate joins
   );
 
   -- The raft's social side. Posts are wins or help asks; everything stays inside one raft.
@@ -169,6 +173,9 @@ function addMissingColumns(db: DatabaseSync): void {
   if (!has("replies", "scene_step_id")) db.exec("ALTER TABLE replies ADD COLUMN scene_step_id TEXT");
   if (!has("students", "goal_routine_id")) db.exec("ALTER TABLE students ADD COLUMN goal_routine_id TEXT");
   if (!has("students", "work_style")) db.exec("ALTER TABLE students ADD COLUMN work_style TEXT");
+  if (!has("invites", "routine_id")) db.exec("ALTER TABLE invites ADD COLUMN routine_id TEXT");
+  if (!has("invites", "from_run_id")) db.exec("ALTER TABLE invites ADD COLUMN from_run_id TEXT");
+  if (!has("invites", "to_run_id")) db.exec("ALTER TABLE invites ADD COLUMN to_run_id TEXT");
 }
 
 // Reuse one connection across hot reloads in development.

@@ -1,9 +1,13 @@
-import { inviteBuddy } from "@/lib/data/crew";
+import { inviteTogether } from "@/lib/data/together";
 import { jsonError, readJson } from "@/lib/http";
 
-/** Ask your practice buddy to practise together. */
+/** Invite a raftmate to do a task together. The inviter's run starts now. */
 export async function POST(request: Request) {
-  const { fromId } = await readJson(request);
-  if (typeof fromId !== "string" || !inviteBuddy(fromId)) return jsonError("No buddy to invite yet.", 400);
-  return Response.json({ ok: true }, { status: 201 });
+  const { fromId, toId, routineId } = await readJson(request);
+  const runId =
+    typeof fromId === "string" && typeof toId === "string" && typeof routineId === "string"
+      ? inviteTogether(fromId, toId, routineId)
+      : null;
+  if (!runId) return jsonError("You can only do a task with someone in your raft.", 400);
+  return Response.json({ runId }, { status: 201 });
 }

@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Only scan our own source for class names, not logs or tool output elsewhere in the folder. */
+@import "tailwindcss" source("..");
 /* Havi's pond styles sit in the components layer, so Tailwind utilities can still override them. */
 @import "./pond.css" layer(components);
 

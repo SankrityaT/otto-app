@@ -1,6 +1,7 @@
 // Typed calls from the screens to our API. Every call throws a readable Error on failure.
 
 import type { Scene } from "../ai/scene";
+import type { Together } from "../data/together";
 import type { CrewView, Student } from "../data/crew";
 import type { Post, PostKind, Profile, Reaction, Reply } from "../data/raft";
 import type { Routine } from "../data/routines";
@@ -57,9 +58,12 @@ export const api = {
   scene: (stepId: string, photo: string | null) => call<{ scene: Scene }>(`/api/steps/${stepId}/scene`, post({ photo })),
   crew: (studentId: string) => call<{ crew: CrewView }>(`/api/crew?studentId=${encodeURIComponent(studentId)}`),
   cheer: (fromId: string, runId: string, phrase: string) => call("/api/crew/cheers", post({ fromId, runId, phrase })),
-  inviteBuddy: (fromId: string) => call("/api/crew/invites", post({ fromId })),
+  inviteTogether: (fromId: string, toId: string, routineId: string) =>
+    call<{ runId: string }>("/api/crew/invites", post({ fromId, toId, routineId })),
   answerInvite: (inviteId: string, studentId: string, answer: "yes" | "not-today") =>
-    call(`/api/crew/invites/${inviteId}`, post({ studentId, answer })),
+    call<{ runId: string | null }>(`/api/crew/invites/${inviteId}`, post({ studentId, answer })),
+  together: (runId: string) => call<{ together: Together | null }>(`/api/runs/${runId}/together`),
+  cheerPartner: (runId: string, phrase: string) => call(`/api/runs/${runId}/together`, post({ phrase })),
   askCrewmate: (fromId: string, stepId: string) => call<{ helperName: string | null }>("/api/crew/asks", post({ fromId, stepId })),
   talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[]) =>
     call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history })),

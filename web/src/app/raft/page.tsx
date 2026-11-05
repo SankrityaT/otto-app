@@ -1,30 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/Button";
-import { CrewPond } from "@/components/CrewPond";
 import { RaftIntro } from "@/components/RaftIntro";
 import { Composer } from "@/components/raft/Composer";
-import { OtterAvatar } from "@/components/raft/OtterAvatar";
 import { PostCard } from "@/components/raft/PostCard";
+import { RaftPond } from "@/components/raft/RaftPond";
 import { RaftIcon } from "@/components/raft/Stickers";
+import { TogetherSheet } from "@/components/raft/TogetherSheet";
 import type { CrewView } from "@/lib/data/crew";
 import type { Post, PostKind } from "@/lib/data/raft";
 import { api } from "@/lib/client/api";
 import { useStudentId } from "@/lib/client/settings";
 
-type Tab = "wins" | "help" | "people";
+type Tab = "wins" | "help";
+type Member = CrewView["members"][number];
 const INTRO_KEY = "ayin.raftIntroSeen";
 
 export default function RaftPage() {
+  const router = useRouter();
   const [studentId] = useStudentId();
   const [tab, setTab] = useState<Tab>("wins");
   const [raft, setRaft] = useState<CrewView | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [composing, setComposing] = useState<PostKind | null>(null);
   const [introOpen, setIntroOpen] = useState(false);
+  // "Do a task together": open with nobody picked, or with the otter tapped in the pond.
+  const [together, setTogether] = useState<{ with: Member | null } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -62,8 +67,14 @@ export default function RaftPage() {
     );
   }
 
-  const shown = posts.filter((p) => (tab === "wins" ? true : tab === "help" ? p.kind === "ask" : false));
+  const shown = posts.filter((p) => (tab === "wins" ? p.kind === "win" : p.kind === "ask"));
   const invites = raft.invites.filter((i) => i.fromId !== studentId && i.status === "waiting");
+  const waitingOn = raft.invites.find((i) => i.fromId === studentId && i.status === "waiting");
+
+  async function join(inviteId: string) {
+    const { runId } = await api.answerInvite(inviteId, studentId!, "yes");
+    if (runId) router.push(`/run/${runId}`);
+  }
 
   return (
     <AppShell>
@@ -87,117 +98,101 @@ export default function RaftPage() {
         />
       )}
 
+      {together && (
+        <TogetherSheet
+          meId={studentId}
+          members={raft.members}
+          buddyId={raft.buddy?.id ?? null}
+          start={together.with}
+          onClose={() => setTogether(null)}
+          onStarted={(runId) => router.push(`/run/${runId}`)}
+        />
+      )}
+
       <div className={`page flex flex-col gap-5 ${introOpen ? "hidden" : ""}`}>
-        <header className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="page__h">{raft.name}</h1>
-            <button onClick={() => setIntroOpen(true)} className="text-[15px] text-ink-3 underline-offset-4 hover:underline">
-              {raft.members.length} otters · What&apos;s a raft?
-            </button>
-          </div>
-          <div className="flex -space-x-3">
-            {raft.members.map((m) => (
-              <Link key={m.id} href={`/raft/people/${m.id}`} aria-label={m.name} className="rounded-full ring-2 ring-ground">
-                <OtterAvatar furHue={m.furHue} size={38} />
-              </Link>
-            ))}
-          </div>
+        <header>
+          <h1 className="page__h">{raft.name}</h1>
+          <button onClick={() => setIntroOpen(true)} className="text-[15px] text-ink-3 underline-offset-4 hover:underline">
+            {raft.members.length} otters · What&apos;s a raft?
+          </button>
         </header>
 
-        <div className="flex rounded-full bg-clay p-1" role="tablist">
-          {(
-            [
-              ["wins", "Wins"],
-              ["help", "Help board"],
-              ["people", "People"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              role="tab"
-              aria-selected={tab === value}
-              onClick={() => setTab(value)}
-              className={`flex-1 rounded-full py-2.5 text-[16px] font-semibold ${tab === value ? "bg-card" : "text-ink-2"}`}
-            >
-              {label}
-            </button>
-          ))}
+        <section className="flex flex-col gap-2" aria-label="Who's here">
+          <RaftPond
+            members={raft.members}
+            meId={studentId}
+            onPick={(m) => (m.id === studentId ? router.push(`/raft/people/${m.id}`) : setTogether({ with: m }))}
+          />
+          <p className="text-center text-[16px] text-ink-2">
+            <strong className="text-ink">{raft.onOwnTogether}</strong> of {raft.weeklyGoal} steps on our own this week, together
+          </p>
+        </section>
+
+        {invites.map((invite) => (
+          <section key={invite.id} className="flex flex-col gap-3 rounded-[var(--radius-card)] bg-cel-wash p-4">
+            <p className="flex items-center gap-2 text-[17px] text-ink">
+              <RaftIcon name="together" />
+              <span>
+                <strong>{invite.fromName}</strong> just started &ldquo;{invite.about}&rdquo;. Do it together?
+              </span>
+            </p>
+            <div className="flex gap-2">
+              <Button look="main" onClick={() => join(invite.id)}>
+                Join {invite.fromName}
+              </Button>
+              <Button onClick={() => act(api.answerInvite(invite.id, studentId, "not-today"))}>Not today</Button>
+            </div>
+          </section>
+        ))}
+
+        {waitingOn?.fromRunId ? (
+          <Link href={`/run/${waitingOn.fromRunId}`} className="btn btn--primary h-14 justify-center">
+            Back to {waitingOn.about}, waiting for {waitingOn.toName}
+          </Link>
+        ) : (
+          <Button look="main" className="h-14" onClick={() => setTogether({ with: null })}>
+            <RaftIcon name="together" /> Do a task together
+          </Button>
+        )}
+
+        <div className="flex items-center gap-2">
+          <div className="flex flex-1 rounded-full bg-clay p-1" role="tablist">
+            {(
+              [
+                ["wins", "Wins"],
+                ["help", "Help board"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                role="tab"
+                aria-selected={tab === value}
+                onClick={() => setTab(value)}
+                className={`flex-1 rounded-full py-2 text-[16px] font-semibold ${tab === value ? "bg-card" : "text-ink-2"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <Button className="h-11 px-4" onClick={() => setComposing(tab === "wins" ? "win" : "ask")}>
+            <RaftIcon name={tab === "wins" ? "win" : "help"} /> {tab === "wins" ? "Share" : "Ask"}
+          </Button>
         </div>
 
-        {tab !== "people" && (
-          <div className="flex gap-3">
-            <Button look="main" className="h-14 flex-1" onClick={() => setComposing("win")}>
-              <RaftIcon name="win" /> Share a win
-            </Button>
-            <Button className="h-14 flex-1" onClick={() => setComposing("ask")}>
-              <RaftIcon name="help" /> Ask for help
-            </Button>
-          </div>
-        )}
-
-        {tab === "wins" && (
-          <>
-            <section className="flex flex-col gap-1">
-              <CrewPond fill={raft.onOwnTogether / raft.weeklyGoal} members={raft.members} />
-              <p className="text-center text-[17px] text-ink-2">
-                <strong className="text-ink">{raft.onOwnTogether}</strong> of {raft.weeklyGoal} steps on our own this week.
-                Every one fills the pond.
-              </p>
-            </section>
-            {invites.map((invite) => (
-              <section key={invite.id} className="flex flex-col gap-3 rounded-[var(--radius-card)] bg-cel-wash p-4">
-                <p className="flex items-center gap-2 text-[17px] text-ink">
-                  <RaftIcon name="together" />
-                  <span>
-                    <strong>{invite.fromName}</strong> wants to practise &ldquo;{invite.about}&rdquo; with you
-                  </span>
-                </p>
-                <div className="flex gap-2">
-                  <Button look="main" onClick={() => act(api.answerInvite(invite.id, studentId, "yes"))}>
-                    Yes, let&apos;s
-                  </Button>
-                  <Button onClick={() => act(api.answerInvite(invite.id, studentId, "not-today"))}>Not today</Button>
-                </div>
-              </section>
-            ))}
-          </>
-        )}
-
-        {tab === "people" ? (
-          <ul className="flex flex-col gap-3">
-            {raft.members.map((m) => (
-              <li key={m.id}>
-                <Link href={`/raft/people/${m.id}`} className="flex items-center gap-4 rounded-[var(--radius-card)] border border-line bg-card p-4">
-                  <OtterAvatar furHue={m.furHue} size={56} />
-                  <span className="flex-1">
-                    <span className="block text-[18px] font-bold">{m.id === studentId ? "You" : m.name}</span>
-                    <span className="text-[15px] text-ink-3">See how {m.id === studentId ? "you work" : `${m.name} works`} best</span>
-                  </span>
-                  {raft.buddy?.id === m.id && (
-                    <span className="rounded-full bg-cel-wash px-3 py-1 text-[14px] font-semibold text-cel-deep">Your buddy</span>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <section className="flex flex-col gap-3" aria-label={tab === "wins" ? "Raft wins" : "Help board"}>
-            {shown.length === 0 && (
-              <p className="py-6 text-center text-ink-2">
-                {tab === "help" ? "Nobody needs help right now." : "No posts yet. Share the first win!"}
-              </p>
-            )}
-            {shown.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                viewerId={studentId}
-                onReact={(kind) => act(api.react(post.id, studentId, kind))}
-                onReport={() => act(api.report(post.id, studentId))}
-              />
-            ))}
-          </section>
-        )}
+        <section className="flex flex-col gap-3" aria-label={tab === "wins" ? "Raft wins" : "Help board"}>
+          {shown.length === 0 && (
+            <p className="py-6 text-center text-ink-2">{tab === "help" ? "Nobody needs help right now." : "No wins yet. Share the first one!"}</p>
+          )}
+          {shown.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              viewerId={studentId}
+              onReact={(kind) => act(api.react(post.id, studentId, kind))}
+              onReport={() => act(api.report(post.id, studentId))}
+            />
+          ))}
+        </section>
 
         {message && <p className="text-ink-3">{message}</p>}
       </div>
