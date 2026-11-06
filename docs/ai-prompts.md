@@ -60,6 +60,7 @@ This file lists the prompts that shaped the project, grouped by the part of Otto
 | Date | Prompt | Result |
 | --- | --- | --- |
 | Nov 5 | Saying hi should get a real answer, and it shouldn't feel like a basic chatbot. | The conversation happens in the pond: Otto's words light up as it speaks, any line can be heard again, there are always ready answers to tap, and the student taps Start for a task |
+| Nov 5 | The deployed home screen lost Now, Done today, Otto remembers, the leaves and the bin. Bring them all back and connect them to the backend so they can be deployed. | Havi's Today layout on real data: tasks and reminders as leaves and a card stack, a bin and Done today on the student's own clock, and memories that say how Otto knows. New tables are added automatically when Vercel builds |
 | Nov 5 | The otter feels like a video on loop. Make it react to the student. | Havi's otter leans toward your finger, leans in to listen, sways while thinking, hops on each spoken word and bounces when tapped |
 
 ## The raft

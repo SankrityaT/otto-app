@@ -1,22 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { OttoChat, type ChatTurn, type Voice } from "@/components/OttoChat";
 import { OtterWaits } from "@/components/OtterWaits";
-import { TaskLeaves } from "@/components/TaskLeaves";
+import { OttoRemembers, DoneToday } from "@/components/TodayShelves";
+import CardStack from "@/components/pond/CardStack";
+import { lineFor } from "@/components/pond/FocusCard";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
-import { toneFor } from "@/components/pond/PondLeaves";
+import { toneFor, type BinItem, type LeafItem } from "@/components/pond/PondLeaves";
 import TalkBar from "@/components/pond/TalkBar";
 import { Welcome } from "@/components/Welcome";
 import type { Student } from "@/lib/data/crew";
-import { api, ApiError } from "@/lib/client/api";
+import { api, ApiError, type ThingAction } from "@/lib/client/api";
 import { hush, speak } from "@/lib/client/speech";
 import { useStudentId } from "@/lib/client/settings";
+import type { Thing, Today as TodayView } from "@/lib/today";
 
-type Routine = { id: string; title: string; stepCount: number };
-type Started = { runId: string; title: string; done: number; total: number };
+/** Leaves drift away while talking. The same empty list each time, so they only go once. */
+const NO_LEAVES: LeafItem[] = [];
 
 function readPhoto(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -31,8 +34,14 @@ export default function Today() {
   const router = useRouter();
   const [studentId, setStudentId] = useStudentId();
   const [student, setStudent] = useState<Student | null>(null);
-  const [routines, setRoutines] = useState<Routine[]>([]);
-  const [started, setStarted] = useState<Started[]>([]);
+  const [today, setToday] = useState<TodayView | null>(null);
+  // The Now cards: which one is on top, whether they're tucked away, and the last one let go.
+  const [focus, setFocus] = useState<string | null>(null);
+  const [stowed, setStowed] = useState(false);
+  const [letGoOf, setLetGoOf] = useState<Thing | null>(null);
+  const now = useRef<HTMLElement>(null);
+  // Tapping the bin in the pond opens Done today; tapping again folds it.
+  const [doneSignal, setDoneSignal] = useState(0);
   const [status, setStatus] = useState<PondStatus>("idle");
   // The conversation with Otto on this screen: the last few turns, and whether the otter is still talking.
   const [chat, setChat] = useState<ChatTurn[]>([]);
@@ -59,18 +68,35 @@ export default function Today() {
       .catch((e) => (e instanceof ApiError && e.status === 404 ? setStudentId(null) : setMessage(e.message)));
   }, [studentId, setStudentId]);
 
-  // This student's tasks (their own and their raft's), and the ones they're part way through.
-  useEffect(() => {
-    if (!studentId) return;
-    api
-      .routines(studentId)
-      .then((r) => setRoutines(r.routines))
-      .catch((e) => setMessage(e.message));
-    api
-      .doneThisWeek(studentId)
-      .then((r) => setStarted(r.inProgress))
-      .catch(() => {});
+  const refresh = useCallback(async () => {
+    if (studentId) setToday(await api.today(studentId));
   }, [studentId]);
+
+  // What's open, done and remembered. Coming back to the screen brings it up to date, since a
+  // phone can stay open past lunch or overnight.
+  useEffect(() => {
+    const load = () => refresh().catch((e) => setMessage(e.message));
+    const onShow = () => document.visibilityState === "visible" && load();
+    load();
+    document.addEventListener("visibilitychange", onShow);
+    return () => document.removeEventListener("visibilitychange", onShow);
+  }, [refresh]);
+
+  const leaves = useMemo<LeafItem[]>(
+    () => (today?.open ?? []).map((t) => ({ id: t.id, title: t.title, line: lineFor(t), tone: toneFor(t.id) })),
+    [today],
+  );
+  const finished = useMemo<BinItem[]>(
+    () =>
+      (today?.done ?? []).map((d) => ({
+        id: d.thingId,
+        doneId: d.id,
+        title: d.title,
+        line: d.line ?? "Done",
+        tone: toneFor(d.thingId),
+      })),
+    [today],
+  );
 
   if (studentId === undefined) return null; // still reading who's on this device
   if (!studentId) {
@@ -90,6 +116,47 @@ export default function Today() {
     router.push(`/app/run/${runId}`);
   }
 
+  /** A button on a Now card. The next thing moves up, in the same place as always. */
+  async function act(thing: Thing, action: ThingAction, line: string) {
+    setMessage(line);
+    setFocus(null);
+    setLetGoOf(action.action === "let-go" ? thing : null);
+    try {
+      await api.thing(thing.id, student!.id, action);
+      await refresh();
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+
+  /** The main button on a card: carry on, start, or mark a reminder done. */
+  function primary(thing: Thing) {
+    if (thing.kind === "reminder") return act(thing, { action: "done" }, `${thing.title}. That's done.`);
+    if (thing.run) return router.push(`/app/run/${thing.run.id}`);
+    start(thing.id).catch((error) => setMessage(error.message));
+  }
+
+  async function undoLetGo() {
+    if (!letGoOf) return;
+    await act(letGoOf, { action: "back" }, `${letGoOf.title} is back on your list.`);
+  }
+
+  /** Tapping a leaf brings its card to the top. */
+  function showCard(id: string) {
+    setFocus(id);
+    setStowed(false);
+    now.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  async function forget(memoryId: string) {
+    try {
+      await api.forget(memoryId, student!.id);
+      await refresh();
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+
   /** Talk with Otto. It chats back out loud, and starts a task when that's what the student means. */
   async function converse(said: string) {
     if (!student) return;
@@ -105,6 +172,7 @@ export default function Today() {
       setChat(turns);
       setChoices(reply.choices);
       if (reply.startTask) setOffer({ title: reply.startTask, routineId: reply.routineId });
+      if (reply.kept) await refresh();
       setStatus("idle");
       sayAloud(turns, turns.length - 1);
     } catch (error) {
@@ -135,20 +203,30 @@ export default function Today() {
   }
 
   const chatting = chat.length > 0;
-  // Each task once: the latest unfinished try of it (newest first from the server).
-  const carryOn = started.filter((s, i) => started.findIndex((other) => other.title === s.title) === i);
-
+  const open = today?.open ?? [];
+  const top = Math.max(0, open.findIndex((t) => t.id === focus));
 
   return (
     <AppShell>
-      <div className="today">
+      <div className={`today ${chatting ? "is-chatting" : ""}`}>
         <div className="today__center">
           <h1 className="sr-only">Today</h1>
-          {/* Just the otter in its pond. While talking, the pond draws in so the words have room. */}
+          {letGoOf && (
+            <div className="today__undo">
+              <button className="btn btn--text" onClick={undoLetGo}>
+                Undo &ldquo;Let go&rdquo;
+              </button>
+            </div>
+          )}
+          {/* While talking, the leaves drift off and the pond draws in, so the words have room. */}
           <Pond
             motion="idle"
             furHue={student.furHue}
             agentStatus={status}
+            open={today ? (chatting ? NO_LEAVES : leaves) : undefined}
+            done={finished}
+            onLeafSelect={showCard}
+            onBin={() => setDoneSignal((n) => n + 1)}
             upright={status !== "idle" || chatting}
             mood={status !== "idle" ? status : voice ? "talking" : "idle"}
             beat={voice?.char}
@@ -181,18 +259,40 @@ export default function Today() {
             onPhoto={async (file) => newTask("", await readPhoto(file))}
           />
           {message && <p className="mt-2 text-center text-ink-2">{message}</p>}
-          {!chatting && (
-            <div className="mt-3 w-full">
-              <TaskLeaves
-                started={carryOn.map((s) => ({ ...s, id: s.runId, tone: toneFor(routines.find((r) => r.title === s.title)?.id ?? s.runId) }))}
-                tasks={routines.filter((r) => !carryOn.some((s) => s.title === r.title)).map((r) => ({ ...r, tone: toneFor(r.id) }))}
-                onCarryOn={(runId) => router.push(`/app/run/${runId}`)}
-                onStart={start}
-              />
-            </div>
-          )}
         </div>
 
+        {today && (
+          <>
+            <aside ref={now} className={`today__left now ${stowed ? "is-stowed" : ""}`} aria-label="Open now">
+              <h2 className="now__h">
+                <button className="now__btn" aria-expanded={!stowed} aria-controls="now-drawer" onClick={() => setStowed(!stowed)}>
+                  <span className="now__title">Now</span>
+                  <span className="now__summary">{open.length === 0 ? "Nothing open" : `${open.length} open`}</span>
+                  <svg className="now__chev" viewBox="0 0 16 16" width="16" height="16" aria-hidden>
+                    <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </h2>
+              {/* The stack slides up and its space folds away while it is tucked in. */}
+              <div id="now-drawer" className="now__drawer" inert={stowed} aria-hidden={stowed}>
+                <div className="now__inner">
+                  <CardStack
+                    open={open}
+                    index={top}
+                    onNext={() => setFocus(open[(top + 1) % open.length].id)}
+                    onPrimary={primary}
+                    act={act}
+                  />
+                </div>
+              </div>
+            </aside>
+
+            <aside className="today__right" aria-label="Today so far">
+              <DoneToday done={today.done} toggleSignal={doneSignal} onAgain={(id) => start(id).catch((e) => setMessage(e.message))} />
+              <OttoRemembers memories={today.memories} onForget={forget} />
+            </aside>
+          </>
+        )}
       </div>
     </AppShell>
   );

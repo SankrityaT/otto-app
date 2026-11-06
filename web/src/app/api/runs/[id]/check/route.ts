@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[i
 
   try {
     const result = photo ? await checkStep(step, photo) : { done: true, say: "Okay. On to the next step.", nudge: null };
-    if (result.done) await logStep(run, step.id, helpLevel as HelpLevel);
+    if (result.done) await logStep(run, step.id, helpLevel as HelpLevel, photo ? "camera" : "student");
     const stepsLeft = run.steps.length - run.doneStepIds.length - (run.doneStepIds.includes(step.id) ? 0 : 1);
     const finished = result.done && stepsLeft === 0;
     return Response.json({ ...result, finished, summary: finished ? await runSummary(id) : null });

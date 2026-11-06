@@ -45,7 +45,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Back on track:** if the camera sees the student drift to their phone during a step, Otto gives one gentle nudge back (never more than once a step). If they leave Otto for another app for a while, it says where they were when they come back, and Watch pauses instead of running on without them.
 - **See what Otto sees:** the live camera is big on every task screen (beside the task on a laptop or tablet, across the top on a phone) and lights up when Otto looks, so nobody has to trust a camera they can't see.
 - **Talk to Otto:** students can just ask out loud ("is this the right way up?"). Otto looks through the camera and answers in a sentence or two, like a coach beside them.
-- **Chat with Otto:** on the home screen, saying hi gets a real answer. It happens right in the pond, not in a chat window: the pond draws in and Otto's words appear under the otter, each one lighting up as Otto says it, any line can be heard again, and there are always 2–3 ready answers to tap. Otto offers a task; the student taps Start. The otter reacts instead of looping: it leans toward the student's finger, leans in to listen, sways while thinking, hops on each word it says, and bounces when tapped. Tapping the otter starts a chat.
+- **Chat with Otto:** on the home screen, saying hi gets a real answer. It happens right in the pond, not in a chat window: the leaves drift off, the pond draws in and Otto's words appear under the otter, each one lighting up as Otto says it, any line can be heard again, and there are always 2–3 ready answers to tap. Otto offers a task; the student taps Start. The otter reacts instead of looping: it leans toward the student's finger, leans in to listen, sways while thinking, hops on each word it says, and bounces when tapped. Tapping the otter starts a chat.
 - **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Otto can look at a shared screen or tab instead.
 
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
@@ -62,7 +62,16 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 
 **Getting in.** The first time on a device, Otto asks the student's first name, they pick their otter's colour, and they join their raft with its code. A returning student types the code and taps their own otter. Anyone without a code can start a new raft from the Raft tab: Otto makes a random six-character code to share, and every member can see it on the Raft tab to invite classmates.
 
-**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen. Under the pond are the student's tasks as leaves they can tap, and a task already started shows a ring for how far along it is.
+**Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen, with what's open around it.
+
+**Today.** The home screen keeps the student's day in one place, saved on the server so it follows them between devices.
+
+- **Leaves:** each open task or reminder floats in the pond as a leaf, in its own colour. Tapping one brings its card to the top of Now.
+- **Now:** open things as a stack of cards, one to act on at a time: tasks already started first (with a ring for how far along they are), then reminders, then tasks to practise. Each card has the same buttons in the same place: Start, Carry on or Done; Later ("in 30 minutes", "after lunch", "this evening"); and Not now, which rests it until tomorrow morning. Something put off can be let go, with an Undo. Starting a task brings it back.
+- **The bin:** finished things drift into the basket beside the pond, even a task finished on the step screen, and tapping it opens Done today.
+- **Done today:** what's finished since midnight on the student's own clock. A task rests there until tomorrow, and "Do it again" is one tap.
+- **Otto remembers:** what the student asked Otto to keep ("remember the lids are on the top shelf") and how their tasks last went. Every line says how Otto knows: "Otto saw every step" only if the photo checks really passed. Otto answers from these when asked, says it doesn't know rather than guessing, and "Forget this" deletes anything the student told it.
+- **Reminders:** "remind me to bring my apron" puts a card in Now until it's marked done. Otto doesn't send alerts; a card put off comes back to the top of Now when its time comes. Otto keeps nothing when a safety concern comes up, and doesn't keep passwords, phone numbers or addresses.
 
 **The otter on the counter.** A 3D-printed otter holds the camera in its pebble, with a privacy shutter. The Raspberry Pi version adds Done, Help and Show me buttons for students who don't speak. "Connect your otter" in the Me tab finds it on the Wi-Fi, shows a live photo through it and tests its buttons, with no files to edit.
 
@@ -111,11 +120,13 @@ cd web
 cp .env.example .env.local     # then add your API key and DATABASE_URL
 npm install
 npm run db:setup               # creates the tables
-npm run seed                   # a demo raft so the Raft screen has data
+npm run seed                   # a demo raft so the Raft screen has data (this wipes the database)
 npm run dev                    # open http://localhost:3000/app
 ```
 
 On Supabase, `DATABASE_URL` is the **transaction pooler** connection string (port 6543) from the project's Connect settings.
+
+Deploying to Vercel runs `npm run vercel-build`, which brings the database up to date with `web/db/schema.sql` before building, so new tables are there before the new code goes live. It only adds what's missing, and the build fails (leaving the old version live) if the database can't be reached. Never run `npm run seed` on the live database.
 
 **The landing page** for students and parents is at http://localhost:3000, and the app itself at http://localhost:3000/app.
 
@@ -126,7 +137,7 @@ Use Chrome or Safari: Otto uses the browser's built-in speech to read steps alou
 Checks:
 
 ```bash
-npm test          # unit tests: help ladder, fading, weekly rings, buddies, picture safety
+npm test          # unit tests: help ladder, fading, weekly rings, buddies, picture safety, what's open today
 npm run lint
 npx tsc --noEmit
 ```
