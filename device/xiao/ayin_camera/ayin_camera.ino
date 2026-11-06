@@ -1,6 +1,6 @@
-// Ayin otter camera: Seeed XIAO ESP32-S3 Sense with an OV5640 camera.
+// Otto otter camera: Seeed XIAO ESP32-S3 Sense with an OV5640 camera.
 //
-// The board joins Wi-Fi and serves one photo at http://<board>/capture. The Ayin server
+// The board joins Wi-Fi and serves one photo at http://<board>/capture. The Otto server
 // asks for a photo only when a student taps Done, Help or Show me (AYIN_CAMERA_URL in
 // web/.env.local), so the camera rests the rest of the time.
 //
@@ -101,7 +101,7 @@ void setup() {
   WiFi.setSleep(false);  // Wi-Fi power saving made each photo take several seconds
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED) delay(500);
-  Serial.printf("Ayin camera ready at http://%s/capture\n", WiFi.localIP().toString().c_str());
+  Serial.printf("Otto camera ready at http://%s/capture\n", WiFi.localIP().toString().c_str());
 
   // Let the app find this otter by itself: by name (ayin-otter.local) and by asking "/hello".
   MDNS.begin("ayin-otter");

@@ -20,15 +20,15 @@ import {
   type VoiceCommand,
 } from "@/lib/client/speech";
 import { STAGES } from "@/lib/stages";
-import { WithEyes } from "./AyinSees";
+import { WithEyes } from "./OttoSees";
 import { Button } from "./Button";
 import { HandsFree } from "./HandsFree";
 import { StepPicture } from "./StepPicture";
 import UprightOtter from "./otter/UprightOtter";
 
-/** The pause after Ayin finishes a step before the walkthrough moves on by itself. */
+/** The pause after Otto finishes a step before the walkthrough moves on by itself. */
 const STEP_PAUSE_MS = 2500;
-/** About how long Ayin takes to say one word. */
+/** About how long Otto takes to say one word. */
 const MS_PER_WORD = 450;
 
 // three.js only runs in the browser, so the 3D view loads on its own.
@@ -39,7 +39,7 @@ const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), {
 /**
  * A pause before the task starts, like the doorway nooks at First Place: a moment to get
  * ready, never a rush. It shows where the student is on the five-stage path. At the "Watch"
- * stage, Ayin walks through the steps in 3D and talks them through. Everything fits on one
+ * stage, Otto walks through the steps in 3D and talks them through. Everything fits on one
  * screen: no scrolling.
  */
 export function TaskStart({
@@ -50,9 +50,9 @@ export function TaskStart({
 }: {
   run: Run;
   onStart: (mode: "steps" | "alone") => void;
-  /** What Ayin sees, shown big beside (or above) the task. */
+  /** What Otto sees, shown big beside (or above) the task. */
   eyes: ReactNode;
-  /** Take one photo through Ayin's eyes, for a question about what the student is holding. */
+  /** Take one photo through Otto's eyes, for a question about what the student is holding. */
   look: () => Promise<string | null>;
 }) {
   const [watching, setWatching] = useState(run.stage === 1);
@@ -157,8 +157,8 @@ export function TaskStart({
 }
 
 /**
- * The steps as a short story with Ayin as the coach: each step is a 3D model the student can
- * turn, read aloud, moving on a moment after Ayin finishes. The student can talk back at any
+ * The steps as a short story with Otto as the coach: each step is a 3D model the student can
+ * turn, read aloud, moving on a moment after Otto finishes. The student can talk back at any
  * point: "next", "back", "help", or any question about what they're looking at. Turning the
  * model, asking something or tapping the arrows hands control to the student.
  */
@@ -219,7 +219,7 @@ function StepStory({
       .join(" "),
   );
 
-  // A new step: Ayin reads it out, plus what to look for on the model if it's ready.
+  // A new step: Otto reads it out, plus what to look for on the model if it's ready.
   useEffect(() => {
     let gone = false;
     const text = narration();
@@ -235,7 +235,7 @@ function StepStory({
     };
   }, [index]);
 
-  // Once Ayin has finished a step, move on after a short pause, unless the student took over.
+  // Once Otto has finished a step, move on after a short pause, unless the student took over.
   useEffect(() => {
     if (!playing || spoken !== index || index === last) return;
     const next = setTimeout(() => setIndex(index + 1), STEP_PAUSE_MS);
@@ -379,7 +379,7 @@ function StepStory({
       ) : (
         listening && (
           <p className="text-center text-[14px] text-ink-3">
-            Hands-free: say &ldquo;next&rdquo;, &ldquo;back&rdquo;, or ask Ayin
+            Hands-free: say &ldquo;next&rdquo;, &ldquo;back&rdquo;, or ask Otto
             anything
           </p>
         )

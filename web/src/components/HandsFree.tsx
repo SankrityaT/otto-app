@@ -3,7 +3,7 @@
 import { Mic, MicOff } from "lucide-react";
 
 /**
- * One switch for working with busy hands: Ayin listens for "next", "done", "help" or any
+ * One switch for working with busy hands: Otto listens for "next", "done", "help" or any
  * question, and on the steps it also looks when the student's hands stop.
  */
 export function HandsFree({ on, onChange }: { on: boolean; onChange: (on: boolean) => void }) {

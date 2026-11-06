@@ -10,7 +10,7 @@ import type { AyinOtterHandle } from "@/components/otter/AyinOtter";
 /** What the otter says each time someone taps it. It never runs out; it just starts again. */
 const BOOPS = [
   "Ready when you are.",
-  "Hi! I'm Ayin.",
+  "Hi! I'm Otto.",
   "One step at a time.",
   "Boop received.",
   "I like your style.",
@@ -43,12 +43,12 @@ export function Hero() {
             at a time.
           </h1>
           <p className="mt-6 max-w-xl text-xl text-ink-2 md:text-[22px]">
-            Ayin is a friendly otter coach for neurodivergent teens and young adults. It shows you one step, checks it
+            Otto is a friendly otter coach for neurodivergent teens and young adults. It shows you one step, checks it
             with you, and helps only when you ask. Every time you do it on your own, it helps a little less.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <a href={site.appUrl} className="btn btn--primary">
-              Try Ayin
+              Try Otto
             </a>
             <a href="#demo" className="btn btn--quiet">
               Watch the demo
@@ -66,7 +66,7 @@ export function Hero() {
             className="block w-full cursor-pointer rounded-[40%] text-left"
             aria-label="Say hi to the otter"
           >
-            <Pond ref={otter} alt="Ayin's otter, floating on its back in a pond and holding a smooth green stone." />
+            <Pond ref={otter} alt="Otto's otter, floating on its back in a pond and holding a smooth green stone." />
           </button>
           <Leaf color="var(--mustard)" className="drift absolute -left-2 bottom-8 w-11" style={{ ["--r" as string]: "-20deg" }} />
           <Leaf color="var(--sky)" className="drift absolute -right-1 bottom-24 w-9" style={{ ["--r" as string]: "40deg", animationDelay: "-3s" }} />

@@ -16,7 +16,7 @@ const Review = z.object({
 export type Review = z.infer<typeof Review>;
 
 /**
- * Ayin reads every raft post and reply before anyone else sees it. It never shames the
+ * Otto reads every raft post and reply before anyone else sees it. It never shames the
  * student: if something might hurt, it suggests a kinder way to say the same thing.
  */
 export function reviewPost(text: string, photo: Photo | null): Promise<Review> {

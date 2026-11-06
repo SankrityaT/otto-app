@@ -39,7 +39,7 @@ const Arrow = z.object({
 
 const Scene = z.object({
   title: z.string().describe("The idea in 6 words or fewer, like 'Turn the knob to steam'"),
-  say: z.string().describe("What Ayin says out loud: one or two short sentences"),
+  say: z.string().describe("What Otto says out loud: one or two short sentences"),
   parts: z.array(Part).min(1).max(40),
   labels: z.array(Label).max(4),
   arrows: z.array(Arrow).max(4),

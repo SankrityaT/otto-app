@@ -14,7 +14,7 @@ function subscribe(onChange: () => void) {
 }
 const current = () => (document.documentElement.dataset.theme === "dark" ? "dark" : "light") as Theme;
 
-/** A round button that switches between Ayin's light pond and its dark evening pond. */
+/** A round button that switches between Otto's light pond and its dark evening pond. */
 export function ThemeToggle() {
   const theme = useSyncExternalStore<Theme | null>(subscribe, current, () => null);
   const next: Theme = theme === "dark" ? "light" : "dark";

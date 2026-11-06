@@ -7,7 +7,7 @@ const HOW = [
   {
     icon: MessageSquareText,
     title: "Say what you want to do",
-    body: "Say it, type it or show it: \"make an iced latte\", \"fold a T-shirt\", \"pack a box\". Ayin turns it into small steps.",
+    body: "Say it, type it or show it: \"make an iced latte\", \"fold a T-shirt\", \"pack a box\". Otto turns it into small steps.",
   },
   {
     icon: Footprints,
@@ -16,8 +16,8 @@ const HOW = [
   },
   {
     icon: Camera,
-    title: "Show Ayin when it's done",
-    body: "Ayin takes one quick look and tells you what it sees: on to the next step, or the one small thing to fix.",
+    title: "Show Otto when it's done",
+    body: "Otto takes one quick look and tells you what it sees: on to the next step, or the one small thing to fix.",
   },
   {
     icon: Lightbulb,
@@ -38,7 +38,7 @@ export function HowItWorks() {
           <span className="italic text-cel-deep">just the next step.</span>
         </>
       }
-      intro="Big tasks can feel like a lot. Ayin breaks them into small steps and stays with you for each one, like a calm coach beside you."
+      intro="Big tasks can feel like a lot. Otto breaks them into small steps and stays with you for each one, like a calm coach beside you."
     >
       <div className="grid items-center gap-14 md:grid-cols-[1fr_auto]">
         <ol className="grid gap-4">

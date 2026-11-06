@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
-/** First Place AZ's five stages, in the words Ayin uses with students. */
+/** First Place AZ's five stages, in the words Otto uses with students. */
 const STAGES = [
-  { name: "Watch", says: "See every step before you try.", ayin: "Ayin shows you the whole task first." },
-  { name: "First tries", says: "Give it a go.", ayin: "Ayin shows each step and sees what you can do." },
-  { name: "With help", says: "Help when you ask.", ayin: "Ayin shows each step and helps when you ask." },
-  { name: "Check-in", says: "You lead.", ayin: "Ayin just checks each step with you." },
-  { name: "On my own", says: "You've got this.", ayin: "Ayin only checks at the very end." },
+  { name: "Watch", says: "See every step before you try.", ayin: "Otto shows you the whole task first." },
+  { name: "First tries", says: "Give it a go.", ayin: "Otto shows each step and sees what you can do." },
+  { name: "With help", says: "Help when you ask.", ayin: "Otto shows each step and helps when you ask." },
+  { name: "Check-in", says: "You lead.", ayin: "Otto just checks each step with you." },
+  { name: "On my own", says: "You've got this.", ayin: "Otto only checks at the very end." },
 ];
 
 /** The sticky nav's height. The pinned card sits in the space below it. */
@@ -108,7 +108,7 @@ export function Stages() {
           <span className="italic text-cel-deep">when to let go.</span>
         </>
       }
-      intro="Every time you do a step on your own, Ayin helps a little less. Ask for help any time and it comes right back. The goal is you, doing it."
+      intro="Every time you do a step on your own, Otto helps a little less. Ask for help any time and it comes right back. The goal is you, doing it."
       className="bg-card/60"
     >
       <div ref={track} className="relative" style={{ height: `calc(100vh - ${NAV_PX}px + ${STAGES.length * STAGE_SCROLL_VH}vh)` }}>
@@ -166,7 +166,7 @@ export function Stages() {
                     <p className="mt-2 text-ink-2">{STAGES[stage].ayin}</p>
                   </div>
                   <p className="mt-4 border-t border-line pt-4 text-[16px] text-ink-3">
-                    These five stages come from First Place AZ, who use them to teach life skills. Ayin works out your stage from how
+                    These five stages come from First Place AZ, who use them to teach life skills. Otto works out your stage from how
                     your last tries went, so you never have to keep track.
                   </p>
                 </div>

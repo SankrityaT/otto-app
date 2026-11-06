@@ -4,12 +4,12 @@ import { Concern, safeReply } from "./safety";
 
 const Answer = z.object({
   concern: Concern,
-  say: z.string().describe("What Ayin says out loud: one or two short sentences, 25 words at most"),
+  say: z.string().describe("What Otto says out loud: one or two short sentences, 25 words at most"),
 });
 
 /**
  * The student asks something out loud while they work ("is this the right way up?").
- * Ayin answers like a coach standing next to them: about the step in front of them and
+ * Otto answers like a coach standing next to them: about the step in front of them and
  * what the camera sees right now.
  */
 export async function answerQuestion(options: {

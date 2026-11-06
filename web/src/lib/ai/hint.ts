@@ -3,7 +3,7 @@ import { HELP_LEVELS, type HelpLevel } from "../help";
 import { askClaude, type Photo } from "./client";
 
 const Hint = z.object({
-  say: z.string().describe("What Ayin says out loud, 15 words or fewer"),
+  say: z.string().describe("What Otto says out loud, 15 words or fewer"),
 });
 
 const HOW_MUCH_TO_SAY: Record<Exclude<HelpLevel, 0>, string> = {

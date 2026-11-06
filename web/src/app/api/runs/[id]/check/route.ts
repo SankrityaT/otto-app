@@ -7,7 +7,7 @@ import { aiFailure, jsonError, readJson } from "@/lib/http";
 
 /**
  * "Done": look at a photo, and log the step if it really is done.
- * If the camera couldn't see the step and the student says they did it, Ayin takes their
+ * If the camera couldn't see the step and the student says they did it, Otto takes their
  * word (`trustStudent`). It never blocks a student who has finished.
  */
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[id]/check">) {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[i
 
   const trustStudent = body.trustStudent === true;
   const photo = trustStudent ? null : await getPhoto(body.photo);
-  if (!trustStudent && !photo) return jsonError("Ayin needs a photo to check the step.", 400);
+  if (!trustStudent && !photo) return jsonError("Otto needs a photo to check the step.", 400);
 
   try {
     const result = photo ? await checkStep(step, photo) : { done: true, say: "Okay. On to the next step.", nudge: null };

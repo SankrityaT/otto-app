@@ -12,6 +12,6 @@ export async function POST(request: Request) {
     if (!photo) return jsonError("The otter answered, but sent no photo. Check its camera cable.", 502);
     return Response.json({ photo: `data:${photo.mediaType};base64,${photo.data}` });
   } catch {
-    return jsonError("Ayin couldn't reach the otter. Check it's on and on the same Wi-Fi.", 502);
+    return jsonError("Otto couldn't reach the otter. Check it's on and on the same Wi-Fi.", 502);
   }
 }

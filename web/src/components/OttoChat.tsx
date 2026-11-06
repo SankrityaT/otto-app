@@ -4,19 +4,19 @@ import type { CSSProperties } from "react";
 import { Play, Volume2 } from "lucide-react";
 
 export type ChatTurn = { who: "student" | "ayin"; text: string };
-/** Which of Ayin's lines is being said out loud, and how far through it Ayin is. */
+/** Which of Otto's lines is being said out loud, and how far through it Otto is. */
 export type Voice = { turn: number; char: number } | null;
 
 /** The answer buttons take the pond's leaf colours in turn. */
 const CHOICE_TONES = ["study", "errands", "care", "health"];
 
 /**
- * Talking with Ayin, right there in the pond: no chat window, no scrolling history. The otter
- * sits up above, and under it is only what matters now: what the student said, Ayin's answer
+ * Talking with Otto, right there in the pond: no chat window, no scrolling history. The otter
+ * sits up above, and under it is only what matters now: what the student said, Otto's answer
  * with each word lighting up as it's said (reading and listening together), and a few ready
  * answers floating like leaves. Starting a task is always the student's tap.
  */
-export function AyinChat({
+export function OttoChat({
   turns,
   thinking,
   voice,
@@ -41,11 +41,11 @@ export function AyinChat({
   const lastYou = turns.findLast((t) => t.who === "student");
 
   return (
-    <section className="mt-[min(80px,16vw)] flex w-full max-w-[560px] flex-col items-center gap-4 px-2 text-center" aria-label="Talking with Ayin" aria-live="polite">
+    <section className="mt-[min(80px,16vw)] flex w-full max-w-[560px] flex-col items-center gap-4 px-2 text-center" aria-label="Talking with Otto" aria-live="polite">
       {lastYou && <p className="text-[16px] text-ink-3">You: {lastYou.text}</p>}
 
       {thinking ? (
-        <p className="chat__dots text-[34px] leading-none text-ink-3" aria-label="Ayin is thinking">
+        <p className="chat__dots text-[34px] leading-none text-ink-3" aria-label="Otto is thinking">
           <span>•</span> <span>•</span> <span>•</span>
         </p>
       ) : (
@@ -88,7 +88,7 @@ export function AyinChat({
   );
 }
 
-/** Ayin's words, with the one being said right now lit up. */
+/** Otto's words, with the one being said right now lit up. */
 function Words({ text, at }: { text: string; at: number | null }) {
   return [...text.matchAll(/\S+/g)].map((match) => {
     const start = match.index;

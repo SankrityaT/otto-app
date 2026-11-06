@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AyinAIError, askClaude, type Photo } from "./client";
+import { OttoAIError, askClaude, type Photo } from "./client";
 import { WONT_HELP } from "./safety";
 
 const StepPlan = z.object({
@@ -26,7 +26,7 @@ export type StepPlan = z.infer<typeof StepPlan>;
 
 /**
  * Break any task into small physical steps. The task comes from the student, not from code.
- * A task Ayin shouldn't help with gets no steps at all, so nothing about it is ever saved or shown.
+ * A task Otto shouldn't help with gets no steps at all, so nothing about it is ever saved or shown.
  */
 export async function planSteps(task: string, photo?: Photo | null): Promise<StepPlan> {
   const plan = await askClaude({
@@ -40,8 +40,8 @@ Each step is one physical action. Include safety steps (gloves, hot surfaces) wh
 The students are capable young adults learning a job. Teach the job, not everyday life: leave out things
 anyone already does (washing hands, walking over, picking things up) unless the task itself is about them.`,
   });
-  if (!plan.safe) throw new AyinAIError(WONT_HELP);
-  if (plan.steps.length < 2) throw new AyinAIError("Ayin couldn't break that into steps. Try saying it another way.");
+  if (!plan.safe) throw new OttoAIError(WONT_HELP);
+  if (plan.steps.length < 2) throw new OttoAIError("Otto couldn't break that into steps. Try saying it another way.");
   return plan;
 }
 

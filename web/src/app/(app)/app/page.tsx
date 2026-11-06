@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { AyinChat, type ChatTurn, type Voice } from "@/components/AyinChat";
+import { OttoChat, type ChatTurn, type Voice } from "@/components/OttoChat";
 import { OtterWaits } from "@/components/OtterWaits";
 import { TaskLeaves } from "@/components/TaskLeaves";
 import Pond, { type PondStatus } from "@/components/pond/Pond";
@@ -34,15 +34,15 @@ export default function Today() {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [started, setStarted] = useState<Started[]>([]);
   const [status, setStatus] = useState<PondStatus>("idle");
-  // The conversation with Ayin on this screen: the last few turns, and whether the otter is still talking.
+  // The conversation with Otto on this screen: the last few turns, and whether the otter is still talking.
   const [chat, setChat] = useState<ChatTurn[]>([]);
   const [voice, setVoice] = useState<Voice>(null);
-  // Ready answers under Ayin's last line, and the task Ayin offered to start (the student taps to go).
+  // Ready answers under Otto's last line, and the task Otto offered to start (the student taps to go).
   const [choices, setChoices] = useState<string[]>([]);
   const [offer, setOffer] = useState<{ title: string; routineId: string | null } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Opened from the "Use Ayin on your phone" QR code: remember who this is, then tidy the address.
+  // Opened from the "Use Otto on your phone" QR code: remember who this is, then tidy the address.
   useEffect(() => {
     const fromLink = new URLSearchParams(window.location.search).get("student");
     if (!fromLink) return;
@@ -90,7 +90,7 @@ export default function Today() {
     router.push(`/app/run/${runId}`);
   }
 
-  /** Talk with Ayin. It chats back out loud, and starts a task when that's what the student means. */
+  /** Talk with Otto. It chats back out loud, and starts a task when that's what the student means. */
   async function converse(said: string) {
     if (!student) return;
     setStatus("thinking");
@@ -113,7 +113,7 @@ export default function Today() {
     }
   }
 
-  /** Read one of Ayin's lines out loud, lighting up each word as it's said. */
+  /** Read one of Otto's lines out loud, lighting up each word as it's said. */
   function sayAloud(turns: ChatTurn[], turn: number) {
     setVoice({ turn, char: 0 });
     speak(turns[turn].text, {
@@ -124,7 +124,7 @@ export default function Today() {
 
   async function newTask(task: string, photo: string | null) {
     setStatus("thinking");
-    setMessage("Ayin is breaking it into steps");
+    setMessage("Otto is breaking it into steps");
     try {
       const { routine } = await api.newRoutine(student!.id, task, photo);
       await start(routine.id);
@@ -152,11 +152,11 @@ export default function Today() {
             upright={status !== "idle" || chatting}
             mood={status !== "idle" ? status : voice ? "talking" : "idle"}
             beat={voice?.char}
-            onOtter={chatting ? undefined : () => converse("Hi Ayin")}
+            onOtter={chatting ? undefined : () => converse("Hi Otto")}
             style={chatting ? { width: "min(56%, 280px)", marginTop: 0 } : undefined}
           />
           {chatting && (
-            <AyinChat
+            <OttoChat
               turns={chat}
               thinking={status === "thinking"}
               voice={voice}

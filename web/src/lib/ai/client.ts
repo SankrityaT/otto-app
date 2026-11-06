@@ -7,8 +7,8 @@ import { SAFETY_RULES, WONT_HELP } from "./safety";
 // Reads ANTHROPIC_API_KEY from the environment.
 const anthropic = new Anthropic();
 
-/** How Ayin talks, and its safety rules, shared by every prompt. Comes from our AZACS research notes. */
-const AYIN_VOICE = `You are Ayin, a calm step-by-step coach for autistic students aged 16-22
+/** How Otto talks, and its safety rules, shared by every prompt. Comes from our AZACS research notes. */
+const OTTO_VOICE = `You are Otto, a calm step-by-step coach for autistic students aged 16-22
 learning job tasks at a school work site (a cafe, a shirt studio, a shipping store).
 Use short, plain, literal words. One idea per sentence. No idioms or sarcasm.
 Be kind and matter-of-fact. Never blame, rush or say the student failed.
@@ -22,7 +22,7 @@ export interface Photo {
   mediaType: "image/jpeg" | "image/png" | "image/webp";
 }
 
-export class AyinAIError extends Error {}
+export class OttoAIError extends Error {}
 
 type Ask<T extends z.ZodType> = {
   schema: T;
@@ -44,7 +44,7 @@ function request<T extends z.ZodType>(options: Ask<T>) {
   return {
     model: config.model,
     max_tokens: options.maxTokens ?? 8000,
-    system: AYIN_VOICE,
+    system: OTTO_VOICE,
     messages: [{ role: "user" as const, content }],
     output_config: { effort: options.effort, format: zodOutputFormat(options.schema) },
   };
@@ -52,10 +52,10 @@ function request<T extends z.ZodType>(options: Ask<T>) {
 
 function checked<T>(response: { stop_reason: string | null; parsed_output?: T | null }): T {
   if (response.stop_reason === "refusal") {
-    throw new AyinAIError(WONT_HELP);
+    throw new OttoAIError(WONT_HELP);
   }
   if (response.parsed_output == null) {
-    throw new AyinAIError("Claude's answer didn't match the expected format.");
+    throw new OttoAIError("Claude's answer didn't match the expected format.");
   }
   return response.parsed_output;
 }

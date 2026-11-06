@@ -8,7 +8,7 @@ export function Nav() {
         <a href="#top" className="flex items-center gap-2.5 rounded-full">
           {/* eslint-disable-next-line @next/next/no-img-element -- a tiny static icon */}
           <img src="/otter/otter-base.png" alt="" width={40} height={40} className="-my-1 size-11 object-contain" />
-          <span className="font-display text-[30px] leading-none">Ayin</span>
+          <span className="font-display text-[30px] leading-none">Otto</span>
         </a>
         <ul className="hidden items-center gap-1 md:flex">
           {NAV.map((link) => (
@@ -21,7 +21,7 @@ export function Nav() {
         </ul>
         <div className="flex items-center gap-2.5">
           <a href={site.appUrl} className="btn btn--primary btn--small">
-            Try Ayin
+            Try Otto
           </a>
           <ThemeToggle />
         </div>

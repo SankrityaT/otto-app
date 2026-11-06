@@ -16,7 +16,7 @@ const CLEAN_WORDS_REVIEW = {
 const MAX_PHOTO_CHARS = 700_000;
 
 /**
- * Share a win or ask for help. Ayin reviews it first; if something might hurt or isn't safe,
+ * Share a win or ask for help. Otto reviews it first; if something might hurt or isn't safe,
  * nothing is saved and the student gets a kinder way to say it.
  */
 export async function POST(request: Request) {

@@ -5,12 +5,12 @@ import { profile } from "@/lib/data/raft";
 import { listRoutines } from "@/lib/data/routines";
 import { aiFailure, jsonError, readJson } from "@/lib/http";
 
-/** One turn of talking with Ayin on the home screen. Returns what Ayin says, and a task to start if any. */
+/** One turn of talking with Otto on the home screen. Returns what Otto says, and a task to start if any. */
 export async function POST(request: Request) {
   const { studentId, said, history } = await readJson(request);
   const student = typeof studentId === "string" ? await getStudent(studentId) : null;
   const text = typeof said === "string" ? said.trim().slice(0, 300) : "";
-  if (!student || !text) return jsonError("Say something to Ayin first.", 400);
+  if (!student || !text) return jsonError("Say something to Otto first.", 400);
 
   const turns = Array.isArray(history)
     ? history
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       practised: routines.map((r) => r.title),
       goal: (await profile(student.id, student.id))?.goal?.text ?? null,
     });
-    // Any safety concern: just Ayin's words (with staff and 988 when someone may be at risk), never a task.
+    // Any safety concern: just Otto's words (with staff and 988 when someone may be at risk), never a task.
     if (turn.concern !== "none") {
       return Response.json({ say: safeReply(turn.say, turn.concern), choices: [], startTask: null, routineId: null });
     }

@@ -1,6 +1,6 @@
 import { networkInterfaces } from "node:os";
 
-// Finds an Ayin otter on the same Wi-Fi without anyone typing an address. Each otter answers
+// Finds an Otto otter on the same Wi-Fi without anyone typing an address. Each otter answers
 // GET /hello with {"ayin": "otter"}. First try its name, then every address on the network.
 
 const NAMES = ["http://ayin-otter.local", "http://ayin-otter.local:8080"];

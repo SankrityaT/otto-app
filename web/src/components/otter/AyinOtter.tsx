@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * We changed only the default asset folder.
  */
 /**

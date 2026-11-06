@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="status__day flex items-center gap-2.5 text-[20px]">
           {/* eslint-disable-next-line @next/next/no-img-element -- Havi's otter logo, a small fixed icon */}
           <img src="/icons/icon-192.png" alt="" className="h-11 w-11 rounded-xl" />
-          Ayin
+          Otto
         </span>
         <span className="status__right">
           <span className="pill">

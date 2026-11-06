@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * We removed plain mode and the floating task leaves (Today lists tasks under the pond), and
  * made the otter respond: tap it to start talking, and it shows what it's doing while it sits up.
  */
@@ -20,7 +20,7 @@ type Props = {
   style?: CSSProperties;
   /** Sit up (while you ask something or a task is being explained) instead of floating. */
   upright?: boolean;
-  /** While sitting up: what Ayin is doing, and a beat that changes on every word it says. */
+  /** While sitting up: what Otto is doing, and a beat that changes on every word it says. */
   mood?: OtterMood;
   beat?: number;
   /** Tapping the floating otter: it swings its tail and tilts its head, then this runs. */

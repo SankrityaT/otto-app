@@ -18,7 +18,7 @@ const MAX_PHOTO_CHARS = 700_000;
 
 /**
  * Answer a post. A helper can add a photo of their work or share the step's 3D model, so the
- * otters can help each other the way Ayin helps one student. Ayin reviews every reply first.
+ * otters can help each other the way Otto helps one student. Otto reviews every reply first.
  */
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/raft/posts/[id]/replies">) {
   const { id } = await ctx.params;

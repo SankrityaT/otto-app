@@ -2,7 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
-// Small choices remembered on this device: who is working, and which camera is Ayin's eyes.
+// Small choices remembered on this device: who is working, and which camera is Otto's eyes.
 
 const STUDENT_KEY = "ayin.studentId";
 const CAMERA_KEY = "ayin.camera";
@@ -37,7 +37,7 @@ export function useStudentId(): [string | null | undefined, (id: string | null) 
   return [id, setId];
 }
 
-/** Where Ayin looks: this device's camera, a shared screen, or the otter. */
+/** Where Otto looks: this device's camera, a shared screen, or the otter. */
 export function useCameraChoice(): [CameraChoice, (choice: CameraChoice) => void] {
   const stored = useSyncExternalStore(subscribe, () => localStorage.getItem(CAMERA_KEY), () => null);
   const choice: CameraChoice = stored === "otter" || stored === "screen" ? stored : "this-device";

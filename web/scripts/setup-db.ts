@@ -1,4 +1,4 @@
-// Creates Ayin's tables in the database at DATABASE_URL. Safe to run again: it only adds what's missing.
+// Creates Otto's tables in the database at DATABASE_URL. Safe to run again: it only adds what's missing.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";

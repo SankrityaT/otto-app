@@ -20,7 +20,7 @@ export function Device() {
           <span className="italic text-cel-deep">sit on the counter.</span>
         </>
       }
-      intro="Ayin works on any phone or tablet. For work stations, we're building a 3D-printed otter that holds a little camera in its pebble, so your hands stay free."
+      intro="Otto works on any phone or tablet. For work stations, we're building a 3D-printed otter that holds a little camera in its pebble, so your hands stay free."
       className="bg-card/60"
     >
       <div className="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">

@@ -1,4 +1,4 @@
-"""Ayin otter on a Raspberry Pi: a camera the server can ask for one photo, plus three buttons.
+"""Otto otter on a Raspberry Pi: a camera the server can ask for one photo, plus three buttons.
 
     GET  http://<pi>:<port>/capture   -> one JPEG, taken right then (nothing is saved)
     Done / Help / Show me buttons     -> POST <server>/api/buttons {"button": "..."}

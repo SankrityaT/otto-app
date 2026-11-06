@@ -1,9 +1,9 @@
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * Unchanged.
  */
 /**
- * Motion and WebGL renderer for the Ayin calm otter (v6 motion).
+ * Motion and WebGL renderer for the Otto calm otter (v6 motion).
  * Framework-free. The React wrapper lives in AyinOtter.tsx.
  *
  * Built on render-v5.swift (same pond bob, neck-localized head warp, 11 solid

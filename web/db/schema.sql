@@ -1,4 +1,4 @@
--- Ayin's database (Postgres, hosted on Supabase). Run with `npm run db:setup`; safe to run again.
+-- Otto's database (Postgres, hosted on Supabase). Run with `npm run db:setup`; safe to run again.
 -- Times are ISO 8601 strings, so they sort and compare as text. No photos of people are stored.
 
 CREATE TABLE IF NOT EXISTS crews (
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS button_presses (
   created_at TEXT NOT NULL
 );
 
--- Ayin's server connects as the owner of these tables. Row-level security is on with no rules,
+-- Otto's server connects as the owner of these tables. Row-level security is on with no rules,
 -- so Supabase's public API (the "anon" key) can't read or change anything.
 ALTER TABLE crews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;

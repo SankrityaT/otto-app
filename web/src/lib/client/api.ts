@@ -31,7 +31,7 @@ const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.strin
 
 export type Summary = { total: number; onOwn: number };
 
-/** Ayin's review of a raft post that wasn't shared yet. */
+/** Otto's review of a raft post that wasn't shared yet. */
 export type PostReview = { ok: boolean; problem: string; why: string; kinderVersion: string | null };
 
 export const api = {

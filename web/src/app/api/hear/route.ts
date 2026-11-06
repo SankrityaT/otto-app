@@ -1,11 +1,11 @@
 import { config } from "@/lib/config";
 import { jsonError } from "@/lib/http";
 
-// Ayin's ears: a short clip of the student talking becomes words (Deepgram). Clips aren't saved,
+// Otto's ears: a short clip of the student talking becomes words (Deepgram). Clips aren't saved,
 // and the key stays on the server.
 
 const DEEPGRAM_LISTEN = "https://api.deepgram.com/v1/listen?model=nova-3&smart_format=true";
-/** About a minute of speech; anything longer isn't someone talking to Ayin. */
+/** About a minute of speech; anything longer isn't someone talking to Otto. */
 const MAX_BYTES = 3_000_000;
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     body: audio,
     signal: AbortSignal.timeout(15_000),
   }).catch(() => null);
-  if (!response?.ok) return jsonError("Ayin couldn't hear that. Please try again.", 502);
+  if (!response?.ok) return jsonError("Otto couldn't hear that. Please try again.", 502);
   const body = await response.json().catch(() => null);
   return Response.json({ text: body?.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? "" });
 }

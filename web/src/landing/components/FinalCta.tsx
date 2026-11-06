@@ -4,8 +4,8 @@ import { OtterSays } from "./OtterSays";
 import { Reveal } from "./Reveal";
 import UprightOtter from "@/components/otter/UprightOtter";
 
-const TELL_SCHOOL = `mailto:?subject=${encodeURIComponent("Have you seen Ayin?")}&body=${encodeURIComponent(
-  "Hi! I found Ayin, a calm step-by-step coach that helps students learn job tasks and do them on their own. Could it work at our school?\n\n",
+const TELL_SCHOOL = `mailto:?subject=${encodeURIComponent("Have you seen Otto?")}&body=${encodeURIComponent(
+  "Hi! I found Otto, a calm step-by-step coach that helps students learn job tasks and do them on their own. Could it work at our school?\n\n",
 )}`;
 
 export function FinalCta() {
@@ -28,11 +28,11 @@ export function FinalCta() {
             Ready for your first step?
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-xl text-[#1f1c18]/80">
-            Try Ayin on a phone or tablet, or tell your school about it. We&apos;d love to float alongside you.
+            Try Otto on a phone or tablet, or tell your school about it. We&apos;d love to float alongside you.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <a href={site.appUrl} className="btn bg-[#1f1c18] text-[#f3eee6]">
-              Try Ayin
+              Try Otto
             </a>
             <a href={TELL_SCHOOL} className="btn border-[#1f1c18]/20 bg-[#fffcf7] text-[#1f1c18]">
               Tell your school

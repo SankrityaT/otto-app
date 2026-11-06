@@ -16,7 +16,7 @@ const PRESS_POLL_MS = 800;
 
 /**
  * "Connect your otter": turn it on, find it on the Wi-Fi, see a real photo through it,
- * try its buttons, and make it Ayin's eyes. No files to edit.
+ * try its buttons, and make it Otto's eyes. No files to edit.
  */
 export default function ConnectOtter() {
   const [, setCamera] = useCameraChoice();
@@ -95,7 +95,7 @@ export default function ConnectOtter() {
         {step === "power" && (
           <>
             <h1 className="page__h">Connect your otter</h1>
-            <Image src="/otter/device.png" alt="The Ayin otter" width={640} height={640} className="mx-auto w-64" priority />
+            <Image src="/otter/device.png" alt="The Otto otter" width={640} height={640} className="mx-auto w-64" priority />
             <p className="text-[18px] text-ink-2">
               Plug your otter in and put it at your work station, about an arm&apos;s length from where you work. The pebble it holds is
               its camera.
@@ -110,7 +110,7 @@ export default function ConnectOtter() {
         {step === "find" && (
           <>
             <h1 className="page__h">Find your otter</h1>
-            <p className="text-[18px] text-ink-2">Ayin looks for your otter on your Wi-Fi. This takes a few seconds.</p>
+            <p className="text-[18px] text-ink-2">Otto looks for your otter on your Wi-Fi. This takes a few seconds.</p>
             {!photo && (
               <Button look="main" className="h-14" disabled={testing} onClick={find}>
                 {testing ? "Looking for your otter" : "Find my otter"}
@@ -154,7 +154,7 @@ export default function ConnectOtter() {
             <h1 className="page__h">Try the buttons</h1>
             <p className="text-[18px] text-ink-2">
               The Raspberry Pi otter has three buttons: Done, Help and Show me. They work like the buttons on screen, so you never have
-              to talk to use Ayin.
+              to talk to use Otto.
             </p>
             <p className={`rounded-2xl p-4 text-center text-[19px] font-semibold ${pressed ? "bg-cel-wash text-cel-deep" : "bg-card"}`} aria-live="polite">
               {pressed ? "Got it! Your otter's buttons work." : "Press any button on your otter"}
@@ -170,7 +170,7 @@ export default function ConnectOtter() {
             <h1 className="page__h">Your otter is ready</h1>
             <Image src="/otter/device.png" alt="" width={640} height={640} className="mx-auto w-48" />
             <p className="text-[18px] text-ink-2">
-              Ayin now looks through your otter when you tap Done, Help or Show me. You can switch back to this phone any time in Me.
+              Otto now looks through your otter when you tap Done, Help or Show me. You can switch back to this phone any time in Me.
             </p>
             <Link href="/" className="btn btn--primary text-center">
               Start a task

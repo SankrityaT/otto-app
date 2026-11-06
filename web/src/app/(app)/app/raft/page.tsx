@@ -91,7 +91,7 @@ export default function RaftPage() {
           <h1 className="page__h">{starting ? "Start a raft" : "Join your raft"}</h1>
           <p className="text-ink-2">
             {starting
-              ? "Name it, and Ayin gives you a code to share with your classmates."
+              ? "Name it, and Otto gives you a code to share with your classmates."
               : "A raft is a few classmates from your work site. Your teacher has its code."}
           </p>
           <label htmlFor="code" className="sr-only">
@@ -133,7 +133,7 @@ export default function RaftPage() {
           <OtterWaits says="Paddling over to your raft" />
         ) : (
           <div className="page flex flex-col items-center gap-3 pt-10 text-center">
-            <p>{message ?? "Say hi to Ayin on the Today screen first."}</p>
+            <p>{message ?? "Say hi to Otto on the Today screen first."}</p>
             <Link href="/app" className="btn btn--text">
               Go to Today
             </Link>

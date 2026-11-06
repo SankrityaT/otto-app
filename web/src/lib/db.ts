@@ -1,7 +1,7 @@
 import postgres from "postgres";
 import { config } from "./config";
 
-// Ayin's data lives in Postgres (Supabase). The tables are in db/schema.sql.
+// Otto's data lives in Postgres (Supabase). The tables are in db/schema.sql.
 // Queries are written with ? for each value, in order; they're numbered for Postgres here.
 
 type Sql = ReturnType<typeof postgres>;

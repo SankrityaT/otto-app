@@ -42,7 +42,7 @@ export function StepPicture({
         <div className="flex flex-col items-center gap-2 px-6">
           <UprightOtter className="h-28 w-28" furHue={furHue} active={status === "loading"} />
           <p className="text-[18px] text-[#3a342d]">{alt}</p>
-          {status === "loading" && <p className="text-[14px]">Ayin is drawing this step</p>}
+          {status === "loading" && <p className="text-[14px]">Otto is drawing this step</p>}
         </div>
       )}
       {status !== "missing" && (

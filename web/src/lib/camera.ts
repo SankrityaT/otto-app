@@ -7,7 +7,7 @@ export async function otterAddress(): Promise<string | null> {
   return (await getSetting("otter_url")) ?? config.cameraUrl;
 }
 
-// Ayin doesn't care which camera a photo comes from: the phone sends one with the
+// Otto doesn't care which camera a photo comes from: the phone sends one with the
 // request, or the server takes one from the otter. Either way the answer is the same.
 // Photos are only used for the one request and are never saved.
 

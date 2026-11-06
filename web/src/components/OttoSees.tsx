@@ -4,11 +4,11 @@ import type { ReactNode, Ref } from "react";
 import { OtterView } from "./OtterView";
 
 /**
- * What Ayin sees, big and always on screen, so the student never has to trust a camera they
+ * What Otto sees, big and always on screen, so the student never has to trust a camera they
  * can't see: this device's camera, a shared screen, or the otter's. The ring lights up while
- * Ayin is looking, and `note` says when it looks (or holds a button, like sharing a screen).
+ * Otto is looking, and `note` says when it looks (or holds a button, like sharing a screen).
  */
-export function AyinSees({
+export function OttoSees({
   videoRef,
   otter,
   looking,
@@ -23,12 +23,12 @@ export function AyinSees({
 }) {
   return (
     <section
-      aria-label="What Ayin sees"
+      aria-label="What Otto sees"
       className={`relative w-full overflow-hidden rounded-[var(--radius-card)] bg-clay ring-4 transition-shadow ${looking ? "ring-cel" : "ring-transparent"} ${className}`}
     >
       {otter ? <OtterView /> : <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />}
       <p className="absolute left-3 top-3 rounded-full bg-card/90 px-3 py-1 text-[14px] font-semibold text-ink">
-        {looking ? "Ayin is looking" : "What Ayin sees"}
+        {looking ? "Otto is looking" : "What Otto sees"}
       </p>
       {note && (
         <div className="absolute inset-x-3 bottom-3 flex justify-center">
@@ -40,7 +40,7 @@ export function AyinSees({
 }
 
 /**
- * A task screen with what Ayin sees, big: beside the task on a laptop or tablet, above it on a
+ * A task screen with what Otto sees, big: beside the task on a laptop or tablet, above it on a
  * phone. `fixed` keeps everything on one screen (no scrolling), for the Watch stage.
  */
 export function WithEyes({ eyes, fixed = false, children }: { eyes: ReactNode; fixed?: boolean; children: ReactNode }) {

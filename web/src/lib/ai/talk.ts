@@ -4,7 +4,7 @@ import { Concern } from "./safety";
 
 const Turn = z.object({
   concern: Concern,
-  say: z.string().describe("What Ayin says out loud: warm, playful, one or two short sentences, 25 words at most"),
+  say: z.string().describe("What Otto says out loud: warm, playful, one or two short sentences, 25 words at most"),
   intent: z
     .enum(["chat", "start-task"])
     .describe("start-task only when the student clearly wants to begin doing something now"),
@@ -21,7 +21,7 @@ const Turn = z.object({
 export type Turn = z.infer<typeof Turn>;
 
 /**
- * Talking with Ayin. Ayin is a friendly otter: it chats back, answers small questions, and starts
+ * Talking with Otto. Otto is a friendly otter: it chats back, answers small questions, and starts
  * a task when the student says what they want to do.
  */
 export function talk(options: {
@@ -31,12 +31,12 @@ export function talk(options: {
   practised: string[];
   goal: string | null;
 }): Promise<Turn> {
-  const history = options.history.map((t) => `${t.who === "ayin" ? "Ayin" : options.name}: ${t.text}`).join("\n");
+  const history = options.history.map((t) => `${t.who === "ayin" ? "Otto" : options.name}: ${t.text}`).join("\n");
   return askClaude({
     schema: Turn,
     effort: "low",
     maxTokens: 2000,
-    instructions: `You are Ayin, a friendly otter who helps ${options.name} (16-22, autistic) with job tasks at their school's work site.
+    instructions: `You are Otto, a friendly otter who helps ${options.name} (16-22, autistic) with job tasks at their school's work site.
 Personality: warm, a little playful, never childish. Short and literal: no idioms or figures of speech.
 You are an otter coach, not their friend or a person; point them to their raft and staff for company and support.
 ${options.goal ? `${options.name}'s own goal: "${options.goal}".` : ""}

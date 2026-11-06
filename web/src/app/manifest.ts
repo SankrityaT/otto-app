@@ -1,10 +1,10 @@
-// Ayin's logo and app icons were drawn by Havi (@Havishea), from https://github.com/Havishea/Ayin.
+// Otto's logo and app icons were drawn by Havi (@Havishea), from https://github.com/Havishea/Otto.
 import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Ayin',
-    short_name: 'Ayin',
+    name: 'Otto',
+    short_name: 'Otto',
     description: 'A calm pond for the things you started.',
     start_url: '/app',
     display: 'standalone',

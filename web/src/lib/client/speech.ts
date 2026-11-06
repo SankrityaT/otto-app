@@ -1,4 +1,4 @@
-// Ayin's voice and ears. Ayin speaks with a real voice from the server (/api/voice: Cartesia,
+// Otto's voice and ears. Otto speaks with a real voice from the server (/api/voice: Cartesia,
 // or Deepgram), and only uses the browser's built-in voice if neither is set up. It hears the
 // student through Deepgram too (/api/hear).
 
@@ -8,8 +8,8 @@ let playing: HTMLAudioElement | null = null;
 /** Each new line gets a number, so a slow reply for an old line never talks over a new one. */
 let latest = 0;
 
-// Phones (iPhones especially) only let a page play sound right after a tap, but Ayin's voice
-// arrives a moment later from the server. So Ayin uses one audio player for every line, and
+// Phones (iPhones especially) only let a page play sound right after a tap, but Otto's voice
+// arrives a moment later from the server. So Otto uses one audio player for every line, and
 // unlocks it with a silent sound on the student's first tap anywhere.
 const SILENCE = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
 let player: HTMLAudioElement | null = null;
@@ -31,11 +31,11 @@ if (typeof window !== "undefined") {
   window.addEventListener("keydown", unlock, { once: true, capture: true });
 }
 
-// The microphone can hear Ayin's own voice, and speech recognition often hands over what it
-// heard just after Ayin stops. So Ayin remembers when it last spoke and what it said.
-/** Anything heard this soon after Ayin stops talking is probably still Ayin. */
+// The microphone can hear Otto's own voice, and speech recognition often hands over what it
+// heard just after Otto stops. So Otto remembers when it last spoke and what it said.
+/** Anything heard this soon after Otto stops talking is probably still Otto. */
 const ECHO_MS = 1500;
-/** Ayin's lines are remembered this long, to spot them coming back through the microphone. */
+/** Otto's lines are remembered this long, to spot them coming back through the microphone. */
 const REMEMBER_MS = 30_000;
 let quietSince = 0;
 const said: { words: Set<string>; at: number }[] = [];
@@ -51,12 +51,12 @@ function stoppedTalking(): void {
   quietSince = Date.now();
 }
 
-/** True if what the microphone heard is most likely Ayin's own voice, not the student's. */
+/** True if what the microphone heard is most likely Otto's own voice, not the student's. */
 function isEcho(heard: string): boolean {
   const words = wordsOf(heard);
   if (words.length === 0) return true;
   const aloudJustNow = isSpeaking() || Date.now() - quietSince < ECHO_MS;
-  // A few words heard while Ayin talks are Ayin's own if Ayin just said every one of them.
+  // A few words heard while Otto talks are Otto's own if Otto just said every one of them.
   if (words.length < 3) return aloudJustNow && said.some((line) => words.every((w) => line.words.has(w)));
   return said.some((line) => words.filter((w) => line.words.has(w)).length / words.length >= (aloudJustNow ? 0.6 : 0.7));
 }
@@ -107,8 +107,8 @@ function playAudio(audio: HTMLAudioElement, text: string, { onEnd, onWord }: Spe
 }
 
 /**
- * Say something out loud. `onWord` gets the position of each word as Ayin reaches it (so the
- * screen can light it up), and `onEnd` runs when Ayin finishes, or right away if it can't talk.
+ * Say something out loud. `onWord` gets the position of each word as Otto reaches it (so the
+ * screen can light it up), and `onEnd` runs when Otto finishes, or right away if it can't talk.
  */
 export function speak(text: string, options: SpeakOptions = {}): void {
   if (typeof window === "undefined") return options.onEnd?.();
@@ -141,7 +141,7 @@ export function hush(): void {
 
 export type VoiceCommand = "done" | "help" | "show-me" | "back";
 
-// Ayin's ears. The microphone is recorded only while someone is talking, in short clips, and
+// Otto's ears. The microphone is recorded only while someone is talking, in short clips, and
 // Deepgram turns each clip into words through our server (/api/hear), so the key never reaches
 // the browser. It works the same in every browser that can record sound, iPhones included.
 
@@ -213,7 +213,7 @@ function toCommand(said: string): VoiceCommand | null {
   return null;
 }
 
-/** True while Ayin itself is talking, so the microphone doesn't answer Ayin's own voice. */
+/** True while Otto itself is talking, so the microphone doesn't answer Otto's own voice. */
 function isSpeaking(): boolean {
   return typeof window !== "undefined" && (playing !== null || window.speechSynthesis?.speaking === true);
 }
@@ -221,7 +221,7 @@ function isSpeaking(): boolean {
 /**
  * Listen until stopped, like talking to a coach. Each time the student says something and
  * pauses, short commands ("done", "help", "show me") go to `onCommand`, and anything else goes
- * to `onQuestion`. Ayin's own voice is ignored. Returns a function that stops listening.
+ * to `onQuestion`. Otto's own voice is ignored. Returns a function that stops listening.
  */
 export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (question: string) => void): () => void {
   let stopped = false;
@@ -229,8 +229,8 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
 
   const handle = (heard: string) => {
     const short = heard.split(/\s+/).length <= 3;
-    if (isEcho(heard)) return; // that was Ayin's own voice
-    hush(); // the student is talking: Ayin stops and listens, like a person would
+    if (isEcho(heard)) return; // that was Otto's own voice
+    hush(); // the student is talking: Otto stops and listens, like a person would
     const command = toCommand(heard);
     if (command && short) onCommand(command);
     else if (heard.length >= 2) onQuestion(heard);
@@ -262,8 +262,8 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
       const loud = level > Math.max(MIN_LEVEL, noise * 3);
       if (!loud) noise = noise * 0.95 + level * 0.05;
 
-      // The student can talk over Ayin. The microphone cancels most of Ayin's voice, and
-      // anything that still comes through is recognised as Ayin's own words (isEcho).
+      // The student can talk over Otto. The microphone cancels most of Otto's voice, and
+      // anything that still comes through is recognised as Otto's own words (isEcho).
       if (!talkingFrom) {
         if (loud) [talkingFrom, quiet] = [Date.now(), 0];
         else if (Date.now() - clipFrom > IDLE_RESTART_MS) {

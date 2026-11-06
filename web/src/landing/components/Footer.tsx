@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="border-t border-line px-5 pb-12 pt-14 sm:px-8">
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <p className="font-display text-[40px] leading-none">Ayin</p>
+          <p className="font-display text-[40px] leading-none">Otto</p>
           <p className="mt-3 max-w-sm text-ink-2">A calm otter coach for big tasks, one small step at a time.</p>
           <p className="mt-6 font-hand text-[19px] text-ink-3">No otters were rushed in the making of this page.</p>
         </div>
@@ -26,7 +26,7 @@ export function Footer() {
           <ul className="mt-3 grid gap-2">
             <li>
               <a href={site.appUrl} className="text-ink-2 hover:text-ink">
-                Try Ayin
+                Try Otto
               </a>
             </li>
             <li>
@@ -46,7 +46,7 @@ export function Footer() {
       </div>
       <div className="mx-auto mt-12 flex max-w-6xl flex-wrap justify-between gap-3 border-t border-line pt-6 text-[14px] text-ink-3">
         <p>Made for the 2026 North American AI Challenge for Neurodiverse Learning.</p>
-        <p>© 2026 Ayin · MIT licensed</p>
+        <p>© 2026 Otto · MIT licensed</p>
       </div>
     </footer>
   );

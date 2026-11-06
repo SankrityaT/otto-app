@@ -80,7 +80,7 @@ export function WorkCard() {
       )}
 
       <footer className="border-t border-[#ddd3c4] pt-4 text-[14px] text-[#69625a]">
-        {profile.name} chose to share this card. It comes from their practice with Ayin, a step-by-step coach.
+        {profile.name} chose to share this card. It comes from their practice with Otto, a step-by-step coach.
       </footer>
     </main>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * We kept the leaf, its colours and the ripples; Today lists tasks as leaves under the pond.
  */
 /** The pond's leaf colours. Each task keeps one colour. */

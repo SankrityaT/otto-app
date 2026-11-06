@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Ayin otter desk-buddy enclosure — parametric source.
+Otto otter desk-buddy enclosure — parametric source.
 
     uv venv --python 3.12 .venv
     uv pip install --python .venv/bin/python manifold3d trimesh numpy scipy scikit-image pillow matplotlib
@@ -1118,7 +1118,7 @@ def main():
     paths = []
     for nm, az, el in views:
         pth = os.path.join(rdir, f"{nm}.png")
-        render(assembled, pth, az=az, el=el, title=f"Ayin otter — {nm}")
+        render(assembled, pth, az=az, el=el, title=f"Otto otter — {nm}")
         paths.append(pth)
     # closed-shutter view
     closed = assembled[:-1] + [tmc(extra["shutter_closed"], COLORS["teal"])]
@@ -1131,7 +1131,7 @@ def main():
     if os.path.exists(ref):
         from PIL import Image
         mine = os.path.join(rdir, "_cmp_view.png")
-        render(assembled, mine, az=14, el=8, size=700, title="Ayin otter (this design)")
+        render(assembled, mine, az=14, el=8, size=700, title="Otto otter (this design)")
         r = Image.open(ref).convert("RGB")
         crop = r.crop((40, 470, 420, 870))
         crop = crop.resize((int(700 * crop.width / crop.height), 700))

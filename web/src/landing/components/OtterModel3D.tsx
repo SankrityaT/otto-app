@@ -73,7 +73,7 @@ export function OtterModel3D({ onReady }: { onReady?: () => void }) {
       <Canvas
         camera={{ position: [1.15, 1.0, 2.9], fov: 35 }}
         dpr={[1, 2]}
-        aria-label="A 3D model of the Ayin otter. Drag to turn it around."
+        aria-label="A 3D model of the Otto otter. Drag to turn it around."
         role="img"
       >
         <hemisphereLight args={["#fffaf0", "#b6cec3", 1.1]} />

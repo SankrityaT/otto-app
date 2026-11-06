@@ -8,7 +8,7 @@ import { Button } from "../Button";
 import { RaftIcon } from "./Stickers";
 
 /**
- * Share a win or ask the raft for help. Ayin checks the post before anyone sees it. If
+ * Share a win or ask the raft for help. Otto checks the post before anyone sees it. If
  * something might hurt or isn't safe, it explains why and offers a kinder way to say it.
  */
 export function Composer({
@@ -153,10 +153,10 @@ export function Composer({
 
         {!review && (
           <Button look="main" className="h-14" disabled={busy || !body.trim()} onClick={() => share()}>
-            {busy ? "Ayin is checking it" : kind === "win" ? "Share with my raft" : "Ask my raft"}
+            {busy ? "Otto is checking it" : kind === "win" ? "Share with my raft" : "Ask my raft"}
           </Button>
         )}
-        <p className="text-center text-[14px] text-ink-3">Ayin checks every post to keep the raft kind and safe.</p>
+        <p className="text-center text-[14px] text-ink-3">Otto checks every post to keep the raft kind and safe.</p>
       </div>
     </div>
   );

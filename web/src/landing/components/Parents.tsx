@@ -17,18 +17,18 @@ const PROMISES = [
 const WHY = [
   {
     big: "Fewer prompts",
-    body: "Our partner school's own goal is students needing fewer prompts. At a first job, nobody prompts each step. So Ayin's help is built to fade.",
+    body: "Our partner school's own goal is students needing fewer prompts. At a first job, nobody prompts each step. So Otto's help is built to fade.",
     source: "Arizona Autism Charter Schools",
   },
   {
     big: "−17%",
-    body: "When AI did the work for students, their scores dropped 17% once it was taken away. Hint-only help did no harm. So Ayin gives hints, not answers.",
+    body: "When AI did the work for students, their scores dropped 17% once it was taken away. Hint-only help did no harm. So Otto gives hints, not answers.",
     source: "PNAS, 2025",
     href: "https://www.pnas.org/doi/10.1073/pnas.2422633122",
   },
   {
     big: "4 in 10",
-    body: "About 40% of neurodivergent young adults in one large study hadn't met up with a friend in a year. So Ayin comes with a raft.",
+    body: "About 40% of neurodivergent young adults in one large study hadn't met up with a friend in a year. So Otto comes with a raft.",
     source: "NLTS2, via Washington University",
     href: "https://source.washu.edu/2013/05/new-study-examines-social-isolation-of-young-adults-with-autism-spectrum-disorder/",
   },
@@ -46,7 +46,7 @@ export function Parents() {
           <span className="italic text-cel-deep">so you can relax.</span>
         </>
       }
-      intro="Ayin was shaped by time with students, teachers and job coaches at our partner school, and by First Place AZ. Here's what we promise, and why we built it this way."
+      intro="Otto was shaped by time with students, teachers and job coaches at our partner school, and by First Place AZ. Here's what we promise, and why we built it this way."
     >
       <Reveal>
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">

@@ -23,7 +23,7 @@ import { RaftIcon } from "./raft/Stickers";
 import type { Scene } from "@/lib/ai/scene";
 import dynamic from "next/dynamic";
 import UprightOtter from "./otter/UprightOtter";
-import { AyinSees, WithEyes } from "./AyinSees";
+import { OttoSees, WithEyes } from "./OttoSees";
 import { HandsFree } from "./HandsFree";
 import { TogetherBar } from "./TogetherBar";
 import {
@@ -38,9 +38,9 @@ import {
 
 /** How often the screen checks for presses on the otter's physical buttons. */
 const BUTTON_POLL_MS = 1000;
-/** How often Ayin looks through the otter's camera while watching hands-free. */
+/** How often Otto looks through the otter's camera while watching hands-free. */
 const WATCH_EVERY_MS = 6000;
-/** Away from Ayin longer than this, and it says where the student was when they come back. */
+/** Away from Otto longer than this, and it says where the student was when they come back. */
 const AWAY_MS = 20_000;
 
 // three.js only runs in the browser, and only loads when a student asks to be shown.
@@ -72,9 +72,9 @@ export function StepCoach({
   const [listening, setListening] = useState(false);
   // Posting to the raft from inside a task: asking for help on a step, or sharing a finished task.
   const [composing, setComposing] = useState<"ask" | "win" | null>(null);
-  // Hands-free: Ayin notices when a step is done, so the student doesn't have to tap. On by default.
+  // Hands-free: Otto notices when a step is done, so the student doesn't have to tap. On by default.
   const [watching, setWatching] = useState(true);
-  // The step Ayin couldn't see being done, so the student can say "I did it".
+  // The step Otto couldn't see being done, so the student can say "I did it".
   const [notSeen, setNotSeen] = useState<string | null>(null);
   // null: the pause before starting. "steps": one step at a time. "alone": checked only at the end.
   const [mode, setMode] = useState<"steps" | "alone" | null>(
@@ -83,7 +83,7 @@ export function StepCoach({
   // Each step's 3D model, built once and then reused. The flat picture is the fallback.
   const [scenes, setScenes] = useState<Record<string, Scene>>({});
   const loading = useRef(new Map<string, Promise<Scene>>());
-  // Steps where Ayin already nudged the student back from their phone.
+  // Steps where Otto already nudged the student back from their phone.
   const nudged = useRef(new Set<string>());
   const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
@@ -97,7 +97,7 @@ export function StepCoach({
   } = useCamera(
     useBrowserEyes && !summary,
     cameraChoice === "screen" ? "screen" : "camera",
-    // Ayin looks when the student moves and then holds still: usually a step just done.
+    // Otto looks when the student moves and then holds still: usually a step just done.
     watching && mode === "steps" ? () => done({ auto: true }) : undefined,
   );
 
@@ -155,7 +155,7 @@ export function StepCoach({
     return photo;
   }
 
-  /** The student asked something out loud. Ayin looks and answers like a coach beside them. */
+  /** The student asked something out loud. Otto looks and answers like a coach beside them. */
   async function answer(question: string) {
     if (!step) return;
     setHeard(question);
@@ -180,7 +180,7 @@ export function StepCoach({
   }
 
   /**
-   * "Done": Ayin looks and checks the step. When it's watching hands-free (`auto`), it stays
+   * "Done": Otto looks and checks the step. When it's watching hands-free (`auto`), it stays
    * quiet until the step is done. `trust` takes the student's word when the camera can't see.
    */
   async function done({ auto = false, trust = false } = {}) {
@@ -195,7 +195,7 @@ export function StepCoach({
         trust,
       );
       if (result.done || !auto) tell(result.say);
-      // Drifted to a phone while Ayin was watching: one gentle nudge back per step, never more.
+      // Drifted to a phone while Otto was watching: one gentle nudge back per step, never more.
       else if (result.nudge && !nudged.current.has(step.id)) {
         nudged.current.add(step.id);
         tell(result.nudge);
@@ -217,7 +217,7 @@ export function StepCoach({
   }
 
   // Back from another app or tab (on a phone, that usually means the phone itself): after a
-  // while away, Ayin says where they were, so they don't have to work it out again.
+  // while away, Otto says where they were, so they don't have to work it out again.
   const welcomeBack = useEffectEvent(() => {
     if (step) tell(`Welcome back. You're on step ${index + 1}: ${step.text}.`);
   });
@@ -354,10 +354,10 @@ export function StepCoach({
     return () => clearInterval(timer);
   }, []);
 
-  // What Ayin sees, always on screen, so the student never has to trust a camera they can't see.
-  // What Ayin sees, big and always on screen, so the student never has to trust a camera they can't see.
+  // What Otto sees, always on screen, so the student never has to trust a camera they can't see.
+  // What Otto sees, big and always on screen, so the student never has to trust a camera they can't see.
   const eyes = (className: string) => (
-    <AyinSees
+    <OttoSees
       videoRef={videoRef}
       otter={!useBrowserEyes}
       looking={looking}
@@ -365,7 +365,7 @@ export function StepCoach({
       note={
         cameraChoice === "screen" && !sharing ? (
           <button onClick={shareScreen} className="font-semibold text-cel-deep">
-            Share a screen with Ayin
+            Share a screen with Otto
           </button>
         ) : cameraError ? (
           cameraError
@@ -545,7 +545,7 @@ export function StepCoach({
             {heard ? (
               <>You said: &ldquo;{heard}&rdquo;</>
             ) : (
-              "Ayin is listening. Ask anything, or say done, help or show me."
+              "Otto is listening. Ask anything, or say done, help or show me."
             )}
           </p>
         )}

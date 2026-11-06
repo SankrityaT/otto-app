@@ -18,7 +18,7 @@ const CHEERS = ["Nice work!", "You got this", "Way to go!", "High five"];
 const IDEAS = [
   { icon: Users, title: "A small, safe group", body: "Three to six students from the same program. Staff set it up. No strangers, ever." },
   { icon: Heart, title: "One shared pond", body: "Every step anyone does on their own raises the water. Everyone fills it together." },
-  { icon: Repeat, title: "Practice buddies", body: "Ayin pairs you with a crewmate, so you can each show the other a step you've mastered." },
+  { icon: Repeat, title: "Practice buddies", body: "Otto pairs you with a crewmate, so you can each show the other a step you've mastered." },
   { icon: HandHeart, title: "Cheers in kind words", body: "Send a cheer with one tap, from friendly words staff picked. Ask someone who's done the step before." },
 ];
 
@@ -124,7 +124,7 @@ export function Raft() {
                 ))}
               </ul>
               <p className="mt-4 text-[16px] text-ink-3">
-                The help you don&apos;t need from Ayin anymore is exactly what you can now share with a friend.
+                The help you don&apos;t need from Otto anymore is exactly what you can now share with a friend.
               </p>
             </div>
           </Reveal>

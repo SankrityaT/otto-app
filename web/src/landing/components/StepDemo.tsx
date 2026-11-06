@@ -77,7 +77,7 @@ export function StepDemo() {
   const [onOwn, setOnOwn] = useState(0);
   const finished = step >= STEPS.length;
 
-  // "Checking" stands in for Ayin looking at the camera photo, then it moves on by itself.
+  // "Checking" stands in for Otto looking at the camera photo, then it moves on by itself.
   useEffect(() => {
     if (phase === "checking") {
       const t = setTimeout(() => setPhase("checked"), 900);
@@ -133,7 +133,7 @@ export function StepDemo() {
               <p className="mt-3 text-ink-2">
                 {onOwn} of {STEPS.length} steps on your own.
                 <br />
-                {onOwn === STEPS.length ? "Next time, Ayin will step back." : "Help is always one tap away."}
+                {onOwn === STEPS.length ? "Next time, Otto will step back." : "Help is always one tap away."}
               </p>
               <button type="button" onClick={restart} className="btn btn--quiet btn--small mt-6">
                 <RotateCcw className="size-4" aria-hidden /> Make another

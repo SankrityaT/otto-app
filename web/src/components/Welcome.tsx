@@ -12,7 +12,7 @@ import { NAME_HINT, safeName } from "@/lib/names";
 type Step = "name" | "otter" | "raft" | "returning";
 
 /**
- * The first time on a device, one question at a time: Ayin asks your first name, you pick your
+ * The first time on a device, one question at a time: Otto asks your first name, you pick your
  * otter's colour, and you join your raft with the code from your teacher. A returning student
  * types their raft's code and taps their own otter. Nobody sees anyone's name without that code.
  */
@@ -27,14 +27,14 @@ export function Welcome({ onReady }: { onReady: (student: Student) => void }) {
   const [talking, setTalking] = useState<number | null>(null);
 
   const says: Record<Step, string> = {
-    name: "Hi, I'm Ayin! What's your first name?",
+    name: "Hi, I'm Otto! What's your first name?",
     otter: `Nice to meet you, ${name.trim()}! Pick your otter's colour.`,
     raft: "Last thing: join your raft.",
     returning: raft ? "Tap your otter." : "Welcome back! What's your raft's code?",
   };
   const line = says[step];
 
-  // Ayin says each question out loud, and its otter talks along.
+  // Otto says each question out loud, and its otter talks along.
   useEffect(() => {
     speak(line, { onWord: (char) => setTalking(char), onEnd: () => setTalking(null) });
     return () => hush();
@@ -101,7 +101,7 @@ export function Welcome({ onReady }: { onReady: (student: Student) => void }) {
                 Next
               </button>
               <button type="button" className="btn btn--text" onClick={() => go("returning")}>
-                I&apos;ve used Ayin before
+                I&apos;ve used Otto before
               </button>
             </>
           )}

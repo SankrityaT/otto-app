@@ -1,6 +1,6 @@
 import { config } from "./config";
 
-// Ayin's voice. Cartesia Sonic sounds the most natural and starts fastest; Deepgram Aura is the
+// Otto's voice. Cartesia Sonic sounds the most natural and starts fastest; Deepgram Aura is the
 // backup if Cartesia is down or out of credit. Nothing said is saved.
 
 const CARTESIA = "https://api.cartesia.ai/tts/bytes";

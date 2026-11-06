@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * Unchanged.
  */
 import { useLayoutEffect, useRef, useState } from 'react';

@@ -27,7 +27,7 @@ export function Demo() {
           {video?.kind === "iframe" && (
             <iframe
               src={video.src}
-              title="Ayin in 30 seconds"
+              title="Otto in 30 seconds"
               className="absolute inset-0 size-full"
               allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen
@@ -49,7 +49,7 @@ export function Demo() {
                 </div>
                 <div>
                   <p className="font-display text-[clamp(30px,4.5vw,46px)] leading-none">The demo is on its way</p>
-                  <p className="mt-3 text-ink-2">We&apos;re filming a short video of Ayin at work. Check back soon!</p>
+                  <p className="mt-3 text-ink-2">We&apos;re filming a short video of Otto at work. Check back soon!</p>
                 </div>
                 <OtterSays className="rotate-[-2deg]" tailX="50%">
                   Practising my lines...

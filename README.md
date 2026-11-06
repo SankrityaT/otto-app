@@ -1,6 +1,6 @@
-# Ayin
+# Otto
 
-**Ayin helps autistic students finish hands-on job tasks on their own.** It turns any task into one small step at a time, shows each step as a 3D model you can turn and talks it through out loud, checks the real work through the camera, and connects students with a small "raft" of peers who've done it. Help fades as the student succeeds.
+**Otto helps autistic students finish hands-on job tasks on their own.** It turns any task into one small step at a time, shows each step as a 3D model you can turn and talks it through out loud, checks the real work through the camera, and connects students with a small "raft" of peers who've done it. Help fades as the student succeeds.
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
 
@@ -8,12 +8,12 @@ Built for the 2026 North American AI Challenge for Neurodiverse Learning, with r
 
 ## Our approach
 
-- **Works on the device a school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Ayin sees the work. AZACS already gives students Chromebooks and iPads, and AZACS staff told us anything worn is a sensory problem, so there's nothing to buy and nothing to wear.
+- **Works on the device a school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Otto sees the work. AZACS already gives students Chromebooks and iPads, and AZACS staff told us anything worn is a sensory problem, so there's nothing to buy and nothing to wear.
 - **Complex things made simple.** Every task becomes one step at a time, and every step a diagram and a 3D model made for that task, talked through with a natural voice. The student can ask out loud at any point.
 - **Real peers, not a chatbot.** The Raft routes help back to classmates who've mastered the step, lets students work side by side, and celebrates wins, with no video, no strangers and no rankings.
 - **Built to be needed less.** Help steps down through First Place AZ's five stages, from watching every step to doing it alone.
 - **A layer for hardware.** Any camera or button can plug in through two small endpoints (see [`device/`](device/README.md)): our 3D-printed otter, a document camera, a big accessibility switch. The app gives the same help whichever one the student uses.
-- **Next: the Ayin lamp.** A desk lamp with a camera looking down at the work that talks the student through it and points at the real part with light. The 3D-printed desk otter in this repo is a first step toward it.
+- **Next: the Otto lamp.** A desk lamp with a camera looking down at the work that talks the student through it and points at the real part with light. The 3D-printed desk otter in this repo is a first step toward it.
 
 ## The problem
 
@@ -25,28 +25,28 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - Students learn best by seeing and doing: *"we learn from our mistakes visually."*
 - Help that never fades creates dependence. The school measures success as needing fewer prompts.
 - About 40% of autistic young adults never got together with friends in a year.
-- Anything worn on the body is a sensory problem, so Ayin needs nothing worn.
+- Anything worn on the body is a sensory problem, so Otto needs nothing worn.
 
-## What Ayin does
+## What Otto does
 
-**Five stages, like First Place AZ.** First Place teaches a skill in five stages: watch, first tries, with help, with a check-in, on your own. Ayin follows the same path for each student and each task, works out the stage from the student's own log, and shows it before every task. A new task starts by watching every step; a mastered one is done alone, with Ayin checking only at the end.
+**Five stages, like First Place AZ.** First Place teaches a skill in five stages: watch, first tries, with help, with a check-in, on your own. Otto follows the same path for each student and each task, works out the stage from the student's own log, and shows it before every task. A new task starts by watching every step; a mastered one is done alone, with Otto checking only at the end.
 
-**One step at a time.** The student says, types or shows a task ("make an iced latte"). Claude breaks it into small physical steps. Ayin shows one step at a time: a 3D model of that step the student can turn (a drawn picture while it builds), 8 words or fewer, read aloud, with progress dots.
+**One step at a time.** The student says, types or shows a task ("make an iced latte"). Claude breaks it into small physical steps. Otto shows one step at a time: a 3D model of that step the student can turn (a drawn picture while it builds), 8 words or fewer, read aloud, with progress dots.
 
-- **Watch first:** at the first stage, Ayin walks through every step in 3D on one screen and talks it through. The student can say "next", "back", or ask about what they're looking at.
-- **Done:** Ayin takes one photo and checks the step, then moves on or says what's missing.
+- **Watch first:** at the first stage, Otto walks through every step in 3D on one screen and talks it through. The student can say "next", "back", or ask about what they're looking at.
+- **Done:** Otto takes one photo and checks the step, then moves on or says what's missing.
 - **Help:** one level at a time, and only when asked: a nudge, then a hint, then "show me".
 - **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing. The step's flat diagram shows straight away, and the 3D model takes its place as soon as Claude has built it (once per step, then saved), so nobody waits on a loading screen.
-- **A real voice, both ways:** Ayin speaks with Cartesia Sonic, with Deepgram Aura as a backup (the browser's own voice only if neither is set up), and words light up as they're said. It hears the student through Deepgram too: the microphone records only while someone is talking, and each clip goes through our server, so it works in every browser, iPhones included, and the key never reaches the device.
-- **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
+- **A real voice, both ways:** Otto speaks with Cartesia Sonic, with Deepgram Aura as a backup (the browser's own voice only if neither is set up), and words light up as they're said. It hears the student through Deepgram too: the microphone records only while someone is talking, and each clip goes through our server, so it works in every browser, iPhones included, and the key never reaches the device.
+- **Smaller steps:** if a step feels too big, Otto splits it into 2–4 smaller ones.
 - **Time you can see:** a step that takes a set time (steam milk for 30 seconds) gets a calm ring timer. It never turns red.
 - **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.
-- **Hands-free:** one switch, on by default during a task, so "done" works with wet hands. Ayin listens for "next", "done", "help" or any question, and ignores its own voice coming back through the microphone. It also notices when a step is done: the browser compares tiny frames on the device, and only when the student moves and then holds still does it send one photo to check. With the otter's camera it checks every few seconds. "I did it" moves on when the camera can't see the step.
-- **Back on track:** if the camera sees the student drift to their phone during a step, Ayin gives one gentle nudge back (never more than once a step). If they leave Ayin for another app for a while, it says where they were when they come back, and Watch pauses instead of running on without them.
-- **See what Ayin sees:** the live camera is big on every task screen (beside the task on a laptop or tablet, across the top on a phone) and lights up when Ayin looks, so nobody has to trust a camera they can't see.
-- **Talk to Ayin:** students can just ask out loud ("is this the right way up?"). Ayin looks through the camera and answers in a sentence or two, like a coach beside them.
-- **Chat with Ayin:** on the home screen, saying hi gets a real answer. It happens right in the pond, not in a chat window: the pond draws in and Ayin's words appear under the otter, each one lighting up as Ayin says it, any line can be heard again, and there are always 2–3 ready answers to tap. Ayin offers a task; the student taps Start. The otter reacts instead of looping: it leans toward the student's finger, leans in to listen, sways while thinking, hops on each word it says, and bounces when tapped. Tapping the otter starts a chat.
-- **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Ayin can look at a shared screen or tab instead.
+- **Hands-free:** one switch, on by default during a task, so "done" works with wet hands. Otto listens for "next", "done", "help" or any question, and ignores its own voice coming back through the microphone. It also notices when a step is done: the browser compares tiny frames on the device, and only when the student moves and then holds still does it send one photo to check. With the otter's camera it checks every few seconds. "I did it" moves on when the camera can't see the step.
+- **Back on track:** if the camera sees the student drift to their phone during a step, Otto gives one gentle nudge back (never more than once a step). If they leave Otto for another app for a while, it says where they were when they come back, and Watch pauses instead of running on without them.
+- **See what Otto sees:** the live camera is big on every task screen (beside the task on a laptop or tablet, across the top on a phone) and lights up when Otto looks, so nobody has to trust a camera they can't see.
+- **Talk to Otto:** students can just ask out loud ("is this the right way up?"). Otto looks through the camera and answers in a sentence or two, like a coach beside them.
+- **Chat with Otto:** on the home screen, saying hi gets a real answer. It happens right in the pond, not in a chat window: the pond draws in and Otto's words appear under the otter, each one lighting up as Otto says it, any line can be heard again, and there are always 2–3 ready answers to tap. Otto offers a task; the student taps Start. The otter reacts instead of looping: it leans toward the student's finger, leans in to listen, sways while thinking, hops on each word it says, and bounces when tapped. Tapping the otter starts a chat.
+- **No camera? Share a screen.** For tasks on a computer, or devices without a camera, Otto can look at a shared screen or tab instead.
 
 **Raft.** A group of otters floating together is called a raft. Each student's raft is a small, safe social space with others from the same work site, set up by staff.
 
@@ -54,13 +54,13 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Do it together:** like body doubling on Focusmate, but made for our students. Tap a raftmate's otter, pick a task, and you both do it at the same time, each in your own step coach. Your partner's otter sits above your step, moving as they finish real steps, and one tap sends a preset cheer. No video and no free chat. "Not today" is always one tap.
 
 - **Wins:** share what you made, with a photo of the work (never faces). Raftmates react with hand-drawn otter stickers that show who reacted, never a count.
-- **Help board:** ask about any step. Raftmates who've done that step on their own see "You know this one" and can answer with words, a photo of their own work, or **the same 3D model of the step** that Ayin builds for "show me", so both can turn it. The thread updates live; the asker marks "This helped". Stuck mid-task? "Ask my raft" posts the question with the step attached.
-- **Safe for kids:** a fast clean-language check blocks swear words (even disguised ones) before anything else. Then Ayin checks every post and reply: kind, nothing sexual or flirty, no personal info, no faces in photos. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff, and one tap blocks someone so you stop seeing each other. No direct messages, no live video between students, no strangers.
+- **Help board:** ask about any step. Raftmates who've done that step on their own see "You know this one" and can answer with words, a photo of their own work, or **the same 3D model of the step** that Otto builds for "show me", so both can turn it. The thread updates live; the asker marks "This helped". Stuck mid-task? "Ask my raft" posts the question with the step attached.
+- **Safe for kids:** a fast clean-language check blocks swear words (even disguised ones) before anything else. Then Otto checks every post and reply: kind, nothing sexual or flirty, no personal info, no faces in photos. If something might hurt, it suggests a kinder way to say it. One tap reports a post to staff, and one tap blocks someone so you stop seeing each other. No direct messages, no live video between students, no strangers.
 - **Profiles:** each student's own goal, "how I work best", and "I can help with", which fills itself from tasks they've mastered.
 - **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
-- **Buddies:** Ayin pairs raftmates so each can show the other a step they've mastered, and suggests your buddy when you pick someone to work with.
+- **Buddies:** Otto pairs raftmates so each can show the other a step they've mastered, and suggests your buddy when you pick someone to work with.
 
-**Getting in.** The first time on a device, Ayin asks the student's first name, they pick their otter's colour, and they join their raft with its code. A returning student types the code and taps their own otter. Anyone without a code can start a new raft from the Raft tab: Ayin makes a random six-character code to share, and every member can see it on the Raft tab to invite classmates.
+**Getting in.** The first time on a device, Otto asks the student's first name, they pick their otter's colour, and they join their raft with its code. A returning student types the code and taps their own otter. Anyone without a code can start a new raft from the Raft tab: Otto makes a random six-character code to share, and every member can see it on the Raft tab to invite classmates.
 
 **Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen. Under the pond are the student's tasks as leaves they can tap, and a task already started shows a ring for how far along it is.
 
@@ -119,9 +119,9 @@ On Supabase, `DATABASE_URL` is the **transaction pooler** connection string (por
 
 **The landing page** for students and parents is at http://localhost:3000, and the app itself at http://localhost:3000/app.
 
-**On a phone:** start with `npm run dev:phone` instead (it serves Ayin over https on your Wi-Fi, which phones need before they allow the camera). Then open **Me** on the computer and scan the **Use Ayin on your phone** QR code with the phone's camera. Ayin opens on the phone, already set to that student. The first time, the phone may ask you to trust the development certificate.
+**On a phone:** start with `npm run dev:phone` instead (it serves Otto over https on your Wi-Fi, which phones need before they allow the camera). Then open **Me** on the computer and scan the **Use Otto on your phone** QR code with the phone's camera. Otto opens on the phone, already set to that student. The first time, the phone may ask you to trust the development certificate.
 
-Use Chrome or Safari: Ayin uses the browser's built-in speech to read steps aloud and to hear "done", "help" and "show me". The first time a step is shown, its picture takes 15–30 seconds to draw; after that it is instant.
+Use Chrome or Safari: Otto uses the browser's built-in speech to read steps aloud and to hear "done", "help" and "show me". The first time a step is shown, its picture takes 15–30 seconds to draw; after that it is instant.
 
 Checks:
 
@@ -141,7 +141,7 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 
 ## Privacy and safety
 
-- **Ayin won't help anyone get hurt.** Every Claude prompt shares one set of safety rules: no weapons, self-harm, violence, drugs, sexual content or hiding things from staff, even "as a joke" or "for a class". The server enforces it too. Claude must decide a task is safe before writing any steps, so an unsafe task saves nothing: no steps, pictures or 3D models. If a student sounds at risk, Ayin starts no task, and every reply tells them to talk to a staff member and gives the 988 crisis line, whatever words Claude chose. The rules are in `web/src/lib/ai/safety.ts`.
+- **Otto won't help anyone get hurt.** Every Claude prompt shares one set of safety rules: no weapons, self-harm, violence, drugs, sexual content or hiding things from staff, even "as a joke" or "for a class". The server enforces it too. Claude must decide a task is safe before writing any steps, so an unsafe task saves nothing: no steps, pictures or 3D models. If a student sounds at risk, Otto starts no task, and every reply tells them to talk to a staff member and gives the 988 crisis line, whatever words Claude chose. The rules are in `web/src/lib/ai/safety.ts`.
 - **Names stay inside the raft.** Students give a first name only, checked for letters and swear words. There is no list of all students: a returning student types their raft's code and sees only that raft's otters.
 - **Camera only when asked.** One photo when the student taps Done, Help or Show me. Photos go to Claude for that one answer and are never stored.
 - **Pictures can't run code.** Step drawings are checked against a strict list of allowed SVG features and shown as images.

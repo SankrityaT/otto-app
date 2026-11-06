@@ -6,13 +6,13 @@ const FEATURES = [
   {
     icon: Hand,
     title: "Hands-free",
-    body: "Hands wet or full? Just say \"done\". Or say \"watch for me\" and Ayin checks every few seconds by itself.",
+    body: "Hands wet or full? Just say \"done\". Or say \"watch for me\" and Otto checks every few seconds by itself.",
     tone: "var(--sky)",
   },
   {
     icon: MessagesSquare,
     title: "Just ask",
-    body: "\"Is this the right way up?\" Ask out loud. Ayin looks and answers in a sentence or two, like a coach beside you.",
+    body: "\"Is this the right way up?\" Ask out loud. Otto looks and answers in a sentence or two, like a coach beside you.",
     tone: "var(--celadon)",
   },
   {
@@ -30,13 +30,13 @@ const FEATURES = [
   {
     icon: Split,
     title: "Smaller steps",
-    body: "A step feels too big? Tap once and Ayin splits it into two to four smaller ones.",
+    body: "A step feels too big? Tap once and Otto splits it into two to four smaller ones.",
     tone: "var(--apricot)",
   },
   {
     icon: MonitorUp,
     title: "No camera? No problem",
-    body: "For tasks on a computer, Ayin can look at a shared screen instead. Or just tap \"I did it\".",
+    body: "For tasks on a computer, Otto can look at a shared screen instead. Or just tap \"I did it\".",
     tone: "var(--plum)",
   },
 ];
@@ -52,7 +52,7 @@ export function Features() {
           <span className="italic text-cel-deep">that help a lot.</span>
         </>
       }
-      intro="Made with students, teachers and job coaches, so Ayin fits the way real work happens: messy hands, noisy rooms and all."
+      intro="Made with students, teachers and job coaches, so Otto fits the way real work happens: messy hands, noisy rooms and all."
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map(({ icon: Icon, title, body, tone }, i) => (

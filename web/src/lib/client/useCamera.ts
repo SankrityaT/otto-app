@@ -11,7 +11,7 @@ const SAMPLE_HEIGHT = 24;
 const SAMPLE_MS = 250;
 
 /**
- * What Ayin looks at from the browser: the device camera, or a screen or tab the student
+ * What Otto looks at from the browser: the device camera, or a screen or tab the student
  * shares (for students without a camera, or tasks that happen on a screen).
  * `capture()` returns one JPEG frame as a data URL. Nothing is recorded or saved.
  * With `onStill`, it calls back each time the student moves and then holds still.
@@ -43,7 +43,7 @@ export function useCamera(enabled: boolean, source: EyesSource = "camera", onSti
       // About 2 megapixels: enough for small parts and labels, and still quick to send.
       .getUserMedia({ video: { facingMode: "environment", width: { ideal: 1920 } }, audio: false })
       .then(attach)
-      .catch(() => setError("Ayin can't use the camera. Check the browser's camera permission."));
+      .catch(() => setError("Otto can't use the camera. Check the browser's camera permission."));
     return () => streamRef.current?.getTracks().forEach((track) => track.stop());
   }, [enabled, source]);
 

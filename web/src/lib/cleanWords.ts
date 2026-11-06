@@ -1,4 +1,4 @@
-// A fast first check for swear words, before Ayin's fuller kindness check. It runs even if
+// A fast first check for swear words, before Otto's fuller kindness check. It runs even if
 // the AI is slow or down, so the raft never shows these words to students.
 
 const BLOCKED = [

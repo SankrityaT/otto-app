@@ -27,7 +27,7 @@ export type Concern = z.infer<typeof Concern>;
 const STAFF = "Please talk to a staff member now.";
 const CRISIS_LINE = "You can call or text 988 any time, day or night.";
 
-/** What Ayin says. When someone may be at risk, it always includes staff and the 988 crisis line. */
+/** What Otto says. When someone may be at risk, it always includes staff and the 988 crisis line. */
 export function safeReply(say: string, concern: Concern): string {
   if (concern !== "at-risk") return say;
   const parts = [say];
@@ -36,5 +36,5 @@ export function safeReply(say: string, concern: Concern): string {
   return parts.join(" ");
 }
 
-/** What a student sees when Ayin won't help. We may not know why, so it always points to people who can. */
-export const WONT_HELP = `Ayin can't help with that one. If something is wrong, ${STAFF.toLowerCase()} ${CRISIS_LINE}`;
+/** What a student sees when Otto won't help. We may not know why, so it always points to people who can. */
+export const WONT_HELP = `Otto can't help with that one. If something is wrong, ${STAFF.toLowerCase()} ${CRISIS_LINE}`;

@@ -1,5 +1,5 @@
 // Hands-free checking without sending a stream anywhere: the browser compares tiny copies of
-// the camera picture itself, and Ayin only takes a photo once the student moved and then
+// the camera picture itself, and Otto only takes a photo once the student moved and then
 // held still, which is usually the moment a step has just been done.
 
 /** Average change per colour channel between two frames of RGBA pixels, from 0 to 255. */
@@ -15,7 +15,7 @@ export function frameChange(a: ArrayLike<number>, b: ArrayLike<number>): number 
 
 /** A change bigger than this means something is moving in front of the camera. */
 export const MOVING = 10;
-/** How long the picture must stay still after moving before Ayin looks. */
+/** How long the picture must stay still after moving before Otto looks. */
 export const STILL_MS = 1500;
 
 /**

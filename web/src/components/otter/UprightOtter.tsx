@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * Written by Havi (@Havishea) for the Ayin team and copied from
- * https://github.com/Havishea/Ayin. Havi's later changes: the whole tail is one layer that swings from its root,
+ * Written by Havi (@Havishea) for the Otto team and copied from
+ * https://github.com/Havishea/Otto. Havi's later changes: the whole tail is one layer that swings from its root,
  * the layers are shrunk to the canvas once so motion stays smooth, and blinks are a solid eyelid closing.
  * We moved the fur tint into useMemo for our lint rules, and added reactions (see below) so it responds
  * to the student instead of playing the same loop.
  *
  * UprightOtter: the otter sitting up, holding its stone. Shown while you ask
- * something or while Ayin is explaining a task.
+ * something or while Otto is explaining a task.
  *
  * It is drawn live on a canvas at the screen's frame rate from three layers
  * (1024×1024, made from Havishea's upright drawing):
@@ -128,9 +128,9 @@ export default function UprightOtter({
   furHue?: number;
   /** Only animate while shown; it rests (and costs nothing) otherwise. */
   active?: boolean;
-  /** What Ayin is doing right now, so its body can show it. */
+  /** What Otto is doing right now, so its body can show it. */
   mood?: OtterMood;
-  /** Changes on every word Ayin says, for a small hop per word. */
+  /** Changes on every word Otto says, for a small hop per word. */
   beat?: number;
   className?: string;
 }) {

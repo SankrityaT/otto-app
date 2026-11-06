@@ -1,7 +1,7 @@
 // Everything that changes between deployments comes from the environment (see .env.example).
 
 export const site = {
-  /** The Ayin app, for "Try Ayin": on the same site, at /app. */
+  /** The Otto app, for "Try Otto": on the same site, at /app. */
   appUrl: "/app",
   /** The demo video. Until it's set, the demo section shows a "coming soon" card. */
   demoVideoUrl: process.env.NEXT_PUBLIC_DEMO_VIDEO_URL || null,

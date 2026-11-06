@@ -4,20 +4,20 @@ import { Section } from "./Section";
 
 const FAQ = [
   {
-    q: "Who is Ayin for?",
+    q: "Who is Otto for?",
     a: "Teens and young adults, about 16 to 22, who are learning job and life skills. It's made especially for neurodivergent learners who like to see one clear step at a time.",
   },
   {
     q: "What kinds of tasks can it help with?",
-    a: "Anything you do with your hands, step by step: making a drink, folding shirts, packing a box, cleaning a station. Type or say the task and Ayin makes the steps.",
+    a: "Anything you do with your hands, step by step: making a drink, folding shirts, packing a box, cleaning a station. Type or say the task and Otto makes the steps.",
   },
   {
     q: "Does it need a camera?",
-    a: "No. The camera lets Ayin check a step, but you can share a screen instead, or just tap \"I did it\" and move on.",
+    a: "No. The camera lets Otto check a step, but you can share a screen instead, or just tap \"I did it\" and move on.",
   },
   {
     q: "Are photos saved anywhere?",
-    a: "Never. Ayin takes one photo only when you tap Done, Help or Show me. It's used for that one answer and then thrown away.",
+    a: "Never. Otto takes one photo only when you tap Done, Help or Show me. It's used for that one answer and then thrown away.",
   },
   {
     q: "Who can my child talk to in the raft?",
@@ -28,8 +28,8 @@ const FAQ = [
     a: "Everything works by tapping too. The otter device also has real buttons for Done, Help and Show me.",
   },
   {
-    q: "Won't they just rely on Ayin forever?",
-    a: "That's the one thing we built against. After a few tries on their own, pictures rest and Ayin steps back. The goal is for Ayin to be needed less and less.",
+    q: "Won't they just rely on Otto forever?",
+    a: "That's the one thing we built against. After a few tries on their own, pictures rest and Otto steps back. The goal is for Otto to be needed less and less.",
   },
 ];
 

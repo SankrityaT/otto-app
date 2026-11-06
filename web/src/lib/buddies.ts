@@ -2,7 +2,7 @@
 // Kept free of I/O so it is easy to test.
 //
 // "Mastered" uses the same rule as fading: RUNS_TO_FADE runs in a row with no help.
-// So the help a student no longer needs from Ayin is exactly what they can now offer a
+// So the help a student no longer needs from Otto is exactly what they can now offer a
 // crewmate. Today's helped becomes tomorrow's helper.
 
 import { RUNS_TO_FADE } from "./help";

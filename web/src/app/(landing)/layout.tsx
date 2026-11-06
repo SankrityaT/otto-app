@@ -11,11 +11,11 @@ const serif = Instrument_Serif({ variable: "--font-instrument", subsets: ["latin
 const hand = Gochi_Hand({ variable: "--font-gochi", subsets: ["latin"], weight: "400" });
 
 export const metadata: Metadata = {
-  title: "Ayin: big tasks, one small step at a time",
+  title: "Otto: big tasks, one small step at a time",
   description:
-    "Ayin is a friendly otter coach that helps neurodivergent teens and young adults learn real job skills, one step at a time, until they can do them on their own.",
+    "Otto is a friendly otter coach that helps neurodivergent teens and young adults learn real job skills, one step at a time, until they can do them on their own.",
   openGraph: {
-    title: "Ayin: big tasks, one small step at a time",
+    title: "Otto: big tasks, one small step at a time",
     description: "A friendly otter coach for neurodivergent teens and young adults. Help that fades as you grow.",
   },
 };
@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 };
 
 // Runs before the page paints, so it never flashes the wrong colours: a saved choice wins,
-// otherwise follow the device. Light is Ayin's home look and the fallback without JavaScript.
+// otherwise follow the device. Light is Otto's home look and the fallback without JavaScript.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("ayin-theme");if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function LandingLayout({ children }: { children: ReactNode }) {

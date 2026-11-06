@@ -11,7 +11,7 @@ const hand = Gochi_Hand({ variable: "--font-gochi", subsets: ["latin"], weight: 
 const THEME_SCRIPT = `try{var t=localStorage.getItem("ayin.theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
 export const metadata: Metadata = {
-  title: "Ayin",
+  title: "Otto",
   description: "A calm step-by-step coach for hands-on job tasks",
 };
 

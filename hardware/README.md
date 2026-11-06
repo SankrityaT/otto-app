@@ -8,7 +8,7 @@ A 3D-printable otter that sits at a work station. It hugs a teal pebble, and the
 | --- | --- |
 | ![Shutter closed](otter/renders/front_shutter_closed.png) | ![Exploded view](otter/renders/exploded.png) |
 
-**Why it looks like this.** AZACS staff told us anything worn on the body is a sensory problem, so Ayin is a desk buddy, not glasses. The shape follows Havi's otter character. The shutter and the light ring answer the privacy concerns about cameras around students.
+**Why it looks like this.** AZACS staff told us anything worn on the body is a sensory problem, so Otto is a desk buddy, not glasses. The shape follows Havi's otter character. The shutter and the light ring answer the privacy concerns about cameras around students.
 
 ## Build the print files
 

@@ -58,7 +58,7 @@ export default function MePage() {
         )}
 
         <fieldset className="choice">
-          <legend className="choice__label">Ayin&apos;s eyes</legend>
+          <legend className="choice__label">Otto&apos;s eyes</legend>
           <div className="choice__opts">
             {(
               [
@@ -73,7 +73,7 @@ export default function MePage() {
               </label>
             ))}
           </div>
-          <p className="choice__help">Ayin looks only when you tap Done, Help or Show me, and never saves what it sees. Share a screen when the task is on a computer, or when there is no camera.</p>
+          <p className="choice__help">Otto looks only when you tap Done, Help or Show me, and never saves what it sees. Share a screen when the task is on a computer, or when there is no camera.</p>
         </fieldset>
 
         <fieldset className="choice">
@@ -100,7 +100,7 @@ export default function MePage() {
         <Link href="/app/me/otter" className="card flex items-center gap-4">
           <span className="text-[17px]">
             <strong className="block">Connect your otter</strong>
-            <span className="text-ink-3">Use the desk otter as Ayin&apos;s eyes, with its own buttons</span>
+            <span className="text-ink-3">Use the desk otter as Otto&apos;s eyes, with its own buttons</span>
           </span>
         </Link>
 

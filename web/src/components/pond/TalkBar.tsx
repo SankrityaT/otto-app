@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * We changed the words to fit starting a task, put the camera in the bar (it turns into Send
  * once you type), only show the hint while it's needed, and listen through Deepgram.
  */
@@ -78,7 +78,7 @@ export default function TalkBar({ status, onListening, onSend, onPhoto }: Props)
           type="button"
           className={`talk__hold ${holding ? 'is-holding' : ''}`}
           aria-pressed={holding}
-          aria-label={voiceOk ? 'Hold to tell Ayin your task' : 'Voice isn’t available here. Type instead.'}
+          aria-label={voiceOk ? 'Hold to tell Otto your task' : 'Voice isn’t available here. Type instead.'}
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId);
             start();
@@ -106,14 +106,14 @@ export default function TalkBar({ status, onListening, onSend, onPhoto }: Props)
           id="ask"
           ref={input}
           className="talk__input"
-          placeholder={holding ? 'Listening…' : hearing ? 'One moment…' : 'Say hi to Ayin'}
+          placeholder={holding ? 'Listening…' : hearing ? 'One moment…' : 'Say hi to Otto'}
           value={holding ? '' : text}
           onChange={(e) => setText(e.target.value)}
           readOnly={holding}
           autoComplete="off"
         />
         {onPhoto && !text.trim() ? (
-          <label className="talk__send grid cursor-pointer place-items-center" aria-label="Show Ayin a photo of the task">
+          <label className="talk__send grid cursor-pointer place-items-center" aria-label="Show Otto a photo of the task">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
               <path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               <circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -135,7 +135,7 @@ export default function TalkBar({ status, onListening, onSend, onPhoto }: Props)
         )}
       </form>
       {(holding || !voiceOk) && (
-        <p className="talk__hint">{holding ? 'Let go to send' : 'Ayin can’t use the microphone here. Type instead.'}</p>
+        <p className="talk__hint">{holding ? 'Let go to send' : 'Otto can’t use the microphone here. Type instead.'}</p>
       )}
     </div>
   );

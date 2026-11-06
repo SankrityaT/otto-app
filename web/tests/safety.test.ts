@@ -18,7 +18,7 @@ describe("safeReply", () => {
     expect(said.match(/staff/g)).toHaveLength(1);
   });
 
-  it("points to people when Ayin won't help", () => {
+  it("points to people when Otto won't help", () => {
     expect(WONT_HELP).toContain("staff member");
     expect(WONT_HELP).toContain("988");
   });

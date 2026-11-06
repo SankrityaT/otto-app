@@ -42,7 +42,7 @@ export function Sticker({ kind, size = 28 }: { kind: Reaction; size?: number }) 
       )}
       {kind === "proud" && (
         <>
-          {/* Ayin's celadon stone, shaped like a heart */}
+          {/* Otto's celadon stone, shaped like a heart */}
           <path
             d="M24 41C12 33 6 26 6 18.5 6 12.6 10.5 8 16 8c3.6 0 6.4 1.8 8 4.6C25.6 9.8 28.4 8 32 8c5.5 0 10 4.6 10 10.5C42 26 36 33 24 41Z"
             fill={PEBBLE}
@@ -129,7 +129,7 @@ export function RaftIcon({ name, size = 22 }: { name: IconName; size?: number })
       )}
       {name === "goal" && (
         <>
-          {/* a flag on Ayin's stone */}
+          {/* a flag on Otto's stone */}
           <ellipse cx="12" cy="18.5" rx="8" ry="3" {...line} />
           <path d="M11 17V3.5l7 3-7 3" {...line} />
         </>

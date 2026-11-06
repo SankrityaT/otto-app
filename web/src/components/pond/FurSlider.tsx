@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
+ * Written by Havi (@Havishea) for the Otto team, from https://github.com/Havishea/Otto.
  * Unchanged.
  */
 /** The painted fur, as HSV: hue 30°, a soft brown. Hue shifts rotate from here. */

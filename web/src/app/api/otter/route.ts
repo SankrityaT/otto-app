@@ -2,7 +2,7 @@ import { otterAddress } from "@/lib/camera";
 import { setSetting } from "@/lib/data/settings";
 import { jsonError, readJson } from "@/lib/http";
 
-/** The otter Ayin is connected to, if any. */
+/** The otter Otto is connected to, if any. */
 export async function GET() {
   return Response.json({ address: await otterAddress() });
 }

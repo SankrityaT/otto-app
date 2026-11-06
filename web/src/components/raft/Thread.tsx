@@ -225,7 +225,7 @@ export function Thread() {
           )}
           {!review && (
             <Button look="main" disabled={busy || !text.trim()} onClick={() => send()}>
-              <RaftIcon name="help" /> {busy ? "Ayin is checking it" : "Send"}
+              <RaftIcon name="help" /> {busy ? "Otto is checking it" : "Send"}
             </Button>
           )}
         </section>
