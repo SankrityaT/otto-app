@@ -111,8 +111,101 @@ button, input { font: inherit; color: inherit; }
 .today { display: flex; flex-direction: column; gap: 28px; }
 .today__center { display: flex; flex-direction: column; align-items: center; min-width: 0; }
 .today__center .talk { max-width: 560px; }
+.today__left, .today__right { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.today__left .card { margin-top: 0; }
+/* On a phone the columns stack under the pond, so they step aside for the conversation. */
+@media (max-width: 959px) {
+  .today.is-chatting .today__left, .today.is-chatting .today__right { display: none; }
+}
+/* The open things as a stack of same-size cards. Every card shares one grid cell,
+   so they are all as tall as the tallest; the ones behind peek out below. */
+.stack { display: grid; padding-bottom: calc(var(--depth, 0) * 14px); isolation: isolate; }
+.stack__more { grid-row: 2; margin: 10px 0 0; font-size: 14px; color: var(--ink-faint); text-align: center; }
+.stack__card {
+  grid-area: 1 / 1; min-width: 0; display: flex;
+  z-index: calc(10 - var(--pos));
+  transform-origin: 50% 100%;
+  transform: translate3d(0, calc(var(--pos) * 14px), 0) scale(calc(1 - var(--pos) * 0.045));
+  transition: transform 520ms cubic-bezier(0.22, 0.8, 0.24, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.stack__card .card { margin-top: 0; width: 100%; display: flex; flex-direction: column; transition: box-shadow 400ms ease, background-color 400ms ease, border-color 400ms ease; }
+.stack__card .card__pager { margin-top: auto; }
+.stack__card .card__body + .card__actions { margin-bottom: 16px; }
+/* Text on cards behind the top one fades rather than popping, so nothing flickers. */
+.stack__card .card > * { opacity: 1; transition: opacity 260ms ease 120ms; }
+.stack__card:not(.is-top) .card > * { opacity: 0; transition: opacity 160ms ease; }
+.stack__card:not(.is-top) .card {
+  box-shadow: 0 8px 16px -14px var(--shadow);
+  /* The edges peeking out below carry their own colour, so you can tell the cards apart. */
+  background: color-mix(in srgb, var(--routine) 45%, var(--surface));
+  border-color: color-mix(in srgb, var(--routine) 75%, var(--surface));
+  border-style: solid;
+}
+.stack__card.is-top .card { box-shadow: 0 14px 30px -22px var(--shadow); }
+.stack__card.is-hidden { opacity: 0; }
+/* Next: slide out to the side, tuck in behind, settle at the back. */
+.stack__card.is-cycling { animation: stack-cycle 560ms cubic-bezier(0.45, 0, 0.25, 1) both; }
+.stack__card.is-cycling .card > * { animation: stack-fade-content 560ms linear both; transition: none; }
+@keyframes stack-cycle {
+  0%   { transform: translate3d(0, 0, 0) scale(1); z-index: 20; }
+  42%  { transform: translate3d(-62%, 0, 0) rotate(-3deg) scale(1); z-index: 20; }
+  43%  { z-index: 0; }
+  100% { transform: translate3d(0, calc(var(--pos) * 14px), 0) scale(calc(1 - var(--pos) * 0.045)); z-index: 0; }
+}
+@keyframes stack-fade-content { 0%, 38% { opacity: 1; } 62%, 100% { opacity: 0; } }
+/* Done, Later, Not now: the card slides away; the one underneath moves up. */
+.stack__card.is-leaving { z-index: 30; animation: stack-leave 420ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+.stack__card.is-leaving .card > * { opacity: 1; transition: none; }
+@keyframes stack-leave { to { transform: translate3d(-70%, 0, 0) rotate(-4deg); opacity: 0; } }
 /* Folding sections: closed by default, the heading opens them */
 .fold { width: 100%; }
+.fold__h { margin: 0; font: inherit; }
+.fold__btn {
+  width: 100%; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left;
+  padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
+}
+.fold__title { font-weight: 600; font-size: 16px; }
+.fold__summary { margin-left: auto; font-size: 15px; color: var(--ink-faint); }
+.fold__chev { flex: none; color: var(--ink-soft); transition: transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+.fold.is-open .fold__chev { transform: rotate(180deg); }
+.fold__panel {
+  display: grid; grid-template-rows: 0fr; opacity: 0;
+  transition: grid-template-rows 320ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 240ms ease;
+}
+.fold.is-open .fold__panel { grid-template-rows: 1fr; opacity: 1; }
+.fold__inner { min-height: 0; overflow: hidden; }
+.fold__inner > :first-child { margin-top: 10px; }
+.fold__more { margin-top: 4px; }
+/* Otto remembers */
+.peek__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.peek__item { padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.peek__item p { margin: 0; }
+.mem__title { font-weight: 600; }
+.mem__detail { color: var(--ink-soft); }
+.mem__when { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--ink-faint); }
+.mem__forget, .shelf__again {
+  border: 0; padding: 0; background: none; cursor: pointer; text-align: left;
+  font-size: 14px; font-weight: 600; color: var(--celadon-text); text-decoration: underline;
+}
+/* Evidence: told apart by shape, then words */
+.evidence { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-soft); font-weight: 400; }
+.evidence__mark { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.evidence--saw .evidence__mark { background: var(--ink); }
+.evidence--confirmed .evidence__mark { background: var(--celadon-text); }
+.evidence--said .evidence__mark { border: 2px dotted var(--ink-soft); }
+/* Done today: a shelf, nothing to count */
+.shelf__row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.shelf__item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px;
+  border-radius: 18px; background: var(--surface); border: 1px solid var(--line);
+  border-bottom: 4px solid var(--routine);
+}
+.shelf__text { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.shelf__title { font-weight: 600; font-size: 16px; line-height: 1.25; }
+.shelf__time { font-size: 14px; color: var(--ink-faint); }
+.shelf__empty { margin: 0; padding: 0 16px; font-size: 15px; color: var(--ink-soft); }
 /* Tablet: pond on the left, the list beside it */
 @media (min-width: 960px) {
   .today {
@@ -133,7 +226,10 @@ button, input { font: inherit; color: inherit; }
 .today__center { padding-top: 48px; }
 @media (min-width: 960px) {
   .today__center { padding-top: 96px; }
+  .today__left, .today__right { padding-top: 40px; }
 }
+.today__undo { display: flex; justify-content: center; margin-top: 16px; }
+.today__undo .btn { padding: 8px 16px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--line); }
 /* The pond */
 .pond { position: relative; width: min(100%, 560px); aspect-ratio: 400 / 260; margin: 44px auto 8px; }
 .pond__water {
@@ -143,6 +239,7 @@ button, input { font: inherit; color: inherit; }
 }
 /* Layers: the pond's water at the back, then the middle column, then the side columns and status. */
 .today__center { position: relative; z-index: 1; }
+.today__left, .today__right { position: relative; z-index: 2; }
 .status { position: relative; z-index: 3; }
 .pond__water ellipse { transition: fill 240ms ease; }
 .pond--listening { --water-edge: var(--celadon-text); }
@@ -185,6 +282,19 @@ button, input { font: inherit; color: inherit; }
   width: 100%; margin-top: 22px; padding: 22px; border-radius: var(--radius);
   background: var(--surface); border: 1px solid var(--line);
   border-left: 6px solid var(--routine, var(--line));
+}
+.card--said { border-style: dashed; border-left-style: solid; }
+.card--empty { text-align: center; border-left-width: 1px; }
+.card__body { display: flex; gap: 16px; align-items: flex-start; }
+.card__text { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card__title { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; }
+.card__line { margin: 0; color: var(--ink-soft); }
+.card__ask { width: 100%; margin: 0 0 2px; font-weight: 600; }
+.card__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.card__pager {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: 15px; color: var(--ink-faint);
 }
 .routine--home { --routine: var(--r-home); }
 .routine--study { --routine: var(--r-study); }
@@ -241,7 +351,7 @@ button, input { font: inherit; color: inherit; }
 .fur__range:focus-visible { outline: 3px solid var(--celadon-text); outline-offset: 4px; border-radius: 999px; }
 /* ---------- Tabs: always in the same place ---------- */
 .tabs {
-  position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+  position: fixed; z-index: 5; left: 50%; bottom: 14px; transform: translateX(-50%);
   display: flex; gap: 4px; padding: 6px; border-radius: 999px;
   background: var(--surface); border: 1px solid var(--line);
   box-shadow: 0 6px 24px var(--shadow); max-width: calc(100% - 32px);
@@ -259,7 +369,7 @@ button, input { font: inherit; color: inherit; }
 }
 .tabs__pill.is-ready { transition: transform 380ms cubic-bezier(0.22, 0.8, 0.24, 1), width 380ms cubic-bezier(0.22, 0.8, 0.24, 1); }
 @media (min-width: 900px) {
-  .tabs { top: 12px; bottom: auto; box-shadow: none; z-index: 5; }
+  .tabs { top: 12px; bottom: auto; box-shadow: none; }
   .app { padding-bottom: 48px; }
   .status { padding-top: 22px; }
 }
@@ -271,6 +381,22 @@ button, input { font: inherit; color: inherit; }
 }
 /* Now: the card stack can be stored on the side */
 .now { gap: 12px; }
+.now__h { margin: 0; font: inherit; }
+.now__btn {
+  width: 100%; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left;
+  padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
+}
+.now__title { font-weight: 600; font-size: 16px; }
+.now__summary { margin-left: auto; font-size: 15px; color: var(--ink-faint); }
+.now__chev { flex: none; color: var(--ink-soft); transition: transform 380ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+.now:not(.is-stowed) .now__chev { transform: rotate(180deg); }
+.now__drawer {
+  display: grid; grid-template-rows: 1fr; opacity: 1; transform: none;
+  transition: grid-template-rows 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 300ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.now__inner { min-height: 0; }
+.now.is-stowed .now__drawer { grid-template-rows: 0fr; opacity: 0; transform: translateY(-12px); }
+.now.is-stowed .now__inner { overflow: hidden; }
 /* Task leaves floating in the pond, and the bin for finished ones */
 .leaves { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .leaf {
@@ -280,13 +406,32 @@ button, input { font: inherit; color: inherit; }
 }
 .leaf:hover, .leaf:focus-within { z-index: 5; }
 .leaves:has(.leaf:hover), .leaves:focus-within { z-index: 4; }
-.leaf__svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 2px rgba(35, 32, 28, 0.18)); }
+.leaf.is-bin { transform: scale(0.45); opacity: 0.2; pointer-events: none; }
+.leaf.is-away { transform: scale(0.6) translateY(10px); opacity: 0; pointer-events: none; }
+.leaf__btn { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; }
+.leaf__btn:focus-visible { outline: 2px solid var(--celadon-text); outline-offset: 2px; }
+.leaf__float { display: block; width: 100%; height: 100%; transform: rotate(var(--tilt)); animation: leaf-drift var(--drift, 16s) ease-in-out var(--delay, 0s) infinite; }
+.leaf:hover .leaf__float, .leaf:focus-within .leaf__float { animation-play-state: paused; }
+.leaf__svg, .bin__leaf svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 2px rgba(35, 32, 28, 0.18)); }
 .leaf__blade { fill: var(--routine); stroke: color-mix(in srgb, var(--routine) 60%, #23201c); stroke-width: 1.5; stroke-linejoin: round; }
 .leaf__vein { fill: none; stroke: color-mix(in srgb, var(--routine) 55%, #23201c); stroke-width: 1.4; stroke-linecap: round; opacity: 0.7; }
+.leaf__btn:hover .leaf__svg { transform: scale(1.12); }
 .leaf__svg { transition: transform 200ms ease; }
+/* The same leaf, small, on the cards and the shelf. */
+.card__leaf { flex: none; width: 52px; height: 52px; }
+.card__ring-leaf { width: 26px; height: 26px; }
+.shelf__leaf { flex: none; width: 30px; height: 30px; }
 @keyframes leaf-in { from { opacity: 0; transform: scale(0.4); } }
+@keyframes leaf-drift {
+  0%, 100% { transform: translate(0, 0) rotate(var(--tilt)); }
+  25% { transform: translate(10px, -7px) rotate(calc(var(--tilt) + 9deg)); }
+  50% { transform: translate(3px, 8px) rotate(calc(var(--tilt) - 4deg)); }
+  75% { transform: translate(-9px, 2px) rotate(calc(var(--tilt) + 5deg)); }
+}
 /* Small ripples under each leaf and the bin, like the otter's but smaller */
 .ripples { position: absolute; left: 50%; pointer-events: none; overflow: visible; }
+.leaf__ripples { width: 92px; height: 37px; top: 58%; transform: translate(-50%, -50%); }
+.bin__ripples { width: 120px; height: 48px; bottom: -22px; transform: translateX(-50%); }
 .ripples__ring {
   fill: none; stroke: rgba(255, 255, 255, 0.7); stroke-width: 1.6; vector-effect: non-scaling-stroke;
   transform-origin: 50px 20px; transform: scale(0.85); opacity: 0.45;
@@ -297,11 +442,47 @@ button, input { font: inherit; color: inherit; }
   15% { opacity: 0.75; }
   100% { transform: scale(1.15); opacity: 0; }
 }
+.leaf.is-bin .ripples, .leaf.is-away .ripples { opacity: 0; transition: opacity 300ms ease; }
 /* The preview that shows on hover, like the tabs on the side */
+.leaf__tip, .bin__tip {
+  position: absolute; left: 50%; bottom: calc(100% + 8px); width: max-content; max-width: 230px;
+  display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 14px; text-align: left;
+  background: color-mix(in srgb, var(--routine, var(--celadon)) 30%, var(--surface)); color: var(--ink);
+  border: 1px solid var(--line); box-shadow: 0 6px 18px var(--shadow);
+  opacity: 0; transform: translate(-50%, 4px); pointer-events: none; transition: opacity 180ms ease, transform 180ms ease;
+}
+.leaf--tip-left .leaf__tip { left: auto; right: -6px; transform: translate(0, 4px); }
+.leaf:not(.leaf--tip-left) .leaf__tip { left: -6px; transform: translate(0, 4px); }
+.leaf--tip-below .leaf__tip { bottom: auto; top: calc(100% + 8px); }
+.leaf:hover .leaf__tip, .leaf:has(:focus-visible) .leaf__tip { opacity: 1; transform: translate(0, 0); }
+.leaf__title { font-size: 15px; font-weight: 600; }
+.leaf__line { font-size: 14px; color: var(--ink-soft); }
 .bin { position: absolute; z-index: 2; width: 74px; margin: -34px 0 0 -37px; }
+.bin__btn { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 12px; }
+.bin__btn:focus-visible { outline: 2px solid var(--celadon-text); outline-offset: 4px; }
+.bin__btn:hover .bin__basket { transform: translateY(-2px); }
+.bin__body { position: relative; display: block; height: 68px; }
+.bin__body.is-bumped { animation: bin-bump 420ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes bin-bump { 40% { transform: translateY(3px) scale(1.06, 0.94); } }
+.bin__basket { position: absolute; left: 0; bottom: 0; width: 74px; height: 56px; overflow: visible; filter: drop-shadow(0 3px 4px rgba(35, 32, 28, 0.2)); transition: transform 200ms ease; }
+.bin__rim { fill: color-mix(in srgb, #b98f62 85%, var(--ink)); }
+.bin__side { fill: #c9a274; }
+.bin__weave { fill: none; stroke: #a07a50; stroke-width: 1.5; stroke-linecap: round; }
+.bin__pile { position: absolute; left: 10px; right: 10px; top: 0; height: 28px; }
+.bin__leaf { position: absolute; width: 28px; height: 28px; left: calc(var(--k) * 8px); top: calc(4px - (var(--k) % 2) * 5px); transform: rotate(calc(var(--k) * 37deg - 50deg)); }
+.bin__count {
+  position: absolute; right: -6px; top: 4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+}
+.bin__tip { left: auto; right: 0; transform: translate(0, 4px); }
+.bin:hover .bin__tip, .bin:has(:focus-visible) .bin__tip { opacity: 1; transform: translate(0, 0); }
 @media (max-width: 640px) {
   .leaf { width: 42px; height: 42px; margin: -21px 0 0 -21px; }
   .bin { left: auto !important; right: 0; margin: -30px 0 0; width: 60px; }
+  .bin__body { height: 56px; }
+  .bin__basket { width: 60px; height: 46px; }
+  .bin__leaf { width: 22px; height: 22px; left: calc(var(--k) * 6px); }
+  .bin__count { right: -2px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }

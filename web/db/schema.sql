@@ -56,6 +56,9 @@ CREATE TABLE IF NOT EXISTS step_logs (
   help_level INTEGER NOT NULL,
   done_at    TEXT NOT NULL
 );
+-- How Otto knows a step was done: camera (a photo check passed) or student (they said "I did it").
+-- Steps logged before this column existed stay empty: Otto doesn't know, so it doesn't claim.
+ALTER TABLE step_logs ADD COLUMN IF NOT EXISTS seen_by TEXT;
 
 CREATE TABLE IF NOT EXISTS cheers (
   id         TEXT PRIMARY KEY,
@@ -129,6 +132,34 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at TEXT NOT NULL
 );
 
+-- Something a student asked Otto to remind them about. It sits in Now until they mark it done.
+CREATE TABLE IF NOT EXISTS reminders (
+  id         TEXT PRIMARY KEY,
+  student_id TEXT NOT NULL REFERENCES students(id),
+  text       TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  done_at    TEXT
+);
+
+-- Something a student told Otto to remember. Only they see it, and they can make Otto forget it.
+CREATE TABLE IF NOT EXISTS memories (
+  id         TEXT PRIMARY KEY,
+  student_id TEXT NOT NULL REFERENCES students(id),
+  text       TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+-- A task or reminder a student moved out of the way in Now: for later, or let go.
+-- item_id is a routine or a reminder; starting a task clears its row.
+CREATE TABLE IF NOT EXISTS now_holds (
+  student_id   TEXT NOT NULL REFERENCES students(id),
+  item_id      TEXT NOT NULL,
+  later_until  TEXT,                -- back in the usual order after this time
+  later_moment TEXT,                -- the same time in words, like "after lunch"
+  let_go_at    TEXT,
+  PRIMARY KEY (student_id, item_id)
+);
+
 -- Small settings saved from the app, like the otter's address
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
@@ -157,5 +188,8 @@ ALTER TABLE replies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE now_holds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE button_presses ENABLE ROW LEVEL SECURITY;

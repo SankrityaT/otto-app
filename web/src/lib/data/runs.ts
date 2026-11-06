@@ -1,6 +1,7 @@
 import { all, newId, now, one, run } from "../db";
 import { RUNS_TO_FADE, showPictureFirst, type HelpLevel } from "../help";
 import { stageFor, type RunResult, type Stage } from "../stages";
+import type { FinishedRun, SeenBy, StartedRun } from "../today";
 import { startOfWeek } from "../week";
 import { getRoutine, type Step } from "./routines";
 
@@ -39,6 +40,8 @@ export async function startRun(routineId: string, studentId: string): Promise<st
   if (!(await getRoutine(routineId))) return null;
   const runId = newId();
   await run("INSERT INTO runs (id, routine_id, student_id, started_at) VALUES (?, ?, ?, ?)", runId, routineId, studentId, now());
+  // Starting a task brings it back, if the student had put it off or let it go.
+  await run("DELETE FROM now_holds WHERE student_id = ? AND item_id = ?", studentId, routineId);
   return runId;
 }
 
@@ -88,28 +91,29 @@ function pastResults(studentId: string, routineId: string, currentRunId: string)
 /** "On my own": the whole task was checked at the end, so every step counts as done alone. */
 export async function logWholeRun(found: Run): Promise<void> {
   for (const step of found.steps) {
-    if (!found.doneStepIds.includes(step.id)) await insertLog(found, step.id, 0);
+    if (!found.doneStepIds.includes(step.id)) await insertLog(found, step.id, 0, "camera");
   }
   await run("UPDATE runs SET finished_at = ? WHERE id = ?", now(), found.id);
 }
 
 /** Record a finished step. Finishing the last step finishes the run. */
-export async function logStep(found: Run, stepId: string, helpLevel: HelpLevel): Promise<void> {
+export async function logStep(found: Run, stepId: string, helpLevel: HelpLevel, seenBy: SeenBy): Promise<void> {
   if (found.doneStepIds.includes(stepId)) return;
-  await insertLog(found, stepId, helpLevel);
+  await insertLog(found, stepId, helpLevel, seenBy);
   if (found.doneStepIds.length + 1 === found.steps.length) {
     await run("UPDATE runs SET finished_at = ? WHERE id = ?", now(), found.id);
   }
 }
 
-function insertLog(found: Run, stepId: string, helpLevel: HelpLevel): Promise<number> {
+function insertLog(found: Run, stepId: string, helpLevel: HelpLevel, seenBy: SeenBy): Promise<number> {
   return run(
-    "INSERT INTO step_logs (id, run_id, step_id, student_id, help_level, done_at) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO step_logs (id, run_id, step_id, student_id, help_level, seen_by, done_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
     newId(),
     found.id,
     stepId,
     found.studentId,
     helpLevel,
+    seenBy,
     now(),
   );
 }
@@ -122,22 +126,25 @@ export async function runSummary(runId: string): Promise<{ total: number; onOwn:
   ))!;
 }
 
-/** Tasks this student finished this week, newest first. */
-export function doneThisWeek(studentId: string): Promise<{ runId: string; title: string; onOwn: number; total: number }[]> {
+/** This student's latest finished runs, newest first, with how Otto knows each step was done. */
+export function finishedRuns(studentId: string): Promise<FinishedRun[]> {
   return all(
-    `SELECT r.id AS "runId", rt.title, COUNT(*) FILTER (WHERE l.help_level = 0) AS "onOwn", COUNT(l.id) AS total
+    `SELECT r.id AS "runId", r.routine_id AS "routineId", rt.title, r.finished_at AS "finishedAt",
+            COUNT(l.id) AS total,
+            COUNT(*) FILTER (WHERE l.help_level = 0) AS "onOwn",
+            COUNT(*) FILTER (WHERE l.seen_by = 'camera') AS seen,
+            COUNT(*) FILTER (WHERE l.seen_by = 'student') AS said
      FROM runs r JOIN routines rt ON rt.id = r.routine_id JOIN step_logs l ON l.run_id = r.id
-     WHERE r.student_id = ? AND r.finished_at >= ?
-     GROUP BY r.id, rt.id ORDER BY r.finished_at DESC`,
+     WHERE r.student_id = ? AND r.finished_at IS NOT NULL
+     GROUP BY r.id, rt.id ORDER BY r.finished_at DESC LIMIT 40`,
     studentId,
-    startOfWeek(new Date()).toISOString(),
   );
 }
 
 /** Tasks this student started this week and hasn't finished yet, newest first. */
-export function inProgress(studentId: string): Promise<{ runId: string; title: string; done: number; total: number }[]> {
+export function inProgress(studentId: string): Promise<StartedRun[]> {
   return all(
-    `SELECT r.id AS "runId", rt.title,
+    `SELECT r.id AS "runId", r.routine_id AS "routineId", rt.title,
             (SELECT COUNT(*) FROM step_logs l WHERE l.run_id = r.id) AS done,
             (SELECT COUNT(*) FROM steps s WHERE s.routine_id = r.routine_id) AS total
      FROM runs r JOIN routines rt ON rt.id = r.routine_id

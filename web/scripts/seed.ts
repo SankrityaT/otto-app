@@ -22,6 +22,9 @@ const TABLES = [
   "button_presses",
   "blocks",
   "settings",
+  "reminders",
+  "memories",
+  "now_holds",
 ];
 
 async function main() {
@@ -188,6 +191,30 @@ async function main() {
     at,
     latte.id,
     leoNow,
+  );
+
+  // Today for Jordan: something to be reminded about, one thing already done, and a fact to keep.
+  await run(
+    "INSERT INTO reminders (id, student_id, text, created_at) VALUES (?, ?, ?, ?)",
+    newId(),
+    students.Jordan,
+    "Bring my apron",
+    at,
+  );
+  await run(
+    "INSERT INTO reminders (id, student_id, text, created_at, done_at) VALUES (?, ?, ?, ?, ?)",
+    newId(),
+    students.Jordan,
+    "Refill the cup stack",
+    at,
+    at,
+  );
+  await run(
+    "INSERT INTO memories (id, student_id, text, created_at) VALUES (?, ?, ?, ?)",
+    newId(),
+    students.Jordan,
+    "The lids are on the top shelf",
+    at,
   );
 
   // What each student chose for "how I work best", and Jordan's own goal.

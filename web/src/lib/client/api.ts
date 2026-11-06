@@ -6,6 +6,7 @@ import type { CrewView, Student } from "../data/crew";
 import type { Post, PostKind, Profile, Reaction, Reply } from "../data/raft";
 import type { Routine } from "../data/routines";
 import type { Run } from "../data/runs";
+import type { LaterMoment, Today } from "../today";
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
@@ -31,6 +32,16 @@ const post = (body: unknown): RequestInit => ({ method: "POST", body: JSON.strin
 
 export type Summary = { total: number; onOwn: number };
 
+/** A button on a Now card. */
+export type ThingAction = { action: "later"; until: string; moment: LaterMoment } | { action: "let-go" | "back" | "done" };
+
+/** Midnight on this device's clock: when the student's "today" began. */
+function startOfDay(): string {
+  const day = new Date();
+  day.setHours(0, 0, 0, 0);
+  return day.toISOString();
+}
+
 /** Otto's review of a raft post that wasn't shared yet. */
 export type PostReview = { ok: boolean; problem: string; why: string; kinderVersion: string | null };
 
@@ -43,13 +54,11 @@ export const api = {
   raftByCode: (code: string) => call<{ members: Student[] }>("/api/crew/members", post({ code })),
   setFurHue: (studentId: string, furHue: number) =>
     call(`/api/students/${studentId}`, { method: "PATCH", body: JSON.stringify({ furHue }) }),
-  doneThisWeek: (studentId: string) =>
-    call<{
-      done: { runId: string; title: string; onOwn: number; total: number }[];
-      inProgress: { runId: string; title: string; done: number; total: number }[];
-    }>(
-      `/api/runs?studentId=${encodeURIComponent(studentId)}`,
-    ),
+  today: (studentId: string) =>
+    call<Today>(`/api/today?studentId=${encodeURIComponent(studentId)}&since=${encodeURIComponent(startOfDay())}`),
+  thing: (id: string, studentId: string, action: ThingAction) => call(`/api/today/things/${id}`, post({ studentId, ...action })),
+  forget: (memoryId: string, studentId: string) =>
+    call(`/api/today/memories/${memoryId}?studentId=${encodeURIComponent(studentId)}`, { method: "DELETE" }),
   routines: (studentId: string) =>
     call<{ routines: { id: string; title: string; stepCount: number }[] }>(`/api/routines?studentId=${encodeURIComponent(studentId)}`),
   routine: (routineId: string) => call<{ routine: Routine }>(`/api/routines/${routineId}`),
@@ -85,7 +94,7 @@ export const api = {
   helperFor: (studentId: string, stepId: string) =>
     call<{ helperName: string | null }>(`/api/crew/helper?studentId=${encodeURIComponent(studentId)}&stepId=${encodeURIComponent(stepId)}`),
   talk: (studentId: string, said: string, history: { who: "student" | "ayin"; text: string }[]) =>
-    call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null }>("/api/talk", post({ studentId, said, history })),
+    call<{ say: string; choices: string[]; startTask: string | null; routineId: string | null; kept: boolean }>("/api/talk", post({ studentId, said, history })),
   feed: (studentId: string, kind: PostKind | null) =>
     call<{ posts: Post[] }>(`/api/raft/feed?studentId=${encodeURIComponent(studentId)}${kind ? `&kind=${kind}` : ""}`),
   post: (postId: string, studentId: string) =>
