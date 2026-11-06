@@ -8,7 +8,7 @@ Built for the 2026 North American AI Challenge for Neurodiverse Learning, with r
 
 ## Our approach
 
-- **Works on the device a school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Otto sees the work. AZACS already gives students Chromebooks and iPads, and AZACS staff told us anything worn is a sensory problem, so there's nothing to buy and nothing to wear.
+- **Works on the device a school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Otto sees the work. AZACS already gives students Chromebooks and iPads, and AZACS staff told us anything worn is a sensory problem for their students, so there's nothing to buy and nothing to wear. (Adults who want camera glasses can choose them; see below.)
 - **Complex things made simple.** Every task becomes one step at a time, and every step a diagram and a 3D model made for that task, talked through with a natural voice. The student can ask out loud at any point.
 - **Real peers, not a chatbot.** The Raft routes help back to classmates who've mastered the step, lets students work side by side, and celebrates wins, with no video, no strangers and no rankings.
 - **Built to be needed less.** Help steps down through First Place AZ's five stages, from watching every step to doing it alone.
@@ -17,7 +17,7 @@ Built for the 2026 North American AI Challenge for Neurodiverse Learning, with r
 
 ## The problem
 
-At AZACS, students aged 16–22 learn real job tasks at school-run work sites: a café, a shirt studio and a shipping store. Each task has many steps, and staff prompt students through them. The school's own goal is students *"demonstrating the need for fewer prompts."* At a first job, nobody prompts.
+At AZACS, high school students and young adults up to 22 learn real job tasks at school-run work sites in the P.I.E.C.E. transition program (grades 9–12, plus a Transition Academy for ages 18–22): a café, a shirt studio and a shipping store. Each task has many steps, and staff prompt students through them. The school's own goal is students *"demonstrating the need for fewer prompts."* At a first job, nobody prompts.
 
 What we found (full notes and sources in [`docs/research.md`](docs/research.md)):
 
@@ -25,7 +25,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - Students learn best by seeing and doing: *"we learn from our mistakes visually."*
 - Help that never fades creates dependence. The school measures success as needing fewer prompts.
 - About 40% of autistic young adults never got together with friends in a year.
-- Anything worn on the body is a sensory problem, so Otto needs nothing worn.
+- For school-age students, anything worn on the body is a sensory problem, so Otto needs nothing worn. Adults are different: an early adult user asked for camera glasses, so glasses are an option for adults who choose them.
 
 ## What Otto does
 
@@ -173,9 +173,8 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 | Name | Role |
 | --- | --- |
 | Sankritya Thakur | Product, research, app and server |
-| Havi ([@Havishea](https://github.com/Havishea)) | The otter character, its animation and the pond design |
-
-<!-- TODO: add the rest of the team and their roles before submitting. -->
+| Havishea Vannemreddy ([@Havishea](https://github.com/Havishea)) | The otter character, its animation, the pond and Today design, the landing page and the demo |
+| Kinjal Chatterjee | Pitch deck and business model |
 
 Havi's otter and pond components are credited at the top of each file in `web/src/components/otter` and `web/src/components/pond`.
 

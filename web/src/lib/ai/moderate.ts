@@ -24,7 +24,7 @@ export function reviewPost(text: string, photo: Photo | null): Promise<Review> {
     schema: Review,
     photo,
     effort: "low",
-    instructions: `A student aged 16-22 wants to share this with their raft, a small private group of classmates from
+    instructions: `A student (high school age to 22) wants to share this with their raft, a small private group of classmates from
 their school work site: "${text}"
 ${photo ? "They attached the photo." : ""}
 Check it before it is shared:

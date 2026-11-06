@@ -5,7 +5,7 @@ import { Section } from "./Section";
 const FAQ = [
   {
     q: "Who is Otto for?",
-    a: "Teens and young adults, about 16 to 22, who are learning job and life skills. It's made especially for neurodivergent learners who like to see one clear step at a time.",
+    a: "Teens and young adults, from high school up to 22, who are learning job and life skills. It's made especially for neurodivergent learners who like to see one clear step at a time.",
   },
   {
     q: "What kinds of tasks can it help with?",

@@ -9,7 +9,7 @@ What we learned from our partner visit and the literature, and how each finding 
 
 ## Who we build for
 
-Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They learn job skills at school-run work sites: a café, a shirt studio and a shipping store. There are about 3 students per staff member at school; at a first job there is no one prompting each step.
+Autistic high school students and young adults up to 22 in AZACS's P.I.E.C.E. transition program: grades 9–12, plus a Transition Academy for ages 18–22 at the Central Phoenix Upper Campus ([AZACS](https://autismcharter.org/p-i-e-c-e-transition-program/)). They learn job skills at school-run work sites: a café, a shirt studio and a shipping store. There are about 3 students per staff member at school; at a first job there is no one prompting each step.
 
 ## Findings and what we did about them
 
@@ -29,7 +29,7 @@ Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They le
 | "Create ways for people to engage, like goals" and "once they're happy they will learn" | [partner] tour | The stage path is the student's own goal for each task; their own otter; buddies and a crew pond |
 | Mix high tech and low tech; affordability matters | [partner] tour | Works on any phone, with a shared screen when there's no camera; the otter uses low-cost boards |
 | Most neurodivergent adults still live with parents over 60; employment is the strongest focus | [partner] tour | Job tasks first, so independence is built before support at home runs out |
-| Ama (withama.ai) is a screen-only app for autistic children 3–17: social stories, reading, communication; $20/month | [competitor] [withama.ai](https://www.withama.ai/) | Otto focuses where Ama doesn't: ages 16–22, hands-on job tasks, a camera that checks real steps, and help that fades |
+| Ama (withama.ai) is a screen-only app for autistic children 3–17: social stories, reading, communication; $20/month | [competitor] [withama.ai](https://www.withama.ai/) | Otto focuses where Ama doesn't: high school to age 22, hands-on job tasks, a camera that checks real steps, and help that fades |
 | Focusmate (focusmate.com) pairs adults with a stranger on live video to work side by side ("body doubling") | [competitor] [focusmate.com](https://www.focusmate.com/) | "Do it together": the same idea with no video and no strangers. Partners are raftmates, Otto already knows the task, and each otter moves only as real steps get done |
 | Peer-based instruction is an evidence-based practice when an adult sets up the context | [research] [AFIRM / NCAEP](https://afirm.fpg.unc.edu/wp-content/uploads/Peer-Based-Instruction-Intervention-Brief-Packet-Sam-AFIRM-Team-2025.pdf) | Staff create crews |
 | Autistic-to-autistic information transfer works as well as between non-autistic people | [research] [Crompton et al. 2020](https://pure.qub.ac.uk/en/publications/autistic-peer-to-peer-information-transfer-is-highly-effective/) | "Ask a crewmate who has done it" |
@@ -50,7 +50,7 @@ Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They le
 ## How we position Otto
 
 - **It extends job coaches, it doesn't replace them.** Coaches are scarce, and AI advice alone can be wrong, so Otto works from the site's task steps and keeps staff in the loop.
-- **It covers the transition years at real work sites.** Ama covers ages 3–17 on a screen. Otto covers ages 16–22 doing physical tasks at work, which is where the employment gap opens.
+- **It covers the transition years at real work sites.** Ama covers ages 3–17 on a screen. Otto covers high school to age 22, doing physical tasks at work, which is where the employment gap opens.
 - **It's a transparent tool, not an AI friend.** Otto shows what its camera sees and says it only looks when needed. Friendship goes to real peers in the raft.
 - **It builds independence on purpose.** Help fades as skills grow, which answers parents' fear of over-reliance.
 
@@ -63,7 +63,7 @@ Autistic students aged 16–22 in AZACS's P.I.E.C.E. transition program. They le
 
 - **IEP paperwork tools.** Staff asked for a standard IEP format, but that is an educator tool, a crowded market and legally risky. Otto's log can feed a teacher summary later, with the student's yes.
 - **Symptom reporting for non-speaking students.** The school nurse described real "detective work", but this is clinical and regulated. It needs the school's speech-language pathologist and is out of scope.
-- **Anything worn.** We prototyped camera glasses earlier; the sensory findings moved us to a phone and a desk otter.
+- **Anything worn, for students.** We prototyped camera glasses earlier; the sensory findings moved us to a phone and a desk otter for school-age students. Adults differ: an adult early user from Navia asked for camera glasses, so glasses stay an option for adults who choose them.
 
 ## Limits of our evidence
 

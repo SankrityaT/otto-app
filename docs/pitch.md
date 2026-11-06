@@ -12,7 +12,7 @@ Tagline (from Havi's landing page): *Big tasks, one small step at a time.*
 
 ## Who it's for
 
-Autistic students aged 16–22 in transition programs, learning real job tasks at school work sites. Our partner school, Arizona Autism Charter Schools (AZACS), runs a café, a shirt studio and a shipping store for this. At school there are about 3 students per staff member; at a first job, nobody prompts each step.
+Autistic high school students and young adults up to 22 in transition programs, learning real job tasks at school work sites (at AZACS: grades 9–12, plus a Transition Academy for ages 18–22). Our partner school, Arizona Autism Charter Schools (AZACS), runs a café, a shirt studio and a shipping store for this. At school there are about 3 students per staff member; at a first job, nobody prompts each step.
 
 ## The problem, in three beats
 
@@ -22,7 +22,7 @@ Autistic students aged 16–22 in transition programs, learning real job tasks a
 
 ## What Otto is
 
-**It works on the device the school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Otto sees the work. AZACS already bought 350+ Chromebooks and gives iPads to students who need them (Paykamian, 2021), and a nonverbal student's *"iPad is actually their voice."* Nothing new to buy, nothing to wear.
+**It works on the device the school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Otto sees the work. AZACS already bought 350+ Chromebooks and gives iPads to students who need them (Paykamian, 2021), and a nonverbal student's *"iPad is actually their voice."* Nothing new to buy, and nothing to wear for students (adults can choose camera glasses).
 
 **The student says what they're doing, Otto coaches it step by step:**
 
@@ -49,7 +49,7 @@ What to say out loud: **"Other AI tools answer the student. Otto makes the stude
 
 | | Who it's for | What it does | Where Otto is different |
 |---|---|---|---|
-| **Ama** (withama.ai) | Autistic children 3–17 | Screen-only: social stories, reading, communication. $20/month | Otto is ages 16–22, hands-on job tasks, checks real work with a camera, and fades help |
+| **Ama** (withama.ai) | Autistic children 3–17 | Screen-only: social stories, reading, communication. $20/month | Otto is high school to age 22, hands-on job tasks, checks real work with a camera, and fades help |
 | **Focusmate** | Adults (mostly ADHD) | Live video with a stranger to work side by side ("body doubling") | Otto's "do it together" has no video and no strangers, and each otter moves only as real steps get done |
 | **General chatbots** | Everyone | Answer questions in text | Otto coaches physical steps, shows them in 3D, checks the real work and points students to peers |
 

@@ -23,7 +23,7 @@ This file lists the prompts that shaped the project, grouped by the part of Otto
 | Nov 2 | What can we learn from Farza's "Clicky" demo? | Answers should be visual, not walls of text |
 | Nov 4 | Research First Place AZ, peer support, streaks and safety for autistic young people. | Weekly rings instead of streaks, closed rafts instead of "people nearby" |
 | Nov 5 | Read our First Place AZ tour notes and build what they teach. | Their five-stage skill path on every task, a calm start screen, personal goals and a work card for employers |
-| Nov 5 | Look at our competitors, Ama and Focusmate, and say where Otto is different. | Added to [`research.md`](research.md): ages 16–22, hands-on job tasks, and working alongside raftmates without video |
+| Nov 5 | Look at our competitors, Ama and Focusmate, and say where Otto is different. | Added to [`research.md`](research.md): high school to age 22, hands-on job tasks, and working alongside raftmates without video |
 | Nov 5 | Find research on how neurodivergent people and their parents use AI, and how we should position Otto. | Research and positioning in [`research.md`](research.md): extend job coaches, be a tool not a friend, and fade on purpose |
 
 ## Design and hardware
