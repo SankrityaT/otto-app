@@ -5,7 +5,7 @@ head is tilted), scales it to the upright otter's larger eyes, and paints it abo
 mirrored for the left one. It goes on the body and on the closed-eyes layer, so the brows
 stay put while the otter blinks.
 
-    python scripts/add_upright_eyebrows.py    # needs numpy, scipy and pillow; run once
+    python scripts/otter-art/add_upright_eyebrows.py    # needs numpy, scipy and pillow; run once
 """
 import math
 import os

@@ -1,5 +1,7 @@
 # Build plan
 
+> This is the plan we wrote on Nov 4, kept as a record. Some names changed since (the crew became the raft, Ayin became Otto); the [README](../README.md) describes what we actually built.
+
 Our plan for the Nov 5 submission. We wrote it after the AZACS visit and the First Place AZ research, then tightened it while pair programming with Claude Code.
 
 ## Goal

@@ -91,7 +91,7 @@ The printed desk otter in the repo is a first step toward this: a camera in a pe
 
 | What | Where |
 |---|---|
-| Logo and app icons (Havi) | `web/public/icons/` |
+| Logo and app icons (Havi) | `web/public/icons/` (the logo is `otto-logo.svg`) |
 | The otter and pond art (Havi) | `web/public/otter/`, or screenshots of the landing page |
 | The desk otter, printed design | `hardware/otter/renders/variant_xiao/three_quarter.png`, `exploded.png`, `internals_layout.png` |
 | Spinnable 3D otter | the "Device" section of the landing page (screen-record it) |

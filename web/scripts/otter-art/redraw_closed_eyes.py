@@ -6,7 +6,7 @@ closed-eye stroke: taken from its fully closed blink frame (otter-eyelids.png), 
 scaled to the upright otter's eyes, mirrored for the left eye so both match. UprightOtter moves the
 lash down with the eyelid as it closes.
 
-    python scripts/redraw_closed_eyes.py    # needs numpy, scipy and pillow; run once
+    python scripts/otter-art/redraw_closed_eyes.py    # needs numpy, scipy and pillow; run once
 
 It prints the eyelid travel and the lash's resting height, for LID and LASH_Y in UprightOtter.tsx.
 """

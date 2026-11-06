@@ -104,7 +104,7 @@ otto-app/
 │   ├── src/components/  screens, the 3D viewer, Havi's pond and otter
 │   ├── src/landing/     the landing page's sections and its own copy of Havi's otter
 │   ├── src/lib/         data, Claude prompts (lib/ai), fading, buddies, weekly rings
-│   ├── scripts/seed.ts  demo crew
+│   ├── scripts/         database setup, the demo raft (seed.ts) and one-off otter art fixes
 │   └── tests/           unit tests
 ├── device/              the otter: XIAO camera sketch, Raspberry Pi camera and buttons
 ├── hardware/            3D-printable otter enclosure, built from code
@@ -132,7 +132,7 @@ Deploying to Vercel runs `npm run vercel-build`, which brings the database up to
 
 **On a phone:** start with `npm run dev:phone` instead (it serves Otto over https on your Wi-Fi, which phones need before they allow the camera). Then open **Me** on the computer and scan the **Use Otto on your phone** QR code with the phone's camera. Otto opens on the phone, already set to that student. The first time, the phone may ask you to trust the development certificate.
 
-Use Chrome or Safari: Otto uses the browser's built-in speech to read steps aloud and to hear "done", "help" and "show me". The first time a step is shown, its picture takes 15–30 seconds to draw; after that it is instant.
+**Voice:** add a `CARTESIA_API_KEY` and/or `DEEPGRAM_API_KEY` to `.env.local` for Otto's voice, and `DEEPGRAM_API_KEY` for hearing the student. Without them, Otto falls back to the browser's own voice, and students type instead of talking. A new task's diagrams are drawn as soon as it's created; each 3D model takes about 20 seconds the first time, then it's saved.
 
 Checks:
 

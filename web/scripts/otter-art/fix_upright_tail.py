@@ -6,7 +6,7 @@ away from both, and the cut edges had a dark fringe from upscaling, so the tail 
 three pieces. This moves every tail pixel right of the body into the tail layer, heals the
 old cuts, and recolours the dark fringe from the fur next to it.
 
-    python scripts/fix_upright_tail.py    # needs numpy, scipy and pillow; run once, on the original layers
+    python scripts/otter-art/fix_upright_tail.py    # needs numpy, scipy and pillow; run once, on the original layers
 
 The tail now swings from its root at the hip, so UprightOtter's TAIL_PIVOT moved to match.
 """
