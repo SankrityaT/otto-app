@@ -186,6 +186,8 @@ export default function RaftPage() {
           : current.justFinished
             ? `just finished ${current.justFinished}!`
             : `${self ? "are" : "is"} taking a break`;
+      // Just finished something: cheer them with one of the raft's preset cheers.
+      const win = !self && !current.asking && !current.now && current.justFinished ? raft!.wins.find((w) => w.studentId === current.id) : undefined;
       return (
         <Card furHue={current.furHue} onClose={close}>
           <p className="text-[18px]">
@@ -197,7 +199,17 @@ export default function RaftPage() {
                 Help {current.name}
               </Link>
             )}
-            {!self && (
+            {win &&
+              (win.cheered ? (
+                <p className="self-center text-[15px] text-ink-2">You cheered {current.name}.</p>
+              ) : (
+                raft!.cheers.map((phrase) => (
+                  <Button key={phrase} onClick={() => act(api.cheer(me, win.runId, phrase))}>
+                    {phrase}
+                  </Button>
+                ))
+              ))}
+            {!self && !(win && !win.cheered) && (
               <Button look={current.asking ? "quiet" : "main"} onClick={() => setTogether({ with: current })}>
                 <RaftIcon name="together" /> Work with {current.name}
               </Button>

@@ -46,7 +46,7 @@ const Scene = z.object({
 });
 
 export type Scene = z.infer<typeof Scene>;
-export type ScenePart = z.infer<typeof Part>;
+type ScenePart = z.infer<typeof Part>;
 
 /** A model while it's being built: the title and every part written so far. */
 export type SceneSoFar = { title: string | null; parts: ScenePart[] };

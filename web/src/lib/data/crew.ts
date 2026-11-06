@@ -15,7 +15,7 @@ export interface Student {
   furHue: number;
 }
 
-export type InviteStatus = "waiting" | "yes" | "not-today";
+type InviteStatus = "waiting" | "yes" | "not-today";
 
 export interface CrewView {
   name: string;

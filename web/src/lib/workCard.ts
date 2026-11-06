@@ -1,7 +1,7 @@
 // Tips for a supervisor or coworker, one for each "how I work best" phrase a student picks.
 // The student chooses what to share; these turn their choices into plain advice.
 
-export const TIPS: Record<string, string> = {
+const TIPS: Record<string, string> = {
   "One step at a time": "Give one step at a time, and wait until it's done before the next.",
   "Show me, then let me try": "Show the task once, then let me try it while you watch.",
   "Pictures over words": "A picture or a quick demo works better than a long explanation.",

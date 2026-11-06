@@ -128,7 +128,7 @@ export function canListen(): boolean {
 }
 
 /** Map what the student said to a command. Plain words only, no wake word. */
-export function toCommand(said: string): VoiceCommand | null {
+function toCommand(said: string): VoiceCommand | null {
   const words = said.toLowerCase();
   if (words.includes("show me")) return "show-me";
   if (words.includes("help") || words.includes("stuck")) return "help";
@@ -138,7 +138,7 @@ export function toCommand(said: string): VoiceCommand | null {
 }
 
 /** True while Ayin itself is talking, so the microphone doesn't answer Ayin's own voice. */
-export function isSpeaking(): boolean {
+function isSpeaking(): boolean {
   return typeof window !== "undefined" && (playing !== null || window.speechSynthesis?.speaking === true);
 }
 

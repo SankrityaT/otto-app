@@ -8,7 +8,7 @@ import { SAFETY_RULES, WONT_HELP } from "./safety";
 const anthropic = new Anthropic();
 
 /** How Ayin talks, and its safety rules, shared by every prompt. Comes from our AZACS research notes. */
-export const AYIN_VOICE = `You are Ayin, a calm step-by-step coach for autistic students aged 16-22
+const AYIN_VOICE = `You are Ayin, a calm step-by-step coach for autistic students aged 16-22
 learning job tasks at a school work site (a cafe, a shirt studio, a shipping store).
 Use short, plain, literal words. One idea per sentence. No idioms or sarcasm.
 Be kind and matter-of-fact. Never blame, rush or say the student failed.
@@ -28,17 +28,17 @@ type Ask<T extends z.ZodType> = {
   schema: T;
   instructions: string;
   photo?: Photo | null;
-  /** Several pictures, in order (like a screen over a few seconds). */
-  photos?: Photo[];
   effort: "low" | "medium" | "high";
   maxTokens?: number;
 };
 
 function request<T extends z.ZodType>(options: Ask<T>) {
   const content: Anthropic.ContentBlockParam[] = [];
-  for (const photo of [options.photo, ...(options.photos ?? [])]) {
-    if (!photo) continue;
-    content.push({ type: "image", source: { type: "base64", media_type: photo.mediaType, data: photo.data } });
+  if (options.photo) {
+    content.push({
+      type: "image",
+      source: { type: "base64", media_type: options.photo.mediaType, data: options.photo.data },
+    });
   }
   content.push({ type: "text", text: options.instructions });
   return {

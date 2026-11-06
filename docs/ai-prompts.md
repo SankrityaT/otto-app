@@ -52,7 +52,6 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Nov 5 | Use the real voice we had before (Cartesia or Deepgram). While a 3D model takes time, show it being built and make small talk, not a loading screen. Nothing hardcoded. | Cartesia Sonic with a Deepgram backup; models stream in part by part as blueprint wireframes with the otter calling out each part; Claude makes small talk until the model is ready |
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
 | Nov 5 | Ayin keeps talking to itself, and the camera view is too small. Add a hands-free mode. | One Hands-free switch; Ayin ignores its own voice through the microphone; what Ayin sees is big on every task screen |
-| Nov 5 | If a student is watching a video and asks what it means, Ayin should explain it in simple words. | "Explain my screen": Ayin follows the last few seconds of a shared tab, hears its last half minute (Deepgram), and explains it out loud |
 
 ## Talking with Ayin
 

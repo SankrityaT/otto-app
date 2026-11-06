@@ -7,7 +7,7 @@ import { getRoutine, type Step } from "./routines";
 // A run is one go at a routine by one student. Every finished step is logged with the
 // most help it took, so the student (and later their teacher) can see help going down.
 
-export interface RunStep extends Step {
+interface RunStep extends Step {
   showPictureFirst: boolean;
 }
 

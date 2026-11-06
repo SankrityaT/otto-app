@@ -22,7 +22,7 @@ export interface RunResult {
 }
 
 /** Runs in a row done fully on their own before Ayin steps back to "On my own". */
-export const RUNS_ON_OWN_TO_FINISH = 3;
+const RUNS_ON_OWN_TO_FINISH = 3;
 
 /** The student's stage for a task, from their finished runs of it, newest first. */
 export function stageFor(runs: RunResult[]): Stage {

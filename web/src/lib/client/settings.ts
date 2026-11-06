@@ -6,7 +6,7 @@ import { useCallback, useSyncExternalStore } from "react";
 
 const STUDENT_KEY = "ayin.studentId";
 const CAMERA_KEY = "ayin.camera";
-export const THEME_KEY = "ayin.theme";
+const THEME_KEY = "ayin.theme";
 const CHANGED = "ayin:settings-changed"; // same-tab updates; "storage" only fires in other tabs
 
 export type CameraChoice = "this-device" | "screen" | "otter";

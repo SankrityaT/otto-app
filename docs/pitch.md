@@ -30,7 +30,6 @@ Autistic students aged 16–22 in transition programs, learning real job tasks a
 - Builds a **3D model of each step** the student can turn in their hand, and you watch it being built while Ayin chats.
 - **Talks the student through it** with a natural voice, and answers questions out loud ("is this the right way up?") from what the camera sees.
 - Notices when a step is done, without the student having to tap.
-- **Explains a video in plain words.** Watching a how-to video and lost? Share the tab and ask "what does that mean?": Ayin sees and hears the last few moments and explains them simply.
 - Gives more help **only when asked**, and **less help every time** the student succeeds. It follows First Place AZ's five stages: watch, first tries, with help, check-in, on your own.
 
 **The Raft: real peers, not a chatbot.** A small, closed group from the same work site, set up by staff. Students see each other's otters in a shared pond: who's working, who needs help, who just finished. They help each other with the same 3D models, work side by side ("do it together"), and cheer wins. No video, no strangers, no rankings, no streaks.

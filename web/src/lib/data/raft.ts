@@ -7,7 +7,7 @@ import { getStudent } from "./crew";
 // Everything stays inside one raft. Posts and replies are checked by Ayin before they are
 // saved (see lib/ai/moderate.ts), and anyone can report a post for staff to look at.
 
-export { REACTIONS, WORK_STYLES, type Reaction } from "../raftWords";
+export { WORK_STYLES, type Reaction } from "../raftWords";
 export type PostKind = "win" | "ask";
 
 export interface Post {

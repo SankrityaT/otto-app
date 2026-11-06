@@ -3,7 +3,7 @@ import { all, now, run } from "../db";
 // The otter's physical buttons. The device reports a press; the screen at the same
 // station picks it up and acts exactly as if the on-screen button was tapped.
 
-export const BUTTONS = ["done", "help", "show-me"] as const;
+const BUTTONS = ["done", "help", "show-me"] as const;
 export type Button = (typeof BUTTONS)[number];
 
 export function isButton(value: unknown): value is Button {
