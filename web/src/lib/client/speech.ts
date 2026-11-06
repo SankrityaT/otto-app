@@ -52,11 +52,13 @@ function stoppedTalking(): void {
 }
 
 /** True if what the microphone heard is most likely Ayin's own voice, not the student's. */
-function isEcho(heard: string, short: boolean): boolean {
-  if (isSpeaking() || Date.now() - quietSince < ECHO_MS) return true;
+function isEcho(heard: string): boolean {
   const words = wordsOf(heard);
-  if (short || words.length < 3) return false;
-  return said.some((line) => words.filter((w) => line.words.has(w)).length / words.length >= 0.7);
+  if (words.length === 0) return true;
+  const aloudJustNow = isSpeaking() || Date.now() - quietSince < ECHO_MS;
+  // A few words heard while Ayin talks are Ayin's own if Ayin just said every one of them.
+  if (words.length < 3) return aloudJustNow && said.some((line) => words.every((w) => line.words.has(w)));
+  return said.some((line) => words.filter((w) => line.words.has(w)).length / words.length >= (aloudJustNow ? 0.6 : 0.7));
 }
 
 /** Where each word starts in the text, for lighting words up as they're said. */
@@ -151,8 +153,10 @@ const PAUSE_MS = 900;
 /** Shorter sounds are a cough or a clatter, not words; longer ones are cut into pieces. */
 const MIN_CLIP_MS = 400;
 const MAX_CLIP_MS = 15_000;
+/** While nobody is talking, the running recording starts over this often, so clips stay small. */
+const IDLE_RESTART_MS = 4000;
 /** The quietest sound that can count as talking (loudness 0..1), above the room's own noise. */
-const MIN_LEVEL = 0.02;
+const MIN_LEVEL = 0.012;
 
 export function canListen(): boolean {
   return typeof window !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia) && typeof MediaRecorder !== "undefined";
@@ -225,7 +229,8 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
 
   const handle = (heard: string) => {
     const short = heard.split(/\s+/).length <= 3;
-    if (isEcho(heard, short)) return; // that was Ayin's own voice
+    if (isEcho(heard)) return; // that was Ayin's own voice
+    hush(); // the student is talking: Ayin stops and listens, like a person would
     const command = toCommand(heard);
     if (command && short) onCommand(command);
     else if (heard.length >= 2) onQuestion(heard);
@@ -244,8 +249,11 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
     context.createMediaStreamSource(stream).connect(analyser);
     const samples = new Float32Array(analyser.fftSize);
     let noise = MIN_LEVEL / 2;
-    let clip: ReturnType<typeof record> | null = null;
-    let since = 0;
+    // Always recording, so a clip includes the moment before the first word. While nobody talks,
+    // the recording is quietly restarted now and then; when someone talks and pauses, it's sent.
+    let clip = record(stream);
+    let clipFrom = Date.now();
+    let talkingFrom = 0;
     let quiet = 0;
 
     const timer = setInterval(async () => {
@@ -253,26 +261,31 @@ export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (
       const level = Math.sqrt(samples.reduce((sum, v) => sum + v * v, 0) / samples.length);
       const loud = level > Math.max(MIN_LEVEL, noise * 3);
       if (!loud) noise = noise * 0.95 + level * 0.05;
-      const ayinTalking = isSpeaking() || Date.now() - quietSince < ECHO_MS;
 
-      if (!clip) {
-        if (loud && !ayinTalking) [clip, since, quiet] = [record(stream), Date.now(), 0];
+      // The student can talk over Ayin. The microphone cancels most of Ayin's voice, and
+      // anything that still comes through is recognised as Ayin's own words (isEcho).
+      if (!talkingFrom) {
+        if (loud) [talkingFrom, quiet] = [Date.now(), 0];
+        else if (Date.now() - clipFrom > IDLE_RESTART_MS) {
+          clip.stop();
+          [clip, clipFrom] = [record(stream), Date.now()];
+        }
         return;
       }
       quiet = loud ? 0 : quiet + TICK_MS;
-      const length = Date.now() - since;
-      if (quiet < PAUSE_MS && length < MAX_CLIP_MS && !ayinTalking) return;
+      const length = Date.now() - talkingFrom;
+      if (quiet < PAUSE_MS && length < MAX_CLIP_MS) return;
       const finished = clip;
-      clip = null;
+      [clip, clipFrom, talkingFrom] = [record(stream), Date.now(), 0];
       const recorded = await finished.stop();
-      if (length - quiet < MIN_CLIP_MS || ayinTalking) return;
+      if (length - quiet < MIN_CLIP_MS) return;
       const heard = await toWords(recorded);
       if (!stopped && heard) handle(heard);
     }, TICK_MS);
 
     close = () => {
       clearInterval(timer);
-      clip?.stop();
+      clip.stop();
       stream.getTracks().forEach((track) => track.stop());
       context.close().catch(() => {});
       if (ears === context) ears = null;

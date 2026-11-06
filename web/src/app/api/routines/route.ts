@@ -1,9 +1,10 @@
 import { planSteps } from "@/lib/ai/steps";
 import { getPhoto } from "@/lib/camera";
-import type { NextRequest } from "next/server";
+import { after, type NextRequest } from "next/server";
 import { getStudent } from "@/lib/data/crew";
 import { createRoutine, listRoutines } from "@/lib/data/routines";
 import { aiFailure, jsonError, readJson } from "@/lib/http";
+import { pictureFor } from "@/lib/pictures";
 
 /** This student's tasks: their own, and their raft's. */
 export async function GET(request: NextRequest) {
@@ -23,7 +24,10 @@ export async function POST(request: Request) {
 
   try {
     const plan = await planSteps(task || "the task in the photo", photo);
-    return Response.json({ routine: await createRoutine(plan, { studentId: student.id }) }, { status: 201 });
+    const routine = await createRoutine(plan, { studentId: student.id });
+    // Draw every step's diagram now, all at once, so they're ready when the student gets there.
+    after(() => Promise.all(routine.steps.map((step) => pictureFor(step.id).catch(() => null))));
+    return Response.json({ routine }, { status: 201 });
   } catch (error) {
     return aiFailure(error);
   }

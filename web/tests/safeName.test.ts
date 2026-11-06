@@ -18,5 +18,7 @@ describe("safeName", () => {
   it("refuses swear words, even disguised", () => {
     expect(safeName("shit")).toBeNull();
     expect(safeName("Fuuuck")).toBeNull();
+    expect(safeName("Sexy")).toBeNull();
+    expect(safeName("N4ked")).toBeNull();
   });
 });

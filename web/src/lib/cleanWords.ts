@@ -4,6 +4,8 @@
 const BLOCKED = [
   "fuck", "shit", "bitch", "bastard", "asshole", "dick", "cunt", "piss", "crap", "damn",
   "slut", "whore", "retard", "stupid ass", "dumbass", "jackass", "wtf", "stfu", "kys",
+  // Sexual words: the raft is for young people, and nobody should see these.
+  "sex", "sexy", "porn", "nude", "nudes", "naked", "horny", "boobs", "penis", "vagina", "dildo",
 ];
 
 /** Undo common tricks like "sh1t", "f.u.c.k" or "fuuuck" before checking. */

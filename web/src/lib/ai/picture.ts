@@ -9,8 +9,8 @@ const Picture = z.object({
 export async function drawStep(taskTitle: string, step: { text: string; detail: string }): Promise<string | null> {
   const picture = await askClaude({
     schema: Picture,
-    effort: "medium",
-    maxTokens: 16000,
+    effort: "low",
+    maxTokens: 6000,
     instructions: `Draw a simple picture for one step of the task "${taskTitle}".
 Step: "${step.text}" (${step.detail})
 
@@ -19,6 +19,7 @@ Rules for the drawing:
 - Colours: outlines #2B2A28, fills #F6EFE4 and #E8DCC8, and one highlight colour #3E8E87
   for the single thing the student must act on (the part to press, the line to fill to).
 - Show only the objects this step needs, large and centred. At most one short text label.
+- Keep it quick and simple: about 10 to 25 shapes is plenty.
 - Plain SVG shapes only: no scripts, no images, no links, no fonts, no animation.`,
   });
   return isSafeSvg(picture.svg) ? picture.svg : null;

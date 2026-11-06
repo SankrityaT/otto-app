@@ -39,6 +39,7 @@ export const api = {
   addStudent: (name: string, furHue: number, raftCode: string) =>
     call<{ student: Student }>("/api/students", post({ name, furHue, raftCode })),
   joinRaft: (studentId: string, code: string) => call(`/api/students/${encodeURIComponent(studentId)}/raft`, post({ code })),
+  startRaft: (studentId: string, name: string) => call<{ code: string }>("/api/crews", post({ studentId, name })),
   raftByCode: (code: string) => call<{ members: Student[] }>("/api/crew/members", post({ code })),
   setFurHue: (studentId: string, furHue: number) =>
     call(`/api/students/${studentId}`, { method: "PATCH", body: JSON.stringify({ furHue }) }),

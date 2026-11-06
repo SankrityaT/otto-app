@@ -1,24 +1,17 @@
 import type { NextRequest } from "next/server";
-import { drawStep } from "@/lib/ai/picture";
-import { getStep, savePicture } from "@/lib/data/routines";
 import { aiFailure, jsonError } from "@/lib/http";
+import { pictureFor } from "@/lib/pictures";
 
-/** The step's picture as an SVG image. Drawn the first time, then reused. */
+/** The step's diagram as an SVG image. Drawn the first time, then reused. */
 export async function GET(_request: NextRequest, ctx: RouteContext<"/api/steps/[id]/picture">) {
   const { id } = await ctx.params;
-  const step = await getStep(id);
-  if (!step) return jsonError("Step not found.", 404);
-
-  let svg = step.pictureSvg;
-  if (!svg) {
-    try {
-      svg = await drawStep(step.routineTitle, step);
-    } catch (error) {
-      return aiFailure(error);
-    }
-    if (!svg) return jsonError("No picture for this step.", 404);
-    await savePicture(id, svg);
+  let svg: string | null;
+  try {
+    svg = await pictureFor(id);
+  } catch (error) {
+    return aiFailure(error);
   }
+  if (!svg) return jsonError("No picture for this step.", 404);
 
   return new Response(svg, {
     headers: {

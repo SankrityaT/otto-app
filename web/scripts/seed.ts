@@ -2,6 +2,7 @@
 // empty on first run. This is sample data for trying the app, not part of the app.
 // Running it again wipes the database and starts over.
 
+import { STARTING_CHEERS } from "../src/lib/data/crew";
 import { createRoutine } from "../src/lib/data/routines";
 import { close, exec, newId, run } from "../src/lib/db";
 
@@ -34,12 +35,7 @@ async function main() {
     crewId,
     "Café raft",
     30,
-    JSON.stringify([
-      "Nice work!",
-      "You did it on your own!",
-      "Proud of you",
-      "Keep going",
-    ]),
+    JSON.stringify(STARTING_CHEERS),
     "OTTER",
   );
 

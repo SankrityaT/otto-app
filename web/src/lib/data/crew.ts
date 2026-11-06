@@ -19,6 +19,8 @@ type InviteStatus = "waiting" | "yes" | "not-today";
 
 export interface CrewView {
   name: string;
+  /** The code that lets a classmate join this raft. */
+  code: string | null;
   weeklyGoal: number;
   onOwnTogether: number;
   cheers: string[];
@@ -149,6 +151,32 @@ export async function crewForCode(code: string): Promise<string | null> {
   return crew?.id ?? null;
 }
 
+/** The cheers a new raft starts with. */
+export const STARTING_CHEERS = ["Nice work!", "You did it on your own!", "Proud of you", "Keep going"];
+/** Steps done on their own that a new raft aims for together each week. */
+const STARTING_GOAL = 30;
+/** Join codes use only letters and digits that can't be mixed up (no 0 and O, no 1, I and L). */
+const CODE_LETTERS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const CODE_LENGTH = 6;
+
+/** A new raft with this student in it. Returns its join code to share, or null if they're already in one. */
+export async function startCrew(studentId: string, name: string): Promise<string | null> {
+  const student = await getStudent(studentId);
+  if (!student || student.crewId) return null;
+  const code = [...crypto.getRandomValues(new Uint8Array(CODE_LENGTH))].map((b) => CODE_LETTERS[b % CODE_LETTERS.length]).join("");
+  const crewId = newId();
+  await run(
+    "INSERT INTO crews (id, name, weekly_goal, cheers, join_code) VALUES (?, ?, ?, ?, ?)",
+    crewId,
+    name,
+    STARTING_GOAL,
+    JSON.stringify(STARTING_CHEERS),
+    code,
+  );
+  await joinCrew(studentId, crewId);
+  return code;
+}
+
 /** Put a student who isn't in a raft yet into one. */
 export async function joinCrew(studentId: string, crewId: string): Promise<boolean> {
   return (await run("UPDATE students SET crew_id = ? WHERE id = ? AND crew_id IS NULL", crewId, studentId)) > 0;
@@ -168,8 +196,8 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
   const weekStart = startOfWeek(new Date()).toISOString();
 
   const [crew, members, logs, wins, invites] = await Promise.all([
-    one<{ name: string; weeklyGoal: number; cheers: string }>(
-      `SELECT name, weekly_goal AS "weeklyGoal", cheers FROM crews WHERE id = ?`,
+    one<{ name: string; code: string | null; weeklyGoal: number; cheers: string }>(
+      `SELECT name, join_code AS code, weekly_goal AS "weeklyGoal", cheers FROM crews WHERE id = ?`,
       crewId,
     ),
     all<{ id: string; name: string; furHue: number; weeklyTarget: number }>(
@@ -228,6 +256,7 @@ export async function crewView(studentId: string): Promise<CrewView | null> {
 
   return {
     name: crew!.name,
+    code: crew!.code,
     weeklyGoal: crew!.weeklyGoal,
     onOwnTogether: memberStats.reduce((sum, member) => sum + member.onOwn, 0),
     cheers: JSON.parse(crew!.cheers) as string[],

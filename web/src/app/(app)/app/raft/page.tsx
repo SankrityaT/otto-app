@@ -45,6 +45,8 @@ export default function RaftPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [noRaft, setNoRaft] = useState(false);
   const [code, setCode] = useState("");
+  // Not in a raft yet: join one with a code, or start a new one (then `code` is its name).
+  const [starting, setStarting] = useState(false);
 
   const load = useCallback(() => {
     if (!studentId) return;
@@ -72,7 +74,8 @@ export default function RaftPage() {
   async function join(event: FormEvent) {
     event.preventDefault();
     try {
-      await api.joinRaft(studentId!, code);
+      if (starting) await api.startRaft(studentId!, code);
+      else await api.joinRaft(studentId!, code);
       setNoRaft(false);
       setMessage(null);
       load();
@@ -85,22 +88,37 @@ export default function RaftPage() {
     return (
       <AppShell>
         <form onSubmit={join} className="page flex max-w-md flex-col items-center gap-3 pt-10 text-center">
-          <h1 className="page__h">Join your raft</h1>
-          <p className="text-ink-2">A raft is a few classmates from your work site. Your teacher has its code.</p>
+          <h1 className="page__h">{starting ? "Start a raft" : "Join your raft"}</h1>
+          <p className="text-ink-2">
+            {starting
+              ? "Name it, and Ayin gives you a code to share with your classmates."
+              : "A raft is a few classmates from your work site. Your teacher has its code."}
+          </p>
           <label htmlFor="code" className="sr-only">
-            Raft code
+            {starting ? "Raft name" : "Raft code"}
           </label>
           <input
             id="code"
-            className="w-full rounded-2xl border-[1.5px] border-line bg-card px-4 py-3 text-center text-[20px] uppercase tracking-[0.2em] outline-none focus:border-ink"
+            className={`w-full rounded-2xl border-[1.5px] border-line bg-card px-4 py-3 text-center text-[20px] outline-none focus:border-ink ${starting ? "" : "uppercase tracking-[0.2em]"}`}
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder="Raft code"
+            placeholder={starting ? "Like Café raft" : "Raft code"}
             autoComplete="off"
-            maxLength={12}
+            maxLength={starting ? 30 : 12}
           />
           <button className="btn btn--primary w-full" disabled={!code.trim()}>
-            Join my raft
+            {starting ? "Start my raft" : "Join my raft"}
+          </button>
+          <button
+            type="button"
+            className="btn btn--text"
+            onClick={() => {
+              setStarting(!starting);
+              setCode("");
+              setMessage(null);
+            }}
+          >
+            {starting ? "I have a code" : "No code? Start a new raft"}
           </button>
           {message && <p className="text-ink-2">{message}</p>}
         </form>
@@ -283,9 +301,16 @@ export default function RaftPage() {
           <div className="min-w-0">
             <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">{raft.name} · this week</p>
             <h1 className="font-display text-[30px] leading-none sm:text-[40px]">The pond is filling up</h1>
-            <button onClick={() => setIntroOpen(true)} className="text-[15px] text-ink-3 underline-offset-4 hover:underline">
-              What&apos;s a raft?
-            </button>
+            <p className="flex flex-wrap items-center gap-x-3 text-[15px] text-ink-3">
+              <button onClick={() => setIntroOpen(true)} className="underline-offset-4 hover:underline">
+                What&apos;s a raft?
+              </button>
+              {raft.code && (
+                <span>
+                  Invite with code <strong className="tracking-[0.15em] text-ink">{raft.code}</strong>
+                </span>
+              )}
+            </p>
           </div>
           {mine && (
             <div className="flex shrink-0 items-center gap-2 text-right">

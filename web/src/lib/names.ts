@@ -12,3 +12,13 @@ export function safeName(name: string): string | null {
 }
 
 export const NAME_HINT = "Please use just your first name, in letters.";
+
+const RAFT_NAME = /^[\p{L}\p{N}][\p{L}\p{N}'\- ]{0,29}$/u;
+
+/** A raft's name, like "Café raft": letters and numbers, short, no swear words. Null if not. */
+export function safeRaftName(name: string): string | null {
+  const trimmed = name.trim().replace(/\s+/g, " ");
+  return RAFT_NAME.test(trimmed) && !hasBlockedWords(trimmed) ? trimmed : null;
+}
+
+export const RAFT_NAME_HINT = "Give your raft a short name, in letters or numbers.";
