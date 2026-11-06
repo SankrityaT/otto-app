@@ -84,9 +84,11 @@ export const api = {
     }>(
       `/api/runs?studentId=${encodeURIComponent(studentId)}`,
     ),
-  routines: () => call<{ routines: { id: string; title: string; stepCount: number }[] }>("/api/routines"),
+  routines: (studentId: string) =>
+    call<{ routines: { id: string; title: string; stepCount: number }[] }>(`/api/routines?studentId=${encodeURIComponent(studentId)}`),
   routine: (routineId: string) => call<{ routine: Routine }>(`/api/routines/${routineId}`),
-  newRoutine: (task: string, photo: string | null) => call<{ routine: Routine }>("/api/routines", post({ task, photo })),
+  newRoutine: (studentId: string, task: string, photo: string | null) =>
+    call<{ routine: Routine }>("/api/routines", post({ studentId, task, photo })),
   startRun: (routineId: string, studentId: string) => call<{ runId: string }>("/api/runs", post({ routineId, studentId })),
   run: (runId: string) => call<{ run: Run; summary: Summary }>(`/api/runs/${runId}`),
   check: (runId: string, stepId: string, helpLevel: number, photo: string | null, trustStudent = false) =>

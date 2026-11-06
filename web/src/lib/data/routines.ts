@@ -20,17 +20,40 @@ export interface Routine {
   steps: Step[];
 }
 
-export function listRoutines(): Promise<{ id: string; title: string; stepCount: number }[]> {
+// A task belongs to the student who asked for it, or to a raft (set up by staff). Nobody else sees it.
+const VISIBLE_TO = `(r.student_id = ? OR (r.student_id IS NULL AND r.crew_id = (SELECT crew_id FROM students WHERE id = ?)))`;
+
+/** The tasks a student can see: their own, and the ones staff set up for their raft. */
+export function listRoutines(studentId: string): Promise<{ id: string; title: string; stepCount: number }[]> {
   return all(
     `SELECT r.id, r.title, COUNT(s.id) AS "stepCount"
      FROM routines r JOIN steps s ON s.routine_id = r.id
+     WHERE ${VISIBLE_TO}
      GROUP BY r.id ORDER BY r.created_at DESC`,
+    studentId,
+    studentId,
   );
 }
 
-export async function createRoutine(plan: Pick<StepPlan, "title" | "steps">): Promise<Routine> {
+/** True if this student may start this task. */
+export async function canUse(routineId: string, studentId: string): Promise<boolean> {
+  return (await one(`SELECT 1 FROM routines r WHERE r.id = ? AND ${VISIBLE_TO}`, routineId, studentId, studentId)) !== null;
+}
+
+/** Save a task's steps, owned by the student who asked for it or by a whole raft. */
+export async function createRoutine(
+  plan: Pick<StepPlan, "title" | "steps">,
+  owner: { studentId: string } | { crewId: string },
+): Promise<Routine> {
   const routineId = newId();
-  await run("INSERT INTO routines (id, title, created_at) VALUES (?, ?, ?)", routineId, plan.title, now());
+  await run(
+    "INSERT INTO routines (id, title, created_at, student_id, crew_id) VALUES (?, ?, ?, ?, ?)",
+    routineId,
+    plan.title,
+    now(),
+    "studentId" in owner ? owner.studentId : null,
+    "crewId" in owner ? owner.crewId : null,
+  );
   for (const [index, step] of plan.steps.entries()) {
     await run(
       "INSERT INTO steps (id, routine_id, position, text, detail, seconds) VALUES (?, ?, ?, ?, ?, ?)",

@@ -34,12 +34,22 @@ async function main() {
     crewId,
     "Café raft",
     30,
-    JSON.stringify(["Nice work!", "You did it on your own!", "Proud of you", "Keep going"]),
+    JSON.stringify([
+      "Nice work!",
+      "You did it on your own!",
+      "Proud of you",
+      "Keep going",
+    ]),
     "OTTER",
   );
 
   // Each student picked their own otter colour (a hue shift; 0 is the painted brown).
-  const otters: Record<string, number> = { Jordan: 0, Ava: 300, Sam: 150, Leo: 210 };
+  const otters: Record<string, number> = {
+    Jordan: 0,
+    Ava: 300,
+    Sam: 150,
+    Leo: 210,
+  };
   const names = Object.keys(otters);
   const students: Record<string, string> = {};
   for (const name of names) {
@@ -54,21 +64,53 @@ async function main() {
     );
   }
 
-  // One routine the crew has practised. New tasks are created in the app by Claude.
-  const latte = await createRoutine({
-    title: "Make an iced latte",
-    steps: [
-      { text: "Take a medium cup", detail: "Take one 16 oz clear cup from the stack by the register.", seconds: null },
-      { text: "Fill a cup with ice", detail: "Scoop ice into a tall cup until it is full.", seconds: null },
-      { text: "Pour milk to the line", detail: "Pour cold milk into the cup up to the line.", seconds: null },
-      { text: "Pull one espresso shot", detail: "Press the one-shot button on the espresso machine.", seconds: null },
-      { text: "Pour the shot over the milk", detail: "Pour the espresso slowly over the milk and ice.", seconds: null },
-      { text: "Put on a lid", detail: "Press a lid onto the cup until it clicks all the way round.", seconds: null },
-    ],
-  });
+  // One task staff set up for the whole raft, with practice history. Every other task is
+  // created in the app by Claude, when a student asks, and belongs to that student.
+  const latte = await createRoutine(
+    {
+      title: "Make an iced latte",
+      steps: [
+        {
+          text: "Take a medium cup",
+          detail: "Take one 16 oz clear cup from the stack by the register.",
+          seconds: null,
+        },
+        {
+          text: "Fill a cup with ice",
+          detail: "Scoop ice into a tall cup until it is full.",
+          seconds: null,
+        },
+        {
+          text: "Pour milk to the line",
+          detail: "Pour cold milk into the cup up to the line.",
+          seconds: null,
+        },
+        {
+          text: "Pull one espresso shot",
+          detail: "Press the one-shot button on the espresso machine.",
+          seconds: null,
+        },
+        {
+          text: "Pour the shot over the milk",
+          detail: "Pour the espresso slowly over the milk and ice.",
+          seconds: null,
+        },
+        {
+          text: "Put on a lid",
+          detail: "Press a lid onto the cup until it clicks all the way round.",
+          seconds: null,
+        },
+      ],
+    },
+    { crewId },
+  );
 
   /** Record a past run: `helpLevels` is the help each step took. */
-  async function pastRun(name: string, daysAgo: number, helpLevels: number[]): Promise<string> {
+  async function pastRun(
+    name: string,
+    daysAgo: number,
+    helpLevels: number[],
+  ): Promise<string> {
     const studentId = students[name];
     const when = new Date();
     when.setDate(when.getDate() - daysAgo);
@@ -122,7 +164,13 @@ async function main() {
   );
   // Leo started an iced latte a few minutes ago and asked Jordan to make one at the same time.
   const leoNow = newId();
-  await run("INSERT INTO runs (id, routine_id, student_id, started_at) VALUES (?, ?, ?, ?)", leoNow, latte.id, students.Leo, at);
+  await run(
+    "INSERT INTO runs (id, routine_id, student_id, started_at) VALUES (?, ?, ?, ?)",
+    leoNow,
+    latte.id,
+    students.Leo,
+    at,
+  );
   for (const step of latte.steps.slice(0, 2)) {
     await run(
       "INSERT INTO step_logs (id, run_id, step_id, student_id, help_level, done_at) VALUES (?, ?, ?, ?, ?, ?)",
@@ -148,13 +196,21 @@ async function main() {
 
   // What each student chose for "how I work best", and Jordan's own goal.
   const styles: Record<string, string[]> = {
-    Jordan: ["One step at a time", "Show me, then let me try", "Pictures over words"],
+    Jordan: [
+      "One step at a time",
+      "Show me, then let me try",
+      "Pictures over words",
+    ],
     Sam: ["Quiet is good", "Show me, then let me try"],
     Ava: ["Talking it through helps", "Give me time to think"],
     Leo: ["Pictures over words", "Tell me what's changing first"],
   };
   for (const [name, style] of Object.entries(styles)) {
-    await run("UPDATE students SET work_style = ? WHERE id = ?", JSON.stringify(style), students[name]);
+    await run(
+      "UPDATE students SET work_style = ? WHERE id = ?",
+      JSON.stringify(style),
+      students[name],
+    );
   }
   await run(
     "UPDATE students SET goal = ?, goal_routine_id = ? WHERE id = ?",
@@ -164,10 +220,19 @@ async function main() {
   );
 
   // A few raft posts, so the feed has life on first run.
-  const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
-  async function post(name: string, kind: "win" | "ask", body: string, ago: number, stepText?: string): Promise<string> {
+  const minutesAgo = (m: number) =>
+    new Date(Date.now() - m * 60_000).toISOString();
+  async function post(
+    name: string,
+    kind: "win" | "ask",
+    body: string,
+    ago: number,
+    stepText?: string,
+  ): Promise<string> {
     const id = newId();
-    const step = stepText ? latte.steps.find((s) => s.text === stepText) : undefined;
+    const step = stepText
+      ? latte.steps.find((s) => s.text === stepText)
+      : undefined;
     await run(
       `INSERT INTO posts (id, crew_id, author_id, kind, body, photo, step_id, task_title, status, created_at)
        VALUES (?, ?, ?, ?, ?, NULL, ?, ?, 'shown', ?)`,
@@ -182,7 +247,12 @@ async function main() {
     );
     return id;
   }
-  const samWin = await post("Sam", "win", "First time making an iced latte all on my own!", 90);
+  const samWin = await post(
+    "Sam",
+    "win",
+    "First time making an iced latte all on my own!",
+    90,
+  );
   const avaAsk = await post(
     "Ava",
     "ask",
@@ -190,7 +260,12 @@ async function main() {
     12,
     "Pour milk to the line",
   );
-  await post("Leo", "win", "Finished my first latte. Only needed one hint this time.", 60 * 26);
+  await post(
+    "Leo",
+    "win",
+    "Finished my first latte. Only needed one hint this time.",
+    60 * 26,
+  );
   for (const [from, kind] of [
     ["Ava", "proud"],
     ["Leo", "clap"],
@@ -212,7 +287,9 @@ async function main() {
     minutesAgo(5),
   );
 
-  console.log(`Seeded the Café raft (${names.join(", ")}) and the "${latte.title}" routine.`);
+  console.log(
+    `Seeded the Café raft (${names.join(", ")}) and the "${latte.title}" routine.`,
+  );
 }
 
 main().finally(close);

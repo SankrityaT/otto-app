@@ -291,10 +291,13 @@ export async function profile(studentId: string, viewerId = ""): Promise<Profile
     `SELECT s.id, s.name, s.fur_hue AS "furHue", s.goal, s.work_style AS "workStyle", c.name AS "raftName",
             r.title AS "goalTask"
      FROM students s LEFT JOIN crews c ON c.id = s.crew_id LEFT JOIN routines r ON r.id = s.goal_routine_id
-     WHERE s.id = ?`,
+     WHERE s.id = ?
+       AND (s.id = ? OR s.crew_id = (SELECT crew_id FROM students WHERE id = ?))`,
     studentId,
+    viewerId,
+    viewerId,
   );
-  if (!row) return null;
+  if (!row) return null; // not found, or not in the viewer's raft
 
   const [tasks, helped, blocked] = await Promise.all([
     // Tasks done fully on their own in recent runs are things they can help with; the rest they're learning.

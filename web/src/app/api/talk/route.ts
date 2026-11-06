@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         .filter((t): t is { who: "student" | "ayin"; text: string } => typeof t?.text === "string" && (t.who === "student" || t.who === "ayin"))
         .slice(-6)
     : [];
-  const routines = await listRoutines();
+  const routines = await listRoutines(student.id);
 
   try {
     const turn = await talk({
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       said: text,
       history: turns,
       practised: routines.map((r) => r.title),
-      goal: (await profile(student.id))?.goal?.text ?? null,
+      goal: (await profile(student.id, student.id))?.goal?.text ?? null,
       busyWith: busy,
     });
     // Any safety concern: just Ayin's words (with staff and 988 when someone may be at risk), never a task.

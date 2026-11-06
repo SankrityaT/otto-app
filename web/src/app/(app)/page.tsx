@@ -50,10 +50,6 @@ export default function Today() {
     window.history.replaceState(null, "", "/");
   }, [setStudentId]);
 
-  useEffect(() => {
-    api.routines().then((r) => setRoutines(r.routines)).catch((e) => setMessage(e.message));
-  }, []);
-
   // Only this student is ever fetched; there's no list of everyone. If they're gone, start over.
   useEffect(() => {
     if (!studentId) return;
@@ -63,8 +59,13 @@ export default function Today() {
       .catch((e) => (e instanceof ApiError && e.status === 404 ? setStudentId(null) : setMessage(e.message)));
   }, [studentId, setStudentId]);
 
+  // This student's tasks (their own and their raft's), and the ones they're part way through.
   useEffect(() => {
     if (!studentId) return;
+    api
+      .routines(studentId)
+      .then((r) => setRoutines(r.routines))
+      .catch((e) => setMessage(e.message));
     api
       .doneThisWeek(studentId)
       .then((r) => setStarted(r.inProgress))
@@ -124,7 +125,7 @@ export default function Today() {
     setStatus("thinking");
     setMessage("Ayin is breaking it into steps");
     try {
-      const { routine } = await api.newRoutine(task, photo);
+      const { routine } = await api.newRoutine(student!.id, task, photo);
       await start(routine.id);
     } catch (error) {
       setMessage((error as Error).message);

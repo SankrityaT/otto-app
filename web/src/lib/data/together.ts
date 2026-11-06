@@ -1,7 +1,7 @@
 import { all, newId, now, one, run } from "../db";
 import { getStudent } from "./crew";
 import { hiddenFrom } from "./raft";
-import { getRoutine } from "./routines";
+import { canUse, getRoutine } from "./routines";
 import { startRun } from "./runs";
 
 // "Do it together", like body doubling on Focusmate but made for our students: two raftmates
@@ -45,7 +45,7 @@ async function canPair(fromId: string, toId: string): Promise<boolean> {
 /** Invite a raftmate to do a task together. Starts the inviter's run straight away; returns its id. */
 export async function inviteTogether(fromId: string, toId: string, routineId: string): Promise<string | null> {
   const routine = await getRoutine(routineId);
-  if (!routine || !(await canPair(fromId, toId))) return null;
+  if (!routine || !(await canUse(routineId, fromId)) || !(await canPair(fromId, toId))) return null;
   const runId = await startRun(routineId, fromId);
   if (!runId) return null;
   await run(

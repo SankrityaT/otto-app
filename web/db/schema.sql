@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS routines (
   id         TEXT PRIMARY KEY,
   title      TEXT NOT NULL,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  student_id TEXT REFERENCES students(id),  -- the student who asked for it: only they see it
+  crew_id    TEXT REFERENCES crews(id)      -- or a task staff set up for a whole raft
 );
 
 CREATE TABLE IF NOT EXISTS steps (

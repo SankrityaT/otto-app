@@ -19,7 +19,8 @@ export function WorkCard() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    api.profile(id).then((r) => setProfile(r.profile));
+    // The card is the student's to share (printed, or its link sent to a job coach).
+    api.profile(id, id).then((r) => setProfile(r.profile));
   }, [id]);
 
   if (!profile) return <OtterWaits says="Getting the card" />;

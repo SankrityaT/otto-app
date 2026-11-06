@@ -33,8 +33,8 @@ export function TogetherSheet({
   const others = members.filter((m) => m.id !== meId);
 
   useEffect(() => {
-    api.routines().then((r) => setRoutines(r.routines)).catch((e) => setMessage(e.message));
-  }, []);
+    api.routines(meId).then((r) => setRoutines(r.routines)).catch((e) => setMessage(e.message));
+  }, [meId]);
 
   async function go(routineId: string) {
     if (!who) return;
