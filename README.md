@@ -60,7 +60,7 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Work card:** a one-page card a student can choose to share with a job coach or supervisor, with tips for giving them instructions. This is the employer side First Place AZ asked for.
 - **Buddies:** Ayin pairs raftmates so each can show the other a step they've mastered, and suggests your buddy when you pick someone to work with.
 
-**Getting in.** The first time on a device, Ayin asks the student's first name, they pick their otter's colour, and they join their raft with a code from their teacher. A returning student types the code and taps their own otter.
+**Getting in.** The first time on a device, Ayin asks the student's first name, they pick their otter's colour, and they join their raft with its code. A returning student types the code and taps their own otter. Anyone without a code can start a new raft from the Raft tab: Ayin makes a random six-character code to share, and every member can see it on the Raft tab to invite classmates.
 
 **Your own otter.** Every student picks the colour of their otter, Havi's character. It floats in the pond on the home screen. Under the pond are the student's tasks as leaves they can tap, and a task already started shows a ring for how far along it is.
 
@@ -152,7 +152,7 @@ To build it, we wrote the plan first ([`docs/plan.md`](docs/plan.md)) and then w
 ## Status and limitations
 
 - This repo was started fresh on Nov 4, during the challenge sprint. Our earlier prototype (a voice assistant and camera glasses) is not in it.
-- There are no passwords or staff accounts yet. A new student joins with a raft code (the demo raft's code is `OTTER`); real rafts need long, random codes and limits on wrong guesses.
+- There are no passwords or staff accounts yet. A new student joins with a raft code (the demo raft's code is `OTTER`; new rafts get a random code), and a real school would want staff to create rafts and limits on wrong guesses.
 - Safety concerns are answered on the spot, but staff aren't alerted yet. A staff alert is the next safety feature to build.
 - The XIAO camera works. The Raspberry Pi otter code is written but hasn't been run on a Pi yet, and the current enclosure fits a Pi Zero, not the Pi 4.
 - Peer-support evidence covers ages 3–18 and mostly non-autistic peers; peer mentoring for ages 19–22 is barely studied.

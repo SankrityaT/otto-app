@@ -23,6 +23,7 @@ import { STAGES } from "@/lib/stages";
 import { WithEyes } from "./AyinSees";
 import { Button } from "./Button";
 import { HandsFree } from "./HandsFree";
+import { StepPicture } from "./StepPicture";
 import UprightOtter from "./otter/UprightOtter";
 
 /** The pause after Ayin finishes a step before the walkthrough moves on by itself. */
@@ -335,15 +336,7 @@ function StepStory({
             onGrab={() => setPlaying(false)}
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-line bg-[#fbf8f2] p-3">
-            {/* eslint-disable-next-line @next/next/no-img-element -- the SVG drawn for this step */}
-            <img
-              key={step.id}
-              src={`/api/steps/${step.id}/picture`}
-              alt={step.detail}
-              className="min-h-0 max-w-full flex-1 object-contain"
-            />
-          </div>
+          <StepPicture key={step.id} stepId={step.id} alt={step.detail} shown furHue={run.furHue} fill />
         )}
       </div>
 
