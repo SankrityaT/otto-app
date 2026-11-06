@@ -41,8 +41,8 @@ The OV5640 runs hot, so the sketch puts the sensor on standby after 15 seconds w
 Setup on Raspberry Pi OS (picamera2 and gpiozero come preinstalled):
 
 ```bash
-git clone https://github.com/SankrityaT/ayin-app.git ~/ayin-app
-cd ~/ayin-app/device/pi
+git clone https://github.com/SankrityaT/otto-app.git ~/otto-app
+cd ~/otto-app/device/pi
 cp .env.example .env        # set AYIN_SERVER_URL to the computer running the web app
 set -a; . ./.env; set +a
 sudo hostnamectl set-hostname ayin-otter   # so the app can find it as ayin-otter.local

@@ -4,7 +4,7 @@
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
 
-**Try it:** the app at [ayin-jade.vercel.app/app](https://ayin-jade.vercel.app/app) (raft code `OTTER` joins the demo raft) · landing page for students and parents: [ayin-jade.vercel.app](https://ayin-jade.vercel.app) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
+**Try it:** the app at [ottocoach.vercel.app/app](https://ottocoach.vercel.app/app) (raft code `OTTER` joins the demo raft) · landing page for students and parents: [ottocoach.vercel.app](https://ottocoach.vercel.app) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
 
 ## Our approach
 
@@ -87,7 +87,7 @@ flowchart LR
 ## Repository layout
 
 ```
-ayin-app/
+otto-app/
 ├── web/                 Next.js app: screens and API
 │   ├── src/app/(app)/   the app's pages, at /app (Today, a task, Raft, Me)
 │   ├── src/app/(landing)/  Havi's landing page for students and parents, at /

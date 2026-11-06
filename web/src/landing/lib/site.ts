@@ -7,7 +7,7 @@ export const site = {
   demoVideoUrl: process.env.NEXT_PUBLIC_DEMO_VIDEO_URL || null,
   /** Where "Get in touch" emails go. Hidden when empty. */
   contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || null,
-  githubUrl: "https://github.com/SankrityaT/ayin-app",
+  githubUrl: "https://github.com/SankrityaT/otto-app",
 };
 
 /** One of the landing page's own files, kept in public/landing. */
