@@ -102,7 +102,7 @@ export function Thread() {
   return (
     <AppShell>
       <div className="page flex flex-col gap-4 pb-10">
-        <Link href="/raft" className="btn btn--text self-start px-0">
+        <Link href="/app/raft" className="btn btn--text self-start px-0">
           Back to the raft
         </Link>
         <PostCard

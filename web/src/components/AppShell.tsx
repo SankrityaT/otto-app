@@ -5,10 +5,10 @@ import type { ReactNode } from "react";
 import { useCameraChoice } from "@/lib/client/settings";
 import Tabs from "./pond/Tabs";
 
-const SECTIONS: ["/" | "/raft" | "/me", string][] = [
-  ["/", "Today"],
-  ["/raft", "Raft"],
-  ["/me", "Me"],
+const SECTIONS: ["/app" | "/app/raft" | "/app/me", string][] = [
+  ["/app", "Today"],
+  ["/app/raft", "Raft"],
+  ["/app/me", "Me"],
 ];
 
 /** The frame around the main screens: a quiet status line on top, the section tabs below. */
@@ -17,7 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [camera] = useCameraChoice();
   // Pages inside a section (a raft post, a profile) keep that section's tab lit.
-  const current = SECTIONS.find(([path]) => path !== "/" && pathname.startsWith(path))?.[0] ?? "/";
+  const current = SECTIONS.find(([path]) => path !== "/app" && pathname.startsWith(path))?.[0] ?? "/app";
 
   return (
     <div className="app">

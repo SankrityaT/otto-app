@@ -83,7 +83,7 @@ export function TogetherSheet({
                 </li>
               ))}
             </ul>
-            <Link href={`/raft/people/${who.id}`} className="btn btn--text self-center">
+            <Link href={`/app/raft/people/${who.id}`} className="btn btn--text self-center">
               See how {who.name} works best
             </Link>
           </>

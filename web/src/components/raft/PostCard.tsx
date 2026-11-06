@@ -34,7 +34,7 @@ export function PostCard({
       }`}
     >
       <header className="flex items-center gap-3">
-        <Link href={`/raft/people/${post.author.id}`}>
+        <Link href={`/app/raft/people/${post.author.id}`}>
           <OtterAvatar furHue={post.author.furHue} />
         </Link>
         <div className="min-w-0 flex-1">
@@ -91,7 +91,7 @@ export function PostCard({
         })}
         {linkToThread && (
           <Link
-            href={`/raft/post/${post.id}`}
+            href={`/app/raft/post/${post.id}`}
             className={`ml-auto rounded-full px-4 py-2 text-[15px] font-bold ${asking ? "bg-[#1f1c18] text-[#fffcf7]" : "text-cel-deep"}`}
           >
             {asking ? (post.replyCount ? `${post.replyCount} answers · Help` : "Help") : post.replyCount ? `${post.replyCount} replies` : "Reply"}

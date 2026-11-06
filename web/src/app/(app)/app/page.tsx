@@ -47,7 +47,7 @@ export default function Today() {
     const fromLink = new URLSearchParams(window.location.search).get("student");
     if (!fromLink) return;
     setStudentId(fromLink);
-    window.history.replaceState(null, "", "/");
+    window.history.replaceState(null, "", "/app");
   }, [setStudentId]);
 
   // Only this student is ever fetched; there's no list of everyone. If they're gone, start over.
@@ -86,7 +86,7 @@ export default function Today() {
 
   async function start(routineId: string) {
     const { runId } = await api.startRun(routineId, student!.id);
-    router.push(`/run/${runId}`);
+    router.push(`/app/run/${runId}`);
   }
 
   /** Talk with Ayin. It chats back out loud, and starts a task when that's what the student means. */
@@ -185,7 +185,7 @@ export default function Today() {
               <TaskLeaves
                 started={carryOn.map((s) => ({ ...s, id: s.runId, tone: toneFor(routines.find((r) => r.title === s.title)?.id ?? s.runId) }))}
                 tasks={routines.filter((r) => !carryOn.some((s) => s.title === r.title)).map((r) => ({ ...r, tone: toneFor(r.id) }))}
-                onCarryOn={(runId) => router.push(`/run/${runId}`)}
+                onCarryOn={(runId) => router.push(`/app/run/${runId}`)}
                 onStart={start}
               />
             </div>

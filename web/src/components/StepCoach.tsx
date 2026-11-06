@@ -510,7 +510,7 @@ export function StepCoach({
         {composer}
         <header className="flex items-center justify-between gap-3">
           <Link
-            href="/"
+            href="/app"
             aria-label="Stop this task"
             className="grid h-11 w-11 place-items-center rounded-full bg-card text-ink-2"
           >
@@ -741,13 +741,13 @@ function Finished({
       </Button>
       <div className="flex gap-3">
         <Link
-          href="/"
+          href="/app"
           className="inline-flex min-h-12 items-center rounded-full bg-clay px-6 text-[17px] font-medium"
         >
           Another task
         </Link>
         <Link
-          href="/raft"
+          href="/app/raft"
           className="inline-flex min-h-12 items-center rounded-full bg-clay px-6 text-[17px] font-medium"
         >
           See my raft

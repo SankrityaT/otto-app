@@ -4,7 +4,7 @@
 
 Built for the 2026 North American AI Challenge for Neurodiverse Learning, with research at our partner school, [Arizona Autism Charter Schools](https://www.autismcharter.org/) (AZACS), and ideas from [First Place AZ](https://firstplaceaz.org/).
 
-**Try it:** [ayin-jade.vercel.app](https://ayin-jade.vercel.app) (raft code `OTTER` joins the demo raft) · landing page for students and parents: [/landing](https://ayin-jade.vercel.app/landing) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
+**Try it:** the app at [ayin-jade.vercel.app/app](https://ayin-jade.vercel.app/app) (raft code `OTTER` joins the demo raft) · landing page for students and parents: [ayin-jade.vercel.app](https://ayin-jade.vercel.app) · pitch brief for the deck: [`docs/pitch.md`](docs/pitch.md)
 
 ## Our approach
 
@@ -88,8 +88,8 @@ flowchart LR
 ```
 ayin-app/
 ├── web/                 Next.js app: screens and API
-│   ├── src/app/(app)/   the app's pages (Today, a task, Raft, Me)
-│   ├── src/app/(landing)/  Havi's landing page for students and parents, at /landing
+│   ├── src/app/(app)/   the app's pages, at /app (Today, a task, Raft, Me)
+│   ├── src/app/(landing)/  Havi's landing page for students and parents, at /
 │   ├── src/app/api/     API routes
 │   ├── src/components/  screens, the 3D viewer, Havi's pond and otter
 │   ├── src/landing/     the landing page's sections and its own copy of Havi's otter
@@ -111,12 +111,12 @@ cp .env.example .env.local     # then add your API key and DATABASE_URL
 npm install
 npm run db:setup               # creates the tables
 npm run seed                   # a demo raft so the Raft screen has data
-npm run dev                    # open http://localhost:3000
+npm run dev                    # open http://localhost:3000/app
 ```
 
 On Supabase, `DATABASE_URL` is the **transaction pooler** connection string (port 6543) from the project's Connect settings.
 
-**The landing page** for students and parents is at http://localhost:3000/landing, part of the same app.
+**The landing page** for students and parents is at http://localhost:3000, and the app itself at http://localhost:3000/app.
 
 **On a phone:** start with `npm run dev:phone` instead (it serves Ayin over https on your Wi-Fi, which phones need before they allow the camera). Then open **Me** on the computer and scan the **Use Ayin on your phone** QR code with the phone's camera. Ayin opens on the phone, already set to that student. The first time, the phone may ask you to trust the development certificate.
 

@@ -97,7 +97,7 @@ export default function MePage() {
 
         {student && <PhoneLink studentId={student.id} />}
 
-        <Link href="/me/otter" className="card flex items-center gap-4">
+        <Link href="/app/me/otter" className="card flex items-center gap-4">
           <span className="text-[17px]">
             <strong className="block">Connect your otter</strong>
             <span className="text-ink-3">Use the desk otter as Ayin&apos;s eyes, with its own buttons</span>
@@ -105,7 +105,7 @@ export default function MePage() {
         </Link>
 
         {student && (
-          <Link href={`/raft/people/${student.id}`} className="card flex items-center gap-4">
+          <Link href={`/app/raft/people/${student.id}`} className="card flex items-center gap-4">
             <span className="text-[17px]">
               <strong className="block">My goal, how I work best, and my work card</strong>
               <span className="text-ink-3">What your raft sees, and a card you can share with a supervisor</span>

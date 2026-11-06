@@ -116,7 +116,7 @@ export default function RaftPage() {
         ) : (
           <div className="page flex flex-col items-center gap-3 pt-10 text-center">
             <p>{message ?? "Say hi to Ayin on the Today screen first."}</p>
-            <Link href="/" className="btn btn--text">
+            <Link href="/app" className="btn btn--text">
               Go to Today
             </Link>
           </div>
@@ -145,7 +145,7 @@ export default function RaftPage() {
   async function go(started: Promise<{ runId: string | null }>) {
     try {
       const { runId } = await started;
-      if (runId) router.push(`/run/${runId}`);
+      if (runId) router.push(`/app/run/${runId}`);
     } catch (error) {
       setMessage((error as Error).message);
     }
@@ -156,7 +156,7 @@ export default function RaftPage() {
     const invite = tapped ? invites.find((i) => i.fromId === tapped.id) : invites[0];
     const close = tapped ? () => setPicked(null) : undefined;
     const backToMine = waitingOn?.fromRunId && (
-      <Link href={`/run/${waitingOn.fromRunId}`} className="btn btn--text self-start px-0">
+      <Link href={`/app/run/${waitingOn.fromRunId}`} className="btn btn--text self-start px-0">
         Back to {waitingOn.about} (waiting for {waitingOn.toName})
       </Link>
     );
@@ -195,7 +195,7 @@ export default function RaftPage() {
           </p>
           <div className="flex flex-wrap gap-2">
             {!self && current.asking && (
-              <Link href={`/raft/post/${current.asking.postId}`} className="btn btn--primary">
+              <Link href={`/app/raft/post/${current.asking.postId}`} className="btn btn--primary">
                 Help {current.name}
               </Link>
             )}
@@ -214,7 +214,7 @@ export default function RaftPage() {
                 <RaftIcon name="together" /> Work with {current.name}
               </Button>
             )}
-            <Link href={`/raft/people/${current.id}`} className="btn btn--text">
+            <Link href={`/app/raft/people/${current.id}`} className="btn btn--text">
               {self ? "Your profile" : `How ${current.name} works best`}
             </Link>
           </div>
@@ -262,7 +262,7 @@ export default function RaftPage() {
           buddyId={raft.buddy?.id ?? null}
           start={together.with}
           onClose={() => setTogether(null)}
-          onStarted={(runId) => router.push(`/run/${runId}`)}
+          onStarted={(runId) => router.push(`/app/run/${runId}`)}
         />
       )}
       {board && (

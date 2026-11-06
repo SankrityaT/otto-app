@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Ayin',
     short_name: 'Ayin',
     description: 'A calm pond for the things you started.',
-    start_url: '/',
+    start_url: '/app',
     display: 'standalone',
     background_color: '#F3EEE6',
     theme_color: '#F3EEE6',

@@ -2,7 +2,7 @@
 
 Everything the deck needs in one place: the story, the facts with their sources, what makes Ayin different, a 5-slide outline, the 30-second demo and the visuals to use. Every number here comes from [`research.md`](research.md); please don't add figures that aren't in it.
 
-**Links:** app [ayin-jade.vercel.app](https://ayin-jade.vercel.app) · landing page [ayin-jade.vercel.app/landing](https://ayin-jade.vercel.app/landing) · code [github.com/SankrityaT/ayin-app](https://github.com/SankrityaT/ayin-app)
+**Links:** app [ayin-jade.vercel.app/app](https://ayin-jade.vercel.app/app) · landing page [ayin-jade.vercel.app](https://ayin-jade.vercel.app) · code [github.com/SankrityaT/ayin-app](https://github.com/SankrityaT/ayin-app)
 
 ## The one-liner
 

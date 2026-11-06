@@ -60,7 +60,7 @@ export function ProfileScreen() {
   return (
     <AppShell>
       <div className="page flex flex-col gap-4 pb-10">
-        <Link href="/raft" className="btn btn--text self-start px-0">
+        <Link href="/app/raft" className="btn btn--text self-start px-0">
           Back to the raft
         </Link>
 
@@ -165,7 +165,7 @@ export function ProfileScreen() {
         )}
 
         {isMe && (
-          <Link href={`/card/${id}`} className="card flex items-center gap-3">
+          <Link href={`/app/card/${id}`} className="card flex items-center gap-3">
             <RaftIcon name="card" size={28} />
             <span className="flex-1">
               <span className="block font-bold">My work card</span>

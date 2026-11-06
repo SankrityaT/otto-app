@@ -147,7 +147,7 @@ export function TaskStart({
             </Button>
           )}
           <a
-            href={`/print/${run.routineId}`}
+            href={`/app/print/${run.routineId}`}
             className="btn btn--text self-center py-1 text-[15px]"
           >
             Print a paper step card

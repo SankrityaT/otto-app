@@ -19,7 +19,7 @@ export function PhoneLink({ studentId }: { studentId: string }) {
         // If this page was opened by its Wi-Fi address already, use that; otherwise use the computer's.
         const host = hostname === "localhost" || hostname === "127.0.0.1" ? addresses[0] : hostname;
         if (!host) return;
-        const link = `${protocol}//${host}${port ? `:${port}` : ""}/?student=${encodeURIComponent(studentId)}`;
+        const link = `${protocol}//${host}${port ? `:${port}` : ""}/app?student=${encodeURIComponent(studentId)}`;
         setUrl(link);
         setQr(await QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: "#1f1c18", light: "#fffcf7" } }));
       })
