@@ -57,7 +57,7 @@ export const api = {
   startRun: (routineId: string, studentId: string) => call<{ runId: string }>("/api/runs", post({ routineId, studentId })),
   run: (runId: string) => call<{ run: Run; summary: Summary }>(`/api/runs/${runId}`),
   check: (runId: string, stepId: string, helpLevel: number, photo: string | null, trustStudent = false) =>
-    call<{ done: boolean; say: string; finished: boolean; summary: Summary | null }>(
+    call<{ done: boolean; say: string; nudge: string | null; finished: boolean; summary: Summary | null }>(
       `/api/runs/${runId}/check`,
       post({ stepId, helpLevel, photo, trustStudent }),
     ),

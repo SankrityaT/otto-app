@@ -241,6 +241,17 @@ function StepStory({
     return () => clearTimeout(next);
   }, [playing, spoken, index, last]);
 
+  // Watching pauses while the student is in another app or tab, so the steps don't run on without them.
+  useEffect(() => {
+    const onChange = () => {
+      if (!document.hidden) return;
+      hush();
+      setPlaying(false);
+    };
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
+  }, []);
+
   function go(to: number) {
     setPlaying(false);
     setSay(null);

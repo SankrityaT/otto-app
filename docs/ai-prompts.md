@@ -52,6 +52,7 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Nov 5 | Use the real voice we had before (Cartesia or Deepgram). While a 3D model takes time, show it being built and make small talk, not a loading screen. Nothing hardcoded. | Cartesia Sonic with a Deepgram backup. (We later replaced the build-in-progress view with the step's diagram first, which is faster.) |
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
 | Nov 5 | Make the 2D diagram the fallback so it's fast, and use Cartesia and Deepgram everywhere instead of the browser's voice and speech recognition. | Each step's diagram shows at once and its 3D model replaces it when ready; Ayin hears through Deepgram in every browser |
+| Nov 5 | If a student gets distracted on their phone while learning, Ayin should handle that too. | The step check notices a phone in view and gives one gentle nudge back; leaving Ayin for another app gets a "welcome back, you're on step 3" |
 | Nov 5 | Ayin keeps talking to itself, and the camera view is too small. Add a hands-free mode. | One Hands-free switch; Ayin ignores its own voice through the microphone; what Ayin sees is big on every task screen |
 
 ## Talking with Ayin

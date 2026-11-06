@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[i
   if (!trustStudent && !photo) return jsonError("Ayin needs a photo to check the step.", 400);
 
   try {
-    const result = photo ? await checkStep(step, photo) : { done: true, say: "Okay. On to the next step." };
+    const result = photo ? await checkStep(step, photo) : { done: true, say: "Okay. On to the next step.", nudge: null };
     if (result.done) await logStep(run, step.id, helpLevel as HelpLevel);
     const stepsLeft = run.steps.length - run.doneStepIds.length - (run.doneStepIds.includes(step.id) ? 0 : 1);
     const finished = result.done && stepsLeft === 0;

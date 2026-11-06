@@ -40,6 +40,8 @@ import {
 const BUTTON_POLL_MS = 1000;
 /** How often Ayin looks through the otter's camera while watching hands-free. */
 const WATCH_EVERY_MS = 6000;
+/** Away from Ayin longer than this, and it says where the student was when they come back. */
+const AWAY_MS = 20_000;
 
 // three.js only runs in the browser, and only loads when a student asks to be shown.
 const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), {
@@ -81,6 +83,8 @@ export function StepCoach({
   // Each step's 3D model, built once and then reused. The flat picture is the fallback.
   const [scenes, setScenes] = useState<Record<string, Scene>>({});
   const loading = useRef(new Map<string, Promise<Scene>>());
+  // Steps where Ayin already nudged the student back from their phone.
+  const nudged = useRef(new Set<string>());
   const [flat, setFlat] = useState(false);
   const [cameraChoice] = useCameraChoice();
   const useBrowserEyes = cameraChoice !== "otter";
@@ -191,6 +195,11 @@ export function StepCoach({
         trust,
       );
       if (result.done || !auto) tell(result.say);
+      // Drifted to a phone while Ayin was watching: one gentle nudge back per step, never more.
+      else if (result.nudge && !nudged.current.has(step.id)) {
+        nudged.current.add(step.id);
+        tell(result.nudge);
+      }
       setNotSeen(result.done || auto ? null : step.id);
       if (result.done) setDoneIds((ids) => [...ids, step.id]);
       if (result.finished) {
@@ -206,6 +215,22 @@ export function StepCoach({
       setBusy(false);
     }
   }
+
+  // Back from another app or tab (on a phone, that usually means the phone itself): after a
+  // while away, Ayin says where they were, so they don't have to work it out again.
+  const welcomeBack = useEffectEvent(() => {
+    if (step) tell(`Welcome back. You're on step ${index + 1}: ${step.text}.`);
+  });
+  useEffect(() => {
+    if (mode !== "steps") return;
+    let leftAt = 0;
+    const onChange = () => {
+      if (document.hidden) leftAt = Date.now();
+      else if (leftAt && Date.now() - leftAt > AWAY_MS) welcomeBack();
+    };
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
+  }, [mode]);
 
   /** Leave the pause screen. Voice turns on by itself, so the student's hands stay free. */
   function start(nextMode: "steps" | "alone") {
