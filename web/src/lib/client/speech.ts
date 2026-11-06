@@ -1,11 +1,35 @@
-// Ayin's voice and ears. Ayin speaks with a real voice from the server (/api/voice), or the
-// browser's built-in voice if that isn't available; it hears "done", "help", "show me" and "back".
+// Ayin's voice and ears. Ayin speaks with a real voice from the server (/api/voice: Cartesia,
+// or Deepgram), and only uses the browser's built-in voice if neither is set up. It hears the
+// student through Deepgram too (/api/hear).
 
 type SpeakOptions = { onEnd?: () => void; onWord?: (charIndex: number) => void };
 
 let playing: HTMLAudioElement | null = null;
 /** Each new line gets a number, so a slow reply for an old line never talks over a new one. */
 let latest = 0;
+
+// Phones (iPhones especially) only let a page play sound right after a tap, but Ayin's voice
+// arrives a moment later from the server. So Ayin uses one audio player for every line, and
+// unlocks it with a silent sound on the student's first tap anywhere.
+const SILENCE = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+let player: HTMLAudioElement | null = null;
+function voicePlayer(): HTMLAudioElement {
+  player ??= new Audio();
+  return player;
+}
+/** The hands-free listener's sound processing, which phones keep paused until a tap. */
+let ears: AudioContext | null = null;
+if (typeof window !== "undefined") {
+  window.addEventListener("pointerdown", () => ears?.resume().catch(() => {}), { capture: true });
+  const unlock = () => {
+    const audio = voicePlayer();
+    if (audio.src) return;
+    audio.src = SILENCE;
+    audio.play().catch(() => {});
+  };
+  window.addEventListener("pointerdown", unlock, { once: true, capture: true });
+  window.addEventListener("keydown", unlock, { once: true, capture: true });
+}
 
 // The microphone can hear Ayin's own voice, and speech recognition often hands over what it
 // heard just after Ayin stops. So Ayin remembers when it last spoke and what it said.
@@ -74,8 +98,9 @@ function playAudio(audio: HTMLAudioElement, text: string, { onEnd, onWord }: Spe
   };
   playing = audio;
   audio.play().catch(() => {
+    // The browser wouldn't play it (no tap yet on this page): stay quiet rather than switch voices.
     playing = null;
-    speakInBrowser(text, { onEnd, onWord });
+    onEnd?.();
   });
 }
 
@@ -94,16 +119,18 @@ export function speak(text: string, options: SpeakOptions = {}): void {
       if (response.status !== 200) return speakInBrowser(text, options);
       const url = URL.createObjectURL(await response.blob());
       if (line !== latest) return URL.revokeObjectURL(url);
-      const audio = new Audio(url);
-      audio.addEventListener("ended", () => URL.revokeObjectURL(url));
+      const audio = voicePlayer();
+      if (audio.src.startsWith("blob:")) URL.revokeObjectURL(audio.src);
+      audio.src = url;
       playAudio(audio, text, options);
     })
     .catch(() => line === latest && speakInBrowser(text, options));
 }
 
-/** Stop talking mid-sentence. */
+/** Stop talking mid-sentence, including a line that's still on its way. */
 export function hush(): void {
   if (typeof window === "undefined") return;
+  latest++;
   if (isSpeaking()) stoppedTalking();
   playing?.pause();
   playing = null;
@@ -112,19 +139,64 @@ export function hush(): void {
 
 export type VoiceCommand = "done" | "help" | "show-me" | "back";
 
-// SpeechRecognition isn't in TypeScript's DOM types yet, so describe the part we use.
-interface Recognition {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((event: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onend: (() => void) | null;
-  start(): void;
-  stop(): void;
-}
+// Ayin's ears. The microphone is recorded only while someone is talking, in short clips, and
+// Deepgram turns each clip into words through our server (/api/hear), so the key never reaches
+// the browser. It works the same in every browser that can record sound, iPhones included.
+
+const CLIP_TYPES = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"];
+/** How often the microphone's loudness is checked while listening hands-free. */
+const TICK_MS = 100;
+/** A pause this long means the student finished saying something. */
+const PAUSE_MS = 900;
+/** Shorter sounds are a cough or a clatter, not words; longer ones are cut into pieces. */
+const MIN_CLIP_MS = 400;
+const MAX_CLIP_MS = 15_000;
+/** The quietest sound that can count as talking (loudness 0..1), above the room's own noise. */
+const MIN_LEVEL = 0.02;
 
 export function canListen(): boolean {
-  return typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  return typeof window !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia) && typeof MediaRecorder !== "undefined";
+}
+
+function openMic(): Promise<MediaStream> {
+  return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+}
+
+/** Start recording; `stop()` hands back the clip. */
+function record(stream: MediaStream): { stop: () => Promise<Blob> } {
+  const type = CLIP_TYPES.find((t) => MediaRecorder.isTypeSupported(t));
+  const recorder = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+  const parts: Blob[] = [];
+  recorder.ondataavailable = (event) => event.data.size && parts.push(event.data);
+  recorder.start();
+  return {
+    stop: () =>
+      new Promise((resolve) => {
+        recorder.onstop = () => resolve(new Blob(parts, { type: recorder.mimeType }));
+        if (recorder.state === "recording") recorder.stop();
+        else resolve(new Blob(parts, { type: recorder.mimeType }));
+      }),
+  };
+}
+
+/** What was said in a clip, or "" if nothing could be heard. */
+async function toWords(clip: Blob): Promise<string> {
+  if (clip.size === 0) return "";
+  const response = await fetch("/api/hear", { method: "POST", headers: { "Content-Type": clip.type }, body: clip }).catch(() => null);
+  if (!response?.ok) return "";
+  const body = (await response.json().catch(() => null)) as { text?: string } | null;
+  return (body?.text ?? "").trim();
+}
+
+/** Hold to talk: recording starts now; the function it returns stops it and gives back the words. */
+export async function holdToTalk(): Promise<() => Promise<string>> {
+  const stream = await openMic();
+  const clip = record(stream);
+  return async () => {
+    const recorded = await clip.stop();
+    stream.getTracks().forEach((track) => track.stop());
+    return toWords(recorded);
+  };
 }
 
 /** Map what the student said to a command. Plain words only, no wake word. */
@@ -143,36 +215,73 @@ function isSpeaking(): boolean {
 }
 
 /**
- * Listen until stopped, like talking to a coach. Short commands ("done", "help", "show me")
- * go to `onCommand`; anything else the student says goes to `onQuestion`.
- * Returns a function that stops listening.
+ * Listen until stopped, like talking to a coach. Each time the student says something and
+ * pauses, short commands ("done", "help", "show me") go to `onCommand`, and anything else goes
+ * to `onQuestion`. Ayin's own voice is ignored. Returns a function that stops listening.
  */
 export function listen(onCommand: (command: VoiceCommand) => void, onQuestion: (question: string) => void): () => void {
-  const w = window as unknown as Record<string, new () => Recognition>;
-  const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-  if (!Ctor) return () => {};
-
-  const recognition = new Ctor();
-  recognition.continuous = true;
-  recognition.interimResults = false;
-  recognition.lang = "en-US";
   let stopped = false;
+  let close = () => {};
 
-  recognition.onresult = (event) => {
-    const heard = event.results[event.resultIndex][0].transcript.trim();
+  const handle = (heard: string) => {
     const short = heard.split(/\s+/).length <= 3;
     if (isEcho(heard, short)) return; // that was Ayin's own voice
     const command = toCommand(heard);
     if (command && short) onCommand(command);
     else if (heard.length >= 2) onQuestion(heard);
   };
-  recognition.onend = () => {
-    if (!stopped) recognition.start(); // browsers stop after a pause; keep going
-  };
-  recognition.start();
+
+  (async () => {
+    const stream = await openMic().catch(() => null);
+    if (!stream) return;
+    if (stopped) return stream.getTracks().forEach((track) => track.stop());
+
+    // Loudness, measured on the device, decides when someone starts and stops talking.
+    const context = new AudioContext();
+    ears = context;
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 1024;
+    context.createMediaStreamSource(stream).connect(analyser);
+    const samples = new Float32Array(analyser.fftSize);
+    let noise = MIN_LEVEL / 2;
+    let clip: ReturnType<typeof record> | null = null;
+    let since = 0;
+    let quiet = 0;
+
+    const timer = setInterval(async () => {
+      analyser.getFloatTimeDomainData(samples);
+      const level = Math.sqrt(samples.reduce((sum, v) => sum + v * v, 0) / samples.length);
+      const loud = level > Math.max(MIN_LEVEL, noise * 3);
+      if (!loud) noise = noise * 0.95 + level * 0.05;
+      const ayinTalking = isSpeaking() || Date.now() - quietSince < ECHO_MS;
+
+      if (!clip) {
+        if (loud && !ayinTalking) [clip, since, quiet] = [record(stream), Date.now(), 0];
+        return;
+      }
+      quiet = loud ? 0 : quiet + TICK_MS;
+      const length = Date.now() - since;
+      if (quiet < PAUSE_MS && length < MAX_CLIP_MS && !ayinTalking) return;
+      const finished = clip;
+      clip = null;
+      const recorded = await finished.stop();
+      if (length - quiet < MIN_CLIP_MS || ayinTalking) return;
+      const heard = await toWords(recorded);
+      if (!stopped && heard) handle(heard);
+    }, TICK_MS);
+
+    close = () => {
+      clearInterval(timer);
+      clip?.stop();
+      stream.getTracks().forEach((track) => track.stop());
+      context.close().catch(() => {});
+      if (ears === context) ears = null;
+    };
+    if (stopped) close();
+  })();
 
   return () => {
     stopped = true;
-    recognition.stop();
+    close();
   };
 }

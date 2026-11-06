@@ -22,8 +22,7 @@ export type Turn = z.infer<typeof Turn>;
 
 /**
  * Talking with Ayin. Ayin is a friendly otter: it chats back, answers small questions, and starts
- * a task when the student says what they want to do. While Ayin is busy making something that
- * takes a while (`busyWith`, like a 3D model), it keeps the student company with small talk.
+ * a task when the student says what they want to do.
  */
 export function talk(options: {
   name: string;
@@ -31,8 +30,6 @@ export function talk(options: {
   history: { who: "student" | "ayin"; text: string }[];
   practised: string[];
   goal: string | null;
-  /** Something Ayin is making for the student right now, which takes a little while. */
-  busyWith?: string | null;
 }): Promise<Turn> {
   const history = options.history.map((t) => `${t.who === "ayin" ? "Ayin" : options.name}: ${t.text}`).join("\n");
   return askClaude({
@@ -45,16 +42,8 @@ You are an otter coach, not their friend or a person; point them to their raft a
 ${options.goal ? `${options.name}'s own goal: "${options.goal}".` : ""}
 Tasks they've practised: ${options.practised.length ? options.practised.join("; ") : "none yet"}.
 ${history ? `The conversation so far:\n${history}` : ""}
-${options.said ? `${options.name} just said: "${options.said}"` : `${options.name} hasn't said anything yet; you speak first.`}
-${
-  options.busyWith
-    ? `Right now you are making ${options.busyWith} for ${options.name}. It takes about 20 seconds.
-Keep them company while it's ready, like a coach at the bench would. If you speak first, say in a few words that
-you're making it, then ask one light, easy question (how their day is going, what they like doing after work,
-something simple like that). Otherwise answer what they said and keep the small talk going. Set intent to chat,
-and don't explain the step: they'll see it in a moment.`
-    : `Reply naturally.`
-} If they greet you, greet them by name and offer one task they could do, maybe toward their goal.
+${options.name} just said: "${options.said}"
+Reply naturally. If they greet you, greet them by name and offer one task they could do, maybe toward their goal.
 If they ask what to do, suggest one practised task. If they want to start something, set intent to start-task,
 say it's ready and they can tap Start when they want. Don't give steps here: the steps screen does that.
 They are capable young adults: never explain everyday things like washing hands.

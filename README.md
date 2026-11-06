@@ -9,7 +9,7 @@ Built for the 2026 North American AI Challenge for Neurodiverse Learning, with r
 ## Our approach
 
 - **Works on the device a school already has.** Phone, iPad, Chromebook or laptop: point its camera at the desk and Ayin sees the work. AZACS already gives students Chromebooks and iPads, and AZACS staff told us anything worn is a sensory problem, so there's nothing to buy and nothing to wear.
-- **Complex things made simple.** Every task becomes one step at a time, and every step a 3D model built live for that task, talked through with a natural voice. The student can ask out loud at any point.
+- **Complex things made simple.** Every task becomes one step at a time, and every step a diagram and a 3D model made for that task, talked through with a natural voice. The student can ask out loud at any point.
 - **Real peers, not a chatbot.** The Raft routes help back to classmates who've mastered the step, lets students work side by side, and celebrates wins, with no video, no strangers and no rankings.
 - **Built to be needed less.** Help steps down through First Place AZ's five stages, from watching every step to doing it alone.
 - **A layer for hardware.** Any camera or button can plug in through two small endpoints (see [`device/`](device/README.md)): our 3D-printed otter, a document camera, a big accessibility switch. The app gives the same help whichever one the student uses.
@@ -36,8 +36,8 @@ What we found (full notes and sources in [`docs/research.md`](docs/research.md))
 - **Watch first:** at the first stage, Ayin walks through every step in 3D on one screen and talks it through. The student can say "next", "back", or ask about what they're looking at.
 - **Done:** Ayin takes one photo and checks the step, then moves on or says what's missing.
 - **Help:** one level at a time, and only when asked: a nudge, then a hint, then "show me".
-- **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing. A new model streams in while Claude writes it: each part grows in as a blueprint wireframe and the otter says what it's adding, then it turns solid. While it builds, Ayin makes small talk out loud (written by Claude in the moment, never scripted), with answers to tap.
-- **A real voice:** Ayin speaks with Cartesia Sonic, with Deepgram Aura as a backup and the browser's own voice if neither is set up. Words still light up as they're said.
+- **Show me in 3D:** the thing the student is stuck on becomes a simple 3D model they can turn, with sticky-note labels and the part to act on glowing. The step's flat diagram shows straight away, and the 3D model takes its place as soon as Claude has built it (once per step, then saved), so nobody waits on a loading screen.
+- **A real voice, both ways:** Ayin speaks with Cartesia Sonic, with Deepgram Aura as a backup (the browser's own voice only if neither is set up), and words light up as they're said. It hears the student through Deepgram too: the microphone records only while someone is talking, and each clip goes through our server, so it works in every browser, iPhones included, and the key never reaches the device.
 - **Smaller steps:** if a step feels too big, Ayin splits it into 2–4 smaller ones.
 - **Time you can see:** a step that takes a set time (steam milk for 30 seconds) gets a calm ring timer. It never turns red.
 - **Fading:** after 3 runs of a step with no help, the picture rests and the words lead. Any help brings it back.

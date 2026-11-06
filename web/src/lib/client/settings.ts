@@ -26,9 +26,13 @@ function save(key: string, value: string | null): void {
   window.dispatchEvent(new Event(CHANGED));
 }
 
-/** The student using this device, or null. Null on the server, where there is no storage. */
-export function useStudentId(): [string | null, (id: string | null) => void] {
-  const id = useSyncExternalStore(subscribe, () => localStorage.getItem(STUDENT_KEY), () => null);
+/**
+ * The student using this device, or null if nobody has said hi yet. Undefined until the page has
+ * read this device's storage (on the server, and for a moment while the page loads), so screens
+ * don't greet a returning student as if they were new.
+ */
+export function useStudentId(): [string | null | undefined, (id: string | null) => void] {
+  const id = useSyncExternalStore(subscribe, () => localStorage.getItem(STUDENT_KEY), () => undefined);
   const setId = useCallback((next: string | null) => save(STUDENT_KEY, next), []);
   return [id, setId];
 }

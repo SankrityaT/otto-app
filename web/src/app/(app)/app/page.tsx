@@ -72,6 +72,7 @@ export default function Today() {
       .catch(() => {});
   }, [studentId]);
 
+  if (studentId === undefined) return null; // still reading who's on this device
   if (!studentId) {
     return (
       <Welcome

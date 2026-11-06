@@ -27,7 +27,7 @@ Autistic students aged 16–22 in transition programs, learning real job tasks a
 **The student says what they're doing, Ayin coaches it step by step:**
 
 - Breaks the task into small physical steps, one on screen at a time.
-- Builds a **3D model of each step** the student can turn in their hand, and you watch it being built while Ayin chats.
+- Shows each step as a **diagram straight away, then a 3D model** the student can turn in their hand.
 - **Talks the student through it** with a natural voice, and answers questions out loud ("is this the right way up?") from what the camera sees.
 - Notices when a step is done, without the student having to tap.
 - Gives more help **only when asked**, and **less help every time** the student succeeds. It follows First Place AZ's five stages: watch, first tries, with help, check-in, on your own.
@@ -38,7 +38,7 @@ Autistic students aged 16–22 in transition programs, learning real job tasks a
 
 | | Everyone else | Ayin |
 |---|---|---|
-| **Complex things made simple** | Text answers, or videos someone recorded in advance | A 3D model of *your* step, built live from the task, that you turn in your hand, plus one step at a time out loud |
+| **Complex things made simple** | Text answers, or videos someone recorded in advance | A 3D model of *your* step, made from the task, that you turn in your hand, plus one step at a time out loud |
 | **Peers** | An AI that becomes the friend | Help is routed back to **real raftmates who've mastered that step**. Peer-based instruction is an evidence-based practice (AFIRM/NCAEP), and autistic-to-autistic information transfer works as well as between non-autistic people (Crompton et al. 2020) |
 | **Independence** | More use = more dependence | Help **fades by design**. Success is measured the way the school measures it: fewer prompts |
 | **Hardware** | Headsets, glasses, new devices | Any device's camera, and a layer other hardware plugs into: any camera or big button that speaks two small endpoints (the otter, a document camera, an accessibility switch) gets the same coaching. AR/VR *"can cause sensory overload"* for autistic students (Paykamian, 2021), and AZACS staff told us anything worn is a sensory problem |
@@ -75,14 +75,14 @@ The printed desk otter in the repo is a first step toward this: a camera in a pe
 
 1. **The problem.** At school, staff prompt every step; at a first job, nobody does. Coaches are scarce, and generic AI makes students dependent. (One photo of a work site task, three short lines.)
 2. **Meet Ayin.** The one-liner, the otter, and "works on the device you already have". Embed the 30-second demo here.
-3. **Complex made simple.** The 3D model being built, one step at a time, the voice, and help that fades through the five stages.
+3. **Complex made simple.** The diagram and 3D model of each step, one step at a time, the voice, and help that fades through the five stages.
 4. **The Raft.** The pond of otters: who needs help, do it together, cheers. "Real peers, not a chatbot."
 5. **Evidence, partners and what's next.** AZACS and First Place AZ, 3–4 research facts from above, privacy in one line, and the Ayin lamp as the next step.
 
 ## The 30-second demo (shot list)
 
 1. **0–3 s:** A student points a phone or iPad at their desk: *"Help me put the camera board in my otter."*
-2. **3–15 s:** Ayin breaks it into steps; the **3D model builds itself** part by part while Ayin chats (*"How's your day going?"*), then explains the step.
+2. **3–15 s:** Ayin breaks it into steps; each step shows as a diagram, then a **3D model** the student can turn, while Ayin explains it out loud.
 3. **15–22 s:** The student asks out loud, *"Which way does the antenna go?"*, and Ayin answers by voice from what the camera sees.
 4. **22–27 s:** The Raft: Ava's otter sits up, "Can someone help?". Another student taps her and sends the same 3D model. A cheer pops.
 5. **27–30 s:** The ring fills: "6 of 6 on my own." Tagline.

@@ -3,29 +3,11 @@
 /*
  * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
  * We changed the words to fit starting a task, put the camera in the bar (it turns into Send
- * once you type), and only show the hint while it's needed.
+ * once you type), only show the hint while it's needed, and listen through Deepgram.
  */
 import { useEffect, useRef, useState } from 'react';
+import { canListen, holdToTalk } from '@/lib/client/speech';
 import type { PondStatus } from './Pond';
-
-type Recognition = {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onend: (() => void) | null;
-  onerror: (() => void) | null;
-};
-
-function getRecognition(): Recognition | null {
-  if (typeof window === 'undefined') return null;
-  const w = window as unknown as { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition };
-  const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-  return Ctor ? new Ctor() : null;
-}
 
 type Props = {
   status: PondStatus;
@@ -36,19 +18,18 @@ type Props = {
 };
 
 /**
- * Hold to talk, or type. Voice uses the browser's speech recognition where it exists
- * (Chrome, Edge, Safari); everywhere else the text field does the same job.
+ * Hold to talk, or type. Voice goes through Deepgram (see lib/client/speech), so it works in
+ * every browser that can use the microphone; where it can't, the text field does the same job.
  */
 export default function TalkBar({ status, onListening, onSend, onPhoto }: Props) {
   const [text, setText] = useState('');
   const [holding, setHolding] = useState(false);
+  const [hearing, setHearing] = useState(false);
   const [voiceOk, setVoiceOk] = useState(true);
-  const [heard, setHeard] = useState('');
-  const rec = useRef<Recognition | null>(null);
-  const transcript = useRef('');
+  const recording = useRef<Promise<() => Promise<string>> | null>(null);
   const input = useRef<HTMLInputElement>(null);
 
-  useEffect(() => setVoiceOk(getRecognition() !== null), []);
+  useEffect(() => setVoiceOk(canListen()), []);
 
   const start = () => {
     if (holding) return;
@@ -56,42 +37,28 @@ export default function TalkBar({ status, onListening, onSend, onPhoto }: Props)
       input.current?.focus();
       return;
     }
-    const r = getRecognition();
-    if (!r) return;
-    transcript.current = '';
-    setHeard('');
-    r.lang = navigator.language || 'en-US';
-    r.interimResults = true;
-    r.continuous = true;
-    r.onresult = (e) => {
-      transcript.current = Array.from(e.results).map((res) => res[0].transcript).join(' ');
-      setHeard(transcript.current);
-    };
-    r.onerror = () => setVoiceOk(false);
-    r.onend = null;
-    rec.current = r;
-    try {
-      r.start();
-    } catch {
-      setVoiceOk(false);
-      return;
-    }
+    recording.current = holdToTalk();
+    recording.current.catch(() => setVoiceOk(false));
     setHolding(true);
     onListening(true);
   };
 
-  const stop = () => {
+  const stop = async () => {
     if (!holding) return;
     setHolding(false);
     onListening(false);
-    const r = rec.current;
-    if (!r) return;
-    r.onend = () => {
-      const said = transcript.current.trim();
-      setHeard('');
+    const pending = recording.current;
+    recording.current = null;
+    if (!pending) return;
+    setHearing(true);
+    try {
+      const said = await (await pending)();
       if (said) onSend(said, 'voice');
-    };
-    r.stop();
+    } catch {
+      setVoiceOk(false);
+    } finally {
+      setHearing(false);
+    }
   };
 
   const busy = status === 'thinking';
@@ -139,8 +106,8 @@ export default function TalkBar({ status, onListening, onSend, onPhoto }: Props)
           id="ask"
           ref={input}
           className="talk__input"
-          placeholder={holding ? 'Listening…' : 'Say hi to Ayin'}
-          value={holding ? heard : text}
+          placeholder={holding ? 'Listening…' : hearing ? 'One moment…' : 'Say hi to Ayin'}
+          value={holding ? '' : text}
           onChange={(e) => setText(e.target.value)}
           readOnly={holding}
           autoComplete="off"
@@ -168,7 +135,7 @@ export default function TalkBar({ status, onListening, onSend, onPhoto }: Props)
         )}
       </form>
       {(holding || !voiceOk) && (
-        <p className="talk__hint">{holding ? 'Let go to send' : 'Voice isn’t available in this browser. Type instead.'}</p>
+        <p className="talk__hint">{holding ? 'Let go to send' : 'Ayin can’t use the microphone here. Type instead.'}</p>
       )}
     </div>
   );

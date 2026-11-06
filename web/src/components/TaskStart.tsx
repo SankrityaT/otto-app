@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Scene, SceneSoFar } from "@/lib/ai/scene";
+import type { Scene } from "@/lib/ai/scene";
 import type { Run } from "@/lib/data/runs";
 import { api } from "@/lib/client/api";
 import {
@@ -34,10 +34,6 @@ const MS_PER_WORD = 450;
 const ShowMe3D = dynamic(() => import("./ShowMe3D").then((m) => m.ShowMe3D), {
   ssr: false,
 });
-const BuildingModel = dynamic(
-  () => import("./ShowMe3D").then((m) => m.BuildingModel),
-  { ssr: false },
-);
 
 /**
  * A pause before the task starts, like the doorway nooks at First Place: a moment to get
@@ -63,11 +59,11 @@ export function TaskStart({
 
   return (
     <WithEyes eyes={eyes} fixed>
-      <main className="flex min-h-0 w-full flex-1 flex-col gap-4 px-5 py-5 md:h-full md:py-0">
+      <main className="flex min-h-0 w-full flex-1 flex-col gap-3 px-5 py-3 md:h-full md:gap-4 md:py-0">
         <header className="flex items-center gap-3">
-          <UprightOtter className="h-16 w-16 shrink-0" furHue={run.furHue} />
+          <UprightOtter className="h-11 w-11 shrink-0 md:h-16 md:w-16" furHue={run.furHue} />
           <div className="min-w-0">
-            <h1 className="font-display text-[30px] leading-[1.05]">
+            <h1 className="font-display text-[24px] leading-[1.05] md:text-[30px]">
               {run.title}
             </h1>
             <p className="text-[15px] text-ink-2">
@@ -76,8 +72,9 @@ export function TaskStart({
           </div>
         </header>
 
+        {/* On a phone, the five stages step aside while watching, so the steps get the room. */}
         <ol
-          className="flex items-start justify-between"
+          className={`items-start justify-between ${watching ? "hidden md:flex" : "flex"}`}
           aria-label={`Stage ${run.stage} of 5: ${stage.name}`}
         >
           {STAGES.map((s, i) => {
@@ -178,42 +175,36 @@ function StepStory({
   );
   const [listening, setListening] = useState(canListen);
   const [scenes, setScenes] = useState<Record<string, Scene>>({});
-  // Models still being built, with the parts written so far.
-  const [building, setBuilding] = useState<Record<string, SceneSoFar>>({});
   const [heard, setHeard] = useState<string | null>(null);
   const [say, setSay] = useState<string | null>(null);
   const step = run.steps[index];
   const scene = scenes[step.id];
   const last = run.steps.length - 1;
 
-  // Get each step's picture and 3D model ready one at a time, starting from the step on screen,
-  // so the one being watched comes first and the app never waits on a dozen at once.
-  // Each is saved, so this is only slow the first time.
-  const started = useRef(new Set<string>());
+  // Each step shows its flat diagram straight away; its 3D model replaces it once it's ready.
+  // Diagrams for the steps ahead come first (they're quick), then the 3D models, one at a time
+  // from the step on screen, so the app never waits on a dozen at once. Both are saved, so this
+  // is only slow the first time anyone does the task.
+  const pictured = useRef(new Set<string>());
+  const modelled = useRef(new Set<string>());
   useEffect(() => {
     let moved = false;
+    const ahead = [...run.steps.slice(index), ...run.steps.slice(0, index)];
     (async () => {
-      for (const s of [
-        ...run.steps.slice(index),
-        ...run.steps.slice(0, index),
-      ]) {
+      for (const s of ahead.slice(1)) {
         if (moved) return;
-        if (started.current.has(s.id)) continue;
-        started.current.add(s.id);
-        new Image().src = `/api/steps/${s.id}/picture`;
+        if (pictured.current.has(s.id)) continue;
+        pictured.current.add(s.id);
+        await fetch(`/api/steps/${s.id}/picture`).catch(() => {});
+      }
+      for (const s of ahead) {
+        if (moved) return;
+        if (modelled.current.has(s.id)) continue;
+        modelled.current.add(s.id);
         await api
-          .scene(s.id, null, (soFar) =>
-            setBuilding((all) => ({ ...all, [s.id]: soFar })),
-          )
+          .scene(s.id, null)
           .then((r) => setScenes((all) => ({ ...all, [s.id]: r.scene })))
-          .catch(() => {}) // the picture stays up instead
-          .finally(() =>
-            setBuilding((all) =>
-              Object.fromEntries(
-                Object.entries(all).filter(([id]) => id !== s.id),
-              ),
-            ),
-          );
+          .catch(() => {}); // the diagram stays up instead
       }
     })();
     return () => {
@@ -243,14 +234,12 @@ function StepStory({
     };
   }, [index]);
 
-  // Once Ayin has finished a step, move on after a short pause, unless the student took over,
-  // or this step's model is still being built (it's worth watching it come together).
-  const stillBuilding = Boolean(building[step.id]);
+  // Once Ayin has finished a step, move on after a short pause, unless the student took over.
   useEffect(() => {
-    if (!playing || spoken !== index || index === last || stillBuilding) return;
+    if (!playing || spoken !== index || index === last) return;
     const next = setTimeout(() => setIndex(index + 1), STEP_PAUSE_MS);
     return () => clearTimeout(next);
-  }, [playing, spoken, index, last, stillBuilding]);
+  }, [playing, spoken, index, last]);
 
   function go(to: number) {
     setPlaying(false);
@@ -334,8 +323,6 @@ function StepStory({
             fill
             onGrab={() => setPlaying(false)}
           />
-        ) : building[step.id] ? (
-          <BuildingModel key={step.id} soFar={building[step.id]} fill />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 rounded-[var(--radius-card)] border border-line bg-[#fbf8f2] p-3">
             {/* eslint-disable-next-line @next/next/no-img-element -- the SVG drawn for this step */}

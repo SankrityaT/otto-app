@@ -49,8 +49,9 @@ This file lists the prompts that shaped the project, grouped by the part of Ayin
 | Nov 5 | Ayin should coach out loud like someone beside the student, looking at what they're holding. | Spoken questions answered from the step, the 3D model and the camera, in about 3 seconds |
 | Nov 5 | Be very careful with safety: Ayin must never help with weapons, self-harm or hurting anyone. | One set of safety rules in every prompt, enforced by the server: unsafe tasks get no steps, and a student at risk always hears "talk to a staff member" and the 988 line |
 | Nov 5 | Our students are capable young adults; don't teach them to wash their hands. | Step planning and chat teach the job, not everyday life |
-| Nov 5 | Use the real voice we had before (Cartesia or Deepgram). While a 3D model takes time, show it being built and make small talk, not a loading screen. Nothing hardcoded. | Cartesia Sonic with a Deepgram backup; models stream in part by part as blueprint wireframes with the otter calling out each part; Claude makes small talk until the model is ready |
+| Nov 5 | Use the real voice we had before (Cartesia or Deepgram). While a 3D model takes time, show it being built and make small talk, not a loading screen. Nothing hardcoded. | Cartesia Sonic with a Deepgram backup. (We later replaced the build-in-progress view with the step's diagram first, which is faster.) |
 | Nov 5 | Students without a camera, or doing a task on a computer, should be able to share a screen with Ayin instead. | "A shared screen" as a third choice for Ayin's eyes |
+| Nov 5 | Make the 2D diagram the fallback so it's fast, and use Cartesia and Deepgram everywhere instead of the browser's voice and speech recognition. | Each step's diagram shows at once and its 3D model replaces it when ready; Ayin hears through Deepgram in every browser |
 | Nov 5 | Ayin keeps talking to itself, and the camera view is too small. Add a hands-free mode. | One Hands-free switch; Ayin ignores its own voice through the microphone; what Ayin sees is big on every task screen |
 
 ## Talking with Ayin

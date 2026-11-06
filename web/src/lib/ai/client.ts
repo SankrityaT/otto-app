@@ -64,13 +64,3 @@ function checked<T>(response: { stop_reason: string | null; parsed_output?: T | 
 export async function askClaude<T extends z.ZodType>(options: Ask<T>): Promise<z.infer<T>> {
   return checked(await anthropic.messages.parse(request(options)));
 }
-
-/**
- * The same, but streamed: `onText` gets the JSON written so far as it arrives, so a caller can
- * use parts of the answer before it's finished (like 3D parts appearing one by one).
- */
-export async function streamClaude<T extends z.ZodType>(options: Ask<T> & { onText: (soFar: string) => void }): Promise<z.infer<T>> {
-  const stream = anthropic.messages.stream(request(options));
-  stream.on("text", (_delta, soFar) => options.onText(soFar));
-  return checked(await stream.finalMessage());
-}

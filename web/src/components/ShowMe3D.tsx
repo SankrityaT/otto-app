@@ -4,9 +4,8 @@ import { Bounds, Center, Line, OrbitControls, RoundedBox } from "@react-three/dr
 import { Canvas, useFrame } from "@react-three/fiber";
 import type { RefObject } from "react";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { DoubleSide, Euler, Group, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
-import type { Scene, SceneSoFar } from "@/lib/ai/scene";
-import UprightOtter from "./otter/UprightOtter";
+import { DoubleSide, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
+import type { Scene } from "@/lib/ai/scene";
 
 // Renders a "show me" scene: simple shapes from Claude, sticky-note labels in tidy rows above
 // and below the model with a line to each part, and arrows for movements. The model fits
@@ -26,11 +25,6 @@ const NOTE_TONES: Record<Label["tone"], string> = {
 const GAP = 8;
 const ROW_INSET = 26;
 
-/** The colour of a part still being built: blueprint lines, before it turns solid. */
-const SKELETON = "#3e8e87";
-/** How long a new part takes to grow into place. */
-const GROW_S = 0.45;
-
 const toVector = (v: Vec) => new Vector3(v.x, v.y, v.z);
 const toEuler = (v: Vec) => new Euler((v.x * Math.PI) / 180, (v.y * Math.PI) / 180, (v.z * Math.PI) / 180);
 
@@ -46,8 +40,8 @@ function usePrefersReducedMotion(): boolean {
   );
 }
 
-/** One shape. `skeleton` draws it as a wireframe, for a model that's still being built. */
-function Part({ part, still, skeleton = false }: { part: Scene["parts"][number]; still: boolean; skeleton?: boolean }) {
+/** One shape. */
+function Part({ part, still }: { part: Scene["parts"][number]; still: boolean }) {
   const material = useRef<MeshStandardMaterial>(null);
   const { x: w, y: h, z: d } = part.size;
 
@@ -57,9 +51,7 @@ function Part({ part, still, skeleton = false }: { part: Scene["parts"][number];
     material.current.emissiveIntensity = still ? 0.45 : 0.3 + 0.25 * (1 + Math.sin(clock.elapsedTime * 2.5)) * 0.5;
   });
 
-  const surface = skeleton ? (
-    <meshBasicMaterial color={SKELETON} wireframe />
-  ) : (
+  const surface = (
     <meshStandardMaterial
       ref={material}
       color={part.color}
@@ -88,7 +80,7 @@ function Part({ part, still, skeleton = false }: { part: Scene["parts"][number];
         </mesh>
         <mesh position={[0, -h / 2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[(w / 2) * 0.88, 40]} />
-          {skeleton ? <meshBasicMaterial color={SKELETON} wireframe /> : <meshStandardMaterial color={part.color} roughness={0.6} side={DoubleSide} />}
+          <meshStandardMaterial color={part.color} roughness={0.6} side={DoubleSide} />
         </mesh>
       </group>
     );
@@ -304,66 +296,6 @@ export function ShowMe3D({ scene, fill = false, onGrab }: { scene: Scene; fill?:
         </div>
       </div>
       <p className="px-5 pb-4 text-[15px] text-ink-3">Drag to turn it</p>
-    </figure>
-  );
-}
-
-/** "steam-knob" → "steam knob": the part names Claude writes, read aloud by the otter. */
-const partName = (id: string) => id.replace(/[-_]+/g, " ").replace(/\d+$/, "").trim();
-
-/** A new part grows into place from its own centre. */
-function GrowIn({ part, still }: { part: Scene["parts"][number]; still: boolean }) {
-  const group = useRef<Group>(null);
-  const born = useRef<number | null>(null);
-  useFrame(({ clock }) => {
-    if (!group.current) return;
-    born.current ??= clock.elapsedTime;
-    const t = still ? 1 : Math.min(1, (clock.elapsedTime - born.current) / GROW_S);
-    group.current.scale.setScalar(0.001 + (1 - (1 - t) ** 3));
-  });
-  return (
-    <group position={toVector(part.position)}>
-      <group ref={group} scale={still ? 1 : 0.001}>
-        <Part part={{ ...part, position: { x: 0, y: 0, z: 0 } }} still={still} skeleton />
-      </group>
-    </group>
-  );
-}
-
-/**
- * The model while Ayin is still making it: a blueprint grid, then each part growing in as a
- * wireframe the moment it's written. It turns into the finished model when that arrives.
- */
-export function BuildingModel({ soFar, fill = false }: { soFar: SceneSoFar | null; fill?: boolean }) {
-  const still = usePrefersReducedMotion();
-  const parts = soFar?.parts ?? [];
-  return (
-    <figure className={`graph-paper flex w-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line ${fill ? "h-full" : ""}`}>
-      <figcaption className="px-5 pt-4 font-hand text-[26px] leading-tight text-ink" aria-live="polite">
-        {soFar?.title ?? "Ayin is sketching it…"}
-      </figcaption>
-      <div className={`relative w-full ${fill ? "min-h-0 flex-1" : "aspect-square"}`} aria-label="A 3D model being built" role="img">
-        <Canvas camera={{ position: [4, 2.6, 4.8], fov: 45 }}>
-          <gridHelper args={[6, 12, SKELETON, "#9fbcb2"]} position={[0, -0.01, 0]} />
-          {parts.length > 0 && (
-            <Bounds fit clip observe margin={1.6}>
-              <Center>
-                {parts.map((part) => (
-                  <GrowIn key={part.id} part={part} still={still} />
-                ))}
-              </Center>
-            </Bounds>
-          )}
-          <OrbitControls makeDefault enablePan={false} autoRotate={!still} autoRotateSpeed={1.2} />
-        </Canvas>
-      </div>
-      {/* Ayin sits beside the blueprint, hopping each time a part goes on, and says what it's adding. */}
-      <div className="pointer-events-none flex items-end gap-1 px-3 pb-2" aria-live="polite">
-        <UprightOtter className="h-20 w-20 shrink-0" mood="talking" beat={parts.length} />
-        <span key={parts.length} className="says bubble-pop mb-10">
-          {parts.length === 0 ? "Planning the shapes…" : `Adding the ${partName(parts[parts.length - 1].id)}…`}
-        </span>
-      </div>
     </figure>
   );
 }
