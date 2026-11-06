@@ -17,7 +17,7 @@ A 3D-printable otter that sits at a work station. It hugs a teal pebble, and the
 ```bash
 cd hardware/otter
 python3 -m venv .venv
-.venv/bin/pip install manifold3d trimesh numpy scipy scikit-image pillow
+.venv/bin/pip install manifold3d trimesh numpy scipy scikit-image pillow matplotlib
 .venv/bin/python otter.py                  # Raspberry Pi layout -> stl/ and renders/
 .venv/bin/python otter.py --variant xiao   # XIAO ESP32-S3 layout -> stl/variant_xiao/
 ```

@@ -1,0 +1,4 @@
+# Never upload local secrets or the old local database.
+.env*
+!.env.example
+/data/

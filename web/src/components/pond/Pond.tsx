@@ -2,17 +2,15 @@
 
 /*
  * Written by Havi (@Havishea) for the Ayin team, from https://github.com/Havishea/Ayin.
- * We wired it to Ayin's tasks instead of mock data and removed plain mode.
+ * We removed plain mode and the floating task leaves (Today lists tasks under the pond), and
+ * made the otter respond: tap it to start talking, and it shows what it's doing while it sits up.
  */
-import { forwardRef, useImperativeHandle, useRef, type CSSProperties } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import AyinOtter, { type AyinOtterHandle } from '../otter/AyinOtter';
-import UprightOtter from '../otter/UprightOtter';
-import PondLeaves, { Ripples, type LeafItem } from './PondLeaves';
+import UprightOtter, { type OtterMood } from '../otter/UprightOtter';
+import { Ripples } from './PondLeaves';
 
-export type OtterReaction = 'listen' | 'acknowledge' | 'happy' | 'curious' | 'none';
 export type PondStatus = 'idle' | 'listening' | 'thinking';
-
-export type PondHandle = { react: (r: OtterReaction) => void };
 
 type Props = {
   motion: 'reactive' | 'idle';
@@ -20,13 +18,13 @@ type Props = {
   furHue?: number;
   agentStatus: PondStatus;
   style?: CSSProperties;
-  /** Tasks to practise float as leaves; finished ones collect in the bin beside the pond. */
-  open?: LeafItem[];
-  done?: LeafItem[];
-  onLeafSelect?: (id: string) => void;
-  onBin?: () => void;
   /** Sit up (while you ask something or a task is being explained) instead of floating. */
   upright?: boolean;
+  /** While sitting up: what Ayin is doing, and a beat that changes on every word it says. */
+  mood?: OtterMood;
+  beat?: number;
+  /** Tapping the floating otter: it swings its tail and tilts its head, then this runs. */
+  onOtter?: () => void;
 };
 
 /**
@@ -35,28 +33,8 @@ type Props = {
  * a gentle one as it settles into the water, a stronger one when its tail swings.
  * With Reduce Motion, everything is still.
  */
-const Pond = forwardRef<PondHandle, Props>(function Pond({ motion, furHue = 0, agentStatus, style, open, done, onLeafSelect, onBin, upright = false }, ref) {
+export default function Pond({ motion, furHue = 0, agentStatus, style, upright = false, mood, beat, onOtter }: Props) {
   const otter = useRef<AyinOtterHandle>(null);
-
-  useImperativeHandle(ref, () => ({
-    react(r) {
-      if (upright) return;
-      switch (r) {
-        case 'listen':
-        case 'curious':
-          otter.current?.tiltHead();
-          break;
-        case 'acknowledge':
-          otter.current?.blink();
-          break;
-        case 'happy':
-          otter.current?.swingTail();
-          break;
-        default:
-          break;
-      }
-    },
-  }), [upright]);
 
   return (
     <div className={`pond pond--${agentStatus}`} style={style}>
@@ -65,7 +43,14 @@ const Pond = forwardRef<PondHandle, Props>(function Pond({ motion, furHue = 0, a
         <ellipse cx="200" cy="132" rx="184" ry="116" fill="var(--water-edge)" />
         <ellipse cx="200" cy="134" rx="176" ry="109" fill="var(--water)" />
       </svg>
-      <div className={`pond__center ${upright ? 'is-hidden' : ''}`}>
+      <div
+        className={`pond__center ${upright ? 'is-hidden' : ''} ${onOtter ? 'is-tappable' : ''}`}
+        onClick={() => {
+          otter.current?.swingTail();
+          otter.current?.tiltHead();
+          onOtter?.();
+        }}
+      >
         <AyinOtter
           ref={otter}
           motion={motion}
@@ -77,16 +62,13 @@ const Pond = forwardRef<PondHandle, Props>(function Pond({ motion, furHue = 0, a
       {/* The otter sits up while you ask or while it explains a task, and floats again after. */}
       <div className={`pond__upright ${upright ? 'is-shown' : ''}`} aria-hidden={!upright}>
         <Ripples className="pond__upright-ripples" />
-        <UprightOtter className="pond__upright-otter" furHue={furHue} active={upright} />
+        <UprightOtter className="pond__upright-otter" furHue={furHue} active={upright} mood={mood} beat={beat} />
         {upright && <span className="sr-only">Your otter sits up to talk with you.</span>}
       </div>
-      {open && done && <PondLeaves open={open} done={done} onSelect={onLeafSelect} onBin={onBin} />}
       <span className="sr-only" aria-live="polite">
         {agentStatus === 'listening' ? 'Listening' : agentStatus === 'thinking' ? 'Thinking' : ''}
       </span>
     </div>
   );
-});
-
-export default Pond;
+}
 

@@ -8,7 +8,7 @@ import { aiFailure, jsonError, readJson } from "@/lib/http";
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[id]/ask">) {
   const { id } = await ctx.params;
   const body = await readJson(request);
-  const run = getRun(id);
+  const run = await getRun(id);
   const step = run?.steps.find((s) => s.id === body.stepId);
   if (!run || !step) return jsonError("Step not found.", 404);
   const question = typeof body.question === "string" ? body.question.trim().slice(0, 500) : "";

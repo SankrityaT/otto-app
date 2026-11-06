@@ -13,7 +13,7 @@ import { aiFailure, jsonError, readJson } from "@/lib/http";
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[id]/check">) {
   const { id } = await ctx.params;
   const body = await readJson(request);
-  const run = getRun(id);
+  const run = await getRun(id);
   const step = run?.steps.find((s) => s.id === body.stepId);
   if (!run || !step) return jsonError("Step not found.", 404);
 
@@ -26,10 +26,10 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/runs/[i
 
   try {
     const result = photo ? await checkStep(step, photo) : { done: true, say: "Okay. On to the next step." };
-    if (result.done) logStep(run, step.id, helpLevel as HelpLevel);
+    if (result.done) await logStep(run, step.id, helpLevel as HelpLevel);
     const stepsLeft = run.steps.length - run.doneStepIds.length - (run.doneStepIds.includes(step.id) ? 0 : 1);
     const finished = result.done && stepsLeft === 0;
-    return Response.json({ ...result, finished, summary: finished ? runSummary(id) : null });
+    return Response.json({ ...result, finished, summary: finished ? await runSummary(id) : null });
   } catch (error) {
     return aiFailure(error);
   }

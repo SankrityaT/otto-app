@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysPractised, ringFill, startOfWeek, stepsOnOwn, type StepLog } from "../src/lib/week";
+import { ringFill, startOfWeek, stepsOnOwn, type StepLog } from "../src/lib/week";
 
 const logs: StepLog[] = [
   { studentId: "ava", helpLevel: 0, doneAt: "2026-11-02T10:00:00" },
@@ -23,9 +23,5 @@ describe("weekly rings", () => {
     expect(ringFill(5, 10)).toBe(0.5);
     expect(ringFill(15, 10)).toBe(1);
     expect(ringFill(3, 0)).toBe(0);
-  });
-
-  it("counts practice days, not a streak", () => {
-    expect(daysPractised(logs, "ava")).toBe(2);
   });
 });

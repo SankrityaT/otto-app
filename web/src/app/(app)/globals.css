@@ -1,0 +1,138 @@
+/* Only scan our own source for class names, not logs or tool output elsewhere in the folder. */
+@import "tailwindcss" source("../..");
+/* Havi's pond styles sit in the components layer, so Tailwind utilities can still override them. */
+@import "./pond.css" layer(components);
+
+/* Tailwind names for the colours and fonts in Havi's pond styles (pond.css), so both agree. */
+@theme inline {
+  --color-ground: var(--ground);
+  --color-card: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-soft);
+  --color-ink-3: var(--ink-faint);
+  --color-line: var(--line);
+  --color-clay: var(--clay);
+  --color-clay-2: var(--clay-2);
+  --color-cel: var(--celadon);
+  --color-cel-deep: var(--celadon-text);
+  --color-cel-wash: var(--celadon-wash);
+  --font-display: var(--serif);
+  --font-sans: var(--sans);
+  --font-hand: var(--font-gochi), "Comic Sans MS", cursive;
+  --radius-card: 22px;
+}
+
+/* Our extra colours, with dark versions that follow Havi's dark theme. */
+:root {
+  --clay: #e7dfd3;
+  --clay-2: #d9cfc1;
+  --paper: #fbf8f2;
+  --paper-grid: rgba(43, 102, 82, 0.07);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --clay: #3a352f;
+    --clay-2: #4a443c;
+    --paper: #26231f;
+    --paper-grid: rgba(184, 221, 201, 0.08);
+  }
+}
+/* "Night" chosen in Me: dark even when the device is light. */
+:root[data-theme="dark"] {
+  --clay: #3a352f;
+  --clay-2: #4a443c;
+  --paper: #26231f;
+  --paper-grid: rgba(184, 221, 201, 0.08);
+}
+
+/* Graph paper behind "show me" explainers. */
+.graph-paper {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--paper-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Talking with Ayin: a little pond for the otter, bubbles that pop in, words that light up as
+   Ayin says them, and answers that float like the pond's leaves. Reduce Motion stills it all. */
+/* The sitting-up otter can be tapped for a happy bounce. */
+.pond__upright.is-shown .pond__upright-otter,
+.pond__center.is-tappable { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+
+/* Today fits on one screen: the pond shrinks on short screens so the tasks under it never
+   need scrolling to find. */
+.today__center { padding-top: 12px; }
+@media (min-width: 960px) { .today__center { padding-top: 12px; } }
+.today__center > .pond { width: min(100%, 560px, calc((100dvh - 460px) * 400 / 260)); margin-top: 44px; }
+
+/* The pond draws in smoothly when a conversation starts. */
+.pond { transition: width 450ms ease, margin 450ms ease; }
+
+.chat__bubble { animation: bubble-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(0.94); } }
+
+.chat__word { border-radius: 6px; transition: background-color 120ms ease; }
+.chat__word.is-now { background: var(--r-study); color: #1f1c18; }
+
+.chat__leaf {
+  border-radius: 26px 6px 26px 6px; padding: 12px 18px; font-size: 17px; font-weight: 600; color: #1f1c18;
+  background: var(--tone); box-shadow: 0 6px 16px -10px var(--shadow);
+  animation: leaf-in 320ms ease both, leaf-float 4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 80ms), calc(var(--i) * 400ms);
+  transition: transform 150ms ease;
+}
+.chat__leaf:hover { transform: translateY(-2px) rotate(-1deg); }
+.chat__leaf:active { transform: scale(0.96); }
+@keyframes leaf-float { 50% { translate: 0 -3px; } }
+
+.chat__dots span { display: inline-block; animation: dot-hop 1s ease-in-out infinite; }
+.chat__dots span:nth-child(2) { animation-delay: 0.15s; }
+.chat__dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dot-hop { 40% { transform: translateY(-5px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pond { transition: none; }
+  .chat__bubble, .chat__leaf, .chat__dots span { animation: none !important; }
+}
+
+/* The raft, from Havi's landing page: otters bob on their own beat, speech bubbles pop up in the
+   otter's handwriting, and emoji float away. Every one of these is set off by something a
+   raftmate really did. Reduce Motion stills them all. */
+.says {
+  position: relative; display: inline-block; padding: 6px 12px; border-radius: 16px;
+  background: var(--surface); border: 1.5px solid var(--ink); font: clamp(14px, 3.6vw, 18px)/1.15 var(--font-hand);
+  color: var(--ink); box-shadow: 3px 3px 0 var(--ink); white-space: nowrap;
+}
+.says::after {
+  content: ""; position: absolute; width: 12px; height: 12px; background: var(--surface);
+  border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink);
+  left: calc(50% - 6px); bottom: -7.5px; transform: rotate(45deg);
+}
+.drift { animation: drift 9s ease-in-out infinite; }
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) rotate(var(--r, 0deg)); }
+  50% { transform: translate(4px, -6px) rotate(calc(var(--r, 0deg) + 6deg)); }
+}
+.raft-float { animation: raft-float 7s ease-in-out infinite; }
+@keyframes raft-float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(1.2%, -2.5%) rotate(1.2deg); }
+  66% { transform: translate(-1%, 1.5%) rotate(-1deg); }
+}
+.bubble-pop { animation: bubble-pop 380ms cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+@keyframes bubble-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+.emoji-pop { animation: emoji-pop 2.2s ease-out both; }
+@keyframes emoji-pop {
+  0% { opacity: 0; transform: translateY(12px) scale(0.4); }
+  15% { opacity: 1; transform: translateY(0) scale(1.15); }
+  25% { transform: translateY(-4px) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-56px) scale(0.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drift, .raft-float, .bubble-pop, .emoji-pop { animation: none; }
+}

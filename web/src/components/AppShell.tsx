@@ -16,12 +16,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [camera] = useCameraChoice();
-  const current = SECTIONS.find(([path]) => path === pathname)?.[0] ?? "/";
+  // Pages inside a section (a raft post, a profile) keep that section's tab lit.
+  const current = SECTIONS.find(([path]) => path !== "/" && pathname.startsWith(path))?.[0] ?? "/";
 
   return (
     <div className="app">
       <header className="status" aria-label="Status">
-        <span className="status__day">Ayin</span>
+        <span className="status__day flex items-center gap-2.5 text-[20px]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- Havi's otter logo, a small fixed icon */}
+          <img src="/icons/icon-192.png" alt="" className="h-11 w-11 rounded-xl" />
+          Ayin
+        </span>
         <span className="status__right">
           <span className="pill">
             <span className="pill__dot pill__dot--off" aria-hidden />
@@ -30,6 +35,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </span>
       </header>
       <main className="main">{children}</main>
+      {/* Room at the bottom so the floating tabs never cover the last button on a page. */}
+      <div className="h-32 shrink-0" aria-hidden />
       <Tabs items={SECTIONS} value={current} onChange={(path) => router.push(path)} />
     </div>
   );

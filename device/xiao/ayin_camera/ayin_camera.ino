@@ -9,6 +9,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <ESPmDNS.h>
 #include "esp_camera.h"
 #include "secrets.h"
 
@@ -54,7 +55,7 @@ bool startCamera() {
   c.pin_pwdn = PWDN_GPIO_NUM; c.pin_reset = RESET_GPIO_NUM;
   c.xclk_freq_hz = 16000000;
   c.pixel_format = PIXFORMAT_JPEG;
-  c.frame_size = FRAMESIZE_XGA;  // 1024 x 768
+  c.frame_size = FRAMESIZE_UXGA;  // 1600 x 1200: enough to read small parts and labels
   c.jpeg_quality = 12;
   c.fb_count = 2;
   c.fb_location = CAMERA_FB_IN_PSRAM;
@@ -102,6 +103,9 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) delay(500);
   Serial.printf("Ayin camera ready at http://%s/capture\n", WiFi.localIP().toString().c_str());
 
+  // Let the app find this otter by itself: by name (ayin-otter.local) and by asking "/hello".
+  MDNS.begin("ayin-otter");
+  server.on("/hello", []() { server.send(200, "application/json", "{\"ayin\":\"otter\",\"buttons\":false}"); });
   server.on("/capture", handleCapture);
   server.begin();
 }

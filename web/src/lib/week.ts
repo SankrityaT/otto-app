@@ -25,11 +25,3 @@ export function ringFill(onOwn: number, weeklyTarget: number): number {
   if (weeklyTarget <= 0) return 0;
   return Math.min(onOwn / weeklyTarget, 1);
 }
-
-/** Days this week the student practised: a count, never a streak. */
-export function daysPractised(logs: StepLog[], studentId: string): number {
-  const days = logs
-    .filter((log) => log.studentId === studentId)
-    .map((log) => new Date(log.doneAt).toDateString());
-  return new Set(days).size;
-}
